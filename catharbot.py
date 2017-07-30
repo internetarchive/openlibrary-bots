@@ -45,6 +45,15 @@ class CatharBot(OpenLibrary):
             docs.append(self.get_redirect(e, master))
         return self.save_many(docs, "Merged duplicate editions")
 
+    def delete_list(self, ids, comment):
+        docs = []
+        for d in ids:
+            docs.append({
+                'key': olid.full_key(d),
+                'type': '/type/delete'
+            })
+        return self.save_many(docs, comment)
+
     def save_many(self, docs, comment):
         headers = {
             'Opt': '"http://openlibrary.org/dev/docs/api"; ns=42',
