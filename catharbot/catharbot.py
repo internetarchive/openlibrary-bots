@@ -70,7 +70,7 @@ class CatharBot(OpenLibrary):
         '''
         return a != b
 
-    def recurse_fix(data, fix_function, changed=False):
+    def recurse_fix(self, data, fix_function, changed=False):
         ''' pass every field in a doc through a function
         '''
         if isinstance(data, basestring):  # only transforming strings at the moment
