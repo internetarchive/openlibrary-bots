@@ -78,12 +78,12 @@ class CatharBot(OpenLibrary):
         if isinstance(data, dict):
              output = {}
              for k, v in data.iteritems():
-                 output[k] = recurse_fix(v, fix_function, changed)
+                 output[k] = self.recurse_fix(v, fix_function, changed)
              return output
         if isinstance(data, list):
              output = []
              for item in data:
-                 output.append(recurse_fix(item, fix_function, changed))
+                 output.append(self.recurse_fix(item, fix_function, changed))
              return output
         # no transform to do, return data
         return data 
