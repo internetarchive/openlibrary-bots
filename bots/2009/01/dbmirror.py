@@ -25,7 +25,7 @@ def playback():
 
     while True:
         for entry in reader:
-            print reader.logfile.tell(), entry.timestamp
+            print(reader.logfile.tell(), entry.timestamp)
             playback.playback(entry)
 
         time.sleep(60)

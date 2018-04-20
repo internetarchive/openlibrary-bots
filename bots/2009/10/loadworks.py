@@ -1,7 +1,12 @@
 """Script to load works fast."""
 import sys, os
 import time
-import simplejson
+# Import JSON for Python 3 else simplejson for Python 2
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import web
 
 import _init_path

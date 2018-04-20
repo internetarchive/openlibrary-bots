@@ -35,7 +35,7 @@ def vol_ia():
     ia_db.printing = False
     iter = ia_db.query("select identifier from metadata where scanner is not null and scanner != 'google' and noindex is null and mediatype='texts' and curatestate='approved'")
     out = open('vol_ia', 'w')
-    print 'start iter'
+    print('start iter')
     for row in iter:
         ia = row.identifier
         m = re_ia_vol.search(ia)
@@ -57,7 +57,7 @@ for line in open('vol_ia'):
     if not m or m.group(1) == '00':
         continue
     (host, path) = find_item(ia)
-    print ia
+    print(ia)
     if not host or not path:
         continue
     base = "http://" + host + path

@@ -18,19 +18,17 @@ def test_lookup():
         fields = tuple((k, v.strip(' /,;:')) for k, v in get_subfields(line, 'abcd'))
         found = name_lookup(fields)
         for i in found:
-            print i
+            print(i)
         dates = pick_first_date(v for k, v in fields if k == 'd')
-        print dates
+        print(dates)
         match = look_for_match(found, dates, False)
-        print len(match)
+        print(len(match))
         for i in match:
-            print i
-        #pprint(match)
+            print(i)
         if len(match) != 1:
             match = pick_from_match(match)
         if len(match) != 1:
             for i in more_than_one_match(match):
-                print i
-        print
+                print(i)
 
 test_lookup()

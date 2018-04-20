@@ -1,4 +1,5 @@
-"""Because edition object doesn't have scan_records property, an
+"""
+Because edition object doesn't have scan_records property, an
 infobase query is made to check whether there exists a scan_record for
 that edition. This is done for rendering each and every edition
 page. This query can be eliminated of scan_records are linked to the
@@ -34,7 +35,7 @@ def main(server):
         if not chunk:
             break
 
-        print 'linking %d editions' % len(chunk)
+        print('linking %d editions' % len(chunk))
 
         for e in chunk:
             e['scan_records'] = [{'key': '/scan_record' + e['key']}]

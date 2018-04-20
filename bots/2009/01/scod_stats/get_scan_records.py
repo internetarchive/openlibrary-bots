@@ -1,5 +1,19 @@
-import simplejson
-import urllib
+# Import JSON for Python 3 else simplejson for Python 2
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3.6
+    from urllib.request import urlopen
+try:
+    from urllib import urlencode
+except ImportError:
+    # Python 3.6
+    from urllib.parse import urlencode
 import os
 import sys
 import datetime
@@ -8,15 +22,14 @@ import datetime
 base_url = "http://pharosdb:7070/openlibrary.org"
 
 def wget(url):
-    #print url
-    return urllib.urlopen(url).read()
+    return urlopen(url).read()
 
 def things(query):
     if 'limit' not in query:
         query = dict(query, limit=1000)
 
     _query = simplejson.dumps(query)
-    result = wget(base_url + '/things?' + urllib.urlencode(dict(query=_query)))
+    result = wget(base_url + '/things?' + urlencode(dict(query=_query)))
     result = simplejson.loads(result)['result']
 
     if len(result) < 1000:
@@ -27,7 +40,7 @@ def things(query):
 def get_many(keys):
     def f(keys):
         keys = simplejson.dumps(keys)
-        result = wget(base_url + '/get_many?' + urllib.urlencode(dict(keys=keys)))
+        result = wget(base_url + '/get_many?' + urlencode(dict(keys=keys)))
         return simplejson.loads(result)['result']
 
     d = {}
@@ -38,11 +51,11 @@ def get_many(keys):
 
 def versions(query):
     query = simplejson.dumps(query)
-    result = wget(base_url + '/versions?' + urllib.urlencode(dict(query=query)))
+    result = wget(base_url + '/versions?' + urlencode(dict(query=query)))
     return simplejson.loads(result)['result']
 
 def write(path, data):
-    print 'writing', path
+    print('writing', path)
     dir = os.path.dirname(path)
     if dir and not os.path.exists(dir):
         os.makedirs(dir)

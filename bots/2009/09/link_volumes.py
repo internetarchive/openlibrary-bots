@@ -1,4 +1,5 @@
-"""Because edition objects has volumes as back-reference instead of
+"""
+Because edition objects has volumes as back-reference instead of
 property, every time an edition page is rendered an infobase query is
 made to find the volumes.
 
@@ -48,7 +49,7 @@ def main(server):
     for e in editions.values():
         e['volumes'] = sorted(e['volumes'], key=lambda v: v['volume_number'])
 
-    print 'linking volumes to %d editions' % len(editions)
+    print('linking volumes to %d editions' % len(editions))
     ol.save_many(editions.values(), 'link volumes')
 
 if __name__ == "__main__":

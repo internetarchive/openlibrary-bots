@@ -24,6 +24,6 @@ for num, line in enumerate(open('/1/edward/imagepdf/possible_match2')):
         continue
     if doc['publisher'] != e['publishers'][0]:
         continue
-    print 'match:', item_id, doc['ol']
+    print('match:', item_id, doc['ol'])
     add_source_records(doc['ol'], item_id)
 

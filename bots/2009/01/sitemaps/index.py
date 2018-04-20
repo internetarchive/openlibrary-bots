@@ -86,7 +86,7 @@ def write_sitemap(i, seq):
     filename = "%s/index_%05d.html" % (dir, i)
     if not os.path.exists(dir):
         os.mkdir(dir)
-    print filename
+    print(filename)
     write(filename, make_sitemap(filename, seq))
 
 def write_sitemaps(data):
@@ -98,7 +98,7 @@ def main():
     data = read(sys.argv[1], sys.argv[2])
     write_indexes(data)
 
-    dirs = os.listdir('index'):
+    dirs = os.listdir('index')
     write('index/index.html', make_index('index', dirs))
 
     for d in dirs:

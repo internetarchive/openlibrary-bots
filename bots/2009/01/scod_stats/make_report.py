@@ -1,7 +1,11 @@
 """
 Generate scod report.
 """
-import simplejson
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import os
 
 def parse():
@@ -29,7 +33,7 @@ def main():
     for k in sorted(data.keys()):
         d = data[k]
         reasons = [r['comment'] for r in d['notfound']]
-        print "%s\t%s\t%s\t%s\t%s" % (k, len(d['request']), len(d['complete']), len(d['notfound']), reasons)
+        print("%s\t%s\t%s\t%s\t%s" % (k, len(d['request']), len(d['complete']), len(d['notfound']), reasons))
 
 if __name__ == "__main__":
     main()

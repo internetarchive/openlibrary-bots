@@ -8,4 +8,4 @@ db.printing = False
 iter = db.query("select identifier, updated from metadata where scanner is not null and noindex is not null and mediatype='texts' and (curatestate='approved' or curatestate is null) and scandate is not null order by updated")
 
 for row in iter:
-    print row.identifier
+    print(row.identifier)

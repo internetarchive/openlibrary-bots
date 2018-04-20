@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-"""Fetch a document and its references recursively upto specified depth from Open Library website.
+"""
+Fetch a document and its references recursively upto specified depth from Open Library website.
 
 USAGE:
 
@@ -13,8 +13,22 @@ USAGE:
 
 """
 import _init_path
-import urllib
-import simplejson
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3.6
+    from urllib.request import urlopen
+try:
+    from urllib import urlencode
+except ImportError:
+    # Python 3.6
+    from urllib.parse import urlencode
+# Import JSON for Python 3 else simplejson for Python 2
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import os
 
 MAX_LEVEL = 3
@@ -24,11 +38,11 @@ def get(key):
     if os.path.exists(path):
         json = open(path).read()
     else:
-        json = urllib.urlopen("http://openlibrary.org%s.json" % key).read()
+        json = urlopen("http://openlibrary.org%s.json" % key).read()
     return simplejson.loads(json)
 
 def query(**kw):
-    json = urllib.urlopen("http://openlibrary.org/query.json?" + urllib.urlencode(kw)).read()
+    json = urlopen("http://openlibrary.org/query.json?" + urlencode(kw)).read()
     return simplejson.loads(json)
 
 def get_backreferences(key, limit=5):
@@ -66,7 +80,7 @@ def _fetch(key, visited=None, level=0, maxlevel=0, limit=5):
         return
 
     prefix = ("|  " * level) + "|--"
-    print prefix, key
+    print(prefix, key)
 
     doc = get(key)
     write(key, doc)
@@ -128,7 +142,7 @@ def load():
     from openlibrary.api import OpenLibrary
     ol = OpenLibrary("http://0.0.0.0:8080")
     ol.autologin()
-    print ol.save_many([documents[k] for k in keys], comment="documents copied from openlibrary.org")
+    print(ol.save_many([documents[k] for k in keys], comment="documents copied from openlibrary.org"))
 
 if __name__ == "__main__":
     import sys

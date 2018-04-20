@@ -5,11 +5,16 @@ The script deals with 3 data formats.
 1. dump of data table in OL postgres database.
 2. rawdump: tab seperated file with key, type and json of page in each row
 3. bookdump: dump containing only books with each property expanded. (used for solr import)
-
 """
 import sys
-import simplejson
 import re
+
+# Import JSON for Python 3 else simplejson for Python 2
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 
 commands = {}
 def command(f):
@@ -18,7 +23,8 @@ def command(f):
 
 @command
 def rawdump(datafile):
-    """Generates a json dump from copy of data table from OL database.
+    """
+    Generates a json dump from copy of data table from OL database.
 
     Usage:
 
@@ -28,7 +34,8 @@ def rawdump(datafile):
 
 @command
 def merge(dump, idump):
-    """Merges a large dump with increamental dump.
+    """
+    Merges a large dump with increamental dump.
 
         $ python jsondump.py bigdump.txt dailydump.txt > bigdump2.txt
     """
@@ -46,19 +53,22 @@ def merge(dump, idump):
 
 @command
 def json2rawdump(jsonfile):
-    """Converts a file containing json rows to rawdump format.
+    """
+    Converts a file containing json rows to rawdump format.
     """
     write_rawdump(sys.stdout, read_json(jsonfile))
 
 @command
 def bookdump(rawdump):
-    """Generates bookdump from rawdump.
+    """
+    Generates bookdump from rawdump.
     """
     pass
 
 @command
 def modified(db, date):
-    """Display list of modified keys on a given day.
+    """
+    Display list of modified keys on a given day.
 
         $ python jsondump.py modified dbname YYYY-MM-DD
     """
@@ -70,17 +80,15 @@ def help(cmd=None):
     """Displays this help."""
     action = cmd and get_action(cmd)
     if action:
-        print "python jsondump.py " + cmd
-        print
-        print action.__doc__
+        print("python jsondump.py " + cmd)
+        print(action.__doc__)
     else:
-        print __doc__
-        print "List of commands:"
-        print
+        print(__doc__)
+        print("List of commands:")
 
         for k in sorted(commands.keys()):
             doc = commands[k].__doc__ or " "
-            print "  %-10s\t%s" % (k, doc.splitlines()[0])
+            print("  %-10s\t%s" % (k, doc.splitlines()[0]))
 
 def get_action(cmd):
     if cmd in commands:
@@ -128,7 +136,8 @@ def doctest_escape():
     """
 
 def read_data_table(path):
-    r"""Read dump of postgres data table assuming that it is sorted by first column.
+    r"""
+    Read dump of postgres data table assuming that it is sorted by first column.
 
         >>> list(read_data_table(['1\t1\tJSON-1-1\n', '1\t2\tJSON-1-2\n', '2\t1\tJSON-2-1\n']))
         ['JSON-1-2\n', 'JSON-2-1\n']
@@ -187,7 +196,11 @@ def make_dict(items):
     return dict(items)
 
 def capture_stdout(f):
-    import StringIO
+    # Import StringIO from Python 2 else import io from StringIO
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
     def g(*a):
         stdout, sys.stdout = sys.stdout, StringIO.StringIO()
         f(*a)
@@ -197,12 +210,11 @@ def capture_stdout(f):
 
 @command
 def test(*args):
-    r"""Test this module.
+    r"""
+    Test this module.
 
         >>> 1 + 1
         2
-
-
     """
     sys.argv = args
     import doctest

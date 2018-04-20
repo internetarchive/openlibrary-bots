@@ -5,6 +5,8 @@ This script removes all the SPAM/* users to restore log-replay.
 """
 
 import sys
+import os
+import web
 
 def main(database):
     db = web.database(dbn='postgres', db=database, user=os.getenv('USER'), pw='')

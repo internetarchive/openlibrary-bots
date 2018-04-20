@@ -40,7 +40,7 @@ def make_thumbnail(record):
             image.resize(sizes[size], resample=Image.ANTIALIAS).save(thumbnail, format='jpeg')
             yield imgpath, thumbnail.getvalue()
         except Exception, e:
-            print 'ERROR:', id, str(e)
+            print('ERROR:', id, str(e))
             sys.stdout.flush()
 
 def add_image(tar, name, data, mtime=None):

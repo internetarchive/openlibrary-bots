@@ -1,4 +1,5 @@
-"""Script to generate XML sitemap of openlibrary.org website.
+"""
+Script to generate XML sitemap of openlibrary.org website.
 
 USAGE:
 
@@ -11,8 +12,13 @@ import itertools
 import datetime
 import gzip
 import re
-import json
 import time
+# Import JSON for Python 3 else simplejson for Python 2
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 
 t_sitemap = """$def with (things)
 <?xml version="1.0" encoding="UTF-8"?>
@@ -46,7 +52,8 @@ def xopen(filename):
         return open(filename)
 
 def urlsafe(name):
-    """Slugifies the name to produce OL url slugs
+    """
+    Slugifies the name to produce OL url slugs
 
     XXX This is duplicated from openlibrary.core.helpers because there
     isn't a great way to import the methods from openlibrary as a
@@ -64,7 +71,8 @@ def urlsafe(name):
     return safepath_re.sub('_', name).replace(' ', '-').strip('_')[:100]
 
 def process_dump(dumpfile):
-    """Generates a summary file used to generate sitemaps.
+    """
+    Generates a summary file used to generate sitemaps.
 
     The summary file contains: sort-key, path and last_modified columns.
     """
@@ -73,7 +81,7 @@ def process_dump(dumpfile):
         if type not in ['/type/work', '/type/author']:
             continue
 
-        doc = json.loads(jsontext)
+        doc = simplejson.loads(jsontext)
         title = doc.get('name', '') if type == '/type/author' \
                 else doc.get('title', '')
 
@@ -84,7 +92,7 @@ def process_dump(dumpfile):
         if sortkey:
             yield [sortkey, path, last_modified]
 
-re_key = re.compile("^/(authors|works)/OL\d+[AMW]$")
+re_key = re.compile(r"^/(authors|works)/OL\d+[AMW]$")
 
 def get_sort_key(key):
     """Returns a sort key used to group urls in 10K batches.
@@ -159,7 +167,7 @@ def system(cmd):
 
 def log(*args):
     msg = " ".join(map(str, args))
-    print time.asctime(), msg
+    print(time.asctime(), msg)
 
 def main(dumpfile):
     system("rm -rf sitemaps sitemaps_data.txt*; mkdir sitemaps")

@@ -14,7 +14,7 @@ logfile = open('log.txt', 'a')
 
 def log(*args):
     msg = " ".join(args)
-    print msg
+    print(msg)
     print >> logfile, msg
     logfile.flush()
 
@@ -64,7 +64,7 @@ class TarManager:
     def close(self):
         for name, _tarfile in self.tarfiles.values():
             if name:
-                print 'closing', name
+                print('closing', name)
                 _tarfile.close()
 
 def main(files):
