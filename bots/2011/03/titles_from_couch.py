@@ -1,11 +1,11 @@
 from urllib import urlopen
 from openlibrary.catalog.utils import mk_norm
 import json, re, codecs
-#import couchdb, sys
-#couch = couchdb.Server('http://ol-couch0.us.archive.org:5984/')
-#db = couch['editions']
+# import couchdb, sys
+# couch = couchdb.Server('http://ol-couch0.us.archive.org:5984/')
+# db = couch['editions']
 
-#for num, couch_id in enumerate(db):
+# for num, couch_id in enumerate(db):
 #    print couch_id, couch_id, db[id]
 
 re_parens = re.compile('\s*\((.*)\)\s*')
@@ -32,7 +32,7 @@ def iter_editions():
     first_line = True
     for line in urlopen(url):
         if first_line:
-            print line
+            print(line)
             first_line = False
             continue
         line = line.strip()
@@ -50,4 +50,3 @@ def iter_editions():
 
 if __name__ == '__main__':
     iter_editions()
-

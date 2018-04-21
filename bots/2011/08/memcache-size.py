@@ -1,10 +1,16 @@
 #! /bin/bash
-"""Script to findout the amount of memory required to cache all OL data.
+"""
+Script to findout the amount of memory required to cache all OL data.
 """
 
 import random
 import web
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 from openlibrary.utils import olcompress
 
 works = 15000000
@@ -16,7 +22,9 @@ compressor = olcompress.OLCompressor()
 N = 100
 
 def clen(d):
-    """Computes the compressed length of given data."""
+    """
+    Computes the compressed length of given data.
+    """
     return len(compressor.compress(simplejson.dumps(d)))
 
 def get_sizes(label, pattern, max, count):
@@ -35,7 +43,7 @@ def get_sizes(label, pattern, max, count):
     total_data_size = data_size*max/M
     total_size = total_doc_size + total_data_size
     sizes = [doc_size, data_size, total_doc_size, total_data_size, total_size]
-    print "\t".join(map(str, [label] + sizes))
+    print("\t".join(map(str, [label] + sizes)))
 
 def main():
     get_sizes("works", "/works/OL%dW", works, N)

@@ -11,11 +11,17 @@ Or only pass the store entries to run the script run faster.
    $ grep -h '"action": "store.' logs/2011/05/*.log | python scripts/2011/05/load_loan_stats.py openlibrary.yml
 """
 import sys
-import simplejson
 import yaml
 import couchdb
 import logging
 import re
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
+
 
 logger = logging.getLogger('loans')
 

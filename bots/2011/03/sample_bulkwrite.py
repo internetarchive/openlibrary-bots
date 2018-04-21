@@ -8,7 +8,8 @@ import sys
 ol = OpenLibrary()
 
 def read_mapping(filename, chunksize=1000):
-    """Reads OLID, OCLC_NUMBER mapping from given file.
+    """
+    Reads OLID, OCLC_NUMBER mapping from given file.
 
     Assumes that the file contains one OLID, OCLC_NUMBER per line, separated by tab.
     """

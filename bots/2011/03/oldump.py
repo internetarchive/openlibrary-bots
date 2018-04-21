@@ -4,7 +4,12 @@ This script must be run on the db node.
 """
 import os, sys
 import web
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 from infogami.infobase._dbstore.save import IndexUtil
 from openlibrary.core import schema
 
@@ -14,7 +19,8 @@ engine = "postgres"
 dbname = "openlibrary"
 
 class RestoreEngine:
-    """Engine to update an existing database with new changes from a dump.
+    """
+    Engine to update an existing database with new changes from a dump.
     """
     def __init__(self, dirname):
         self.dirname = dirname
@@ -107,7 +113,7 @@ class RestoreEngine:
         for line in open(self.path("transactions.txt")):
             row = simplejson.loads(line)
             if self.has_transaction(row['id']):
-                print "ignoring tx", row['id']
+                print("ignoring tx", row['id'])
                 continue
             else:
                 self.restore_tx(row)
@@ -199,7 +205,8 @@ class DumpEngine:
         f.close()
 
     def read_transactions(self, txid):
-        """Returns an iterator over transactions in the db starting from the given transaction ID.
+        """
+        Returns an iterator over transactions in the db starting from the given transaction ID.
         """
         while True:
             rows = db.query("SELECT * FROM transaction where id >= $txid order by id limit 100", vars=locals()).list()

@@ -2,14 +2,23 @@
 
 This programs tests the effectiveness of that compression aginst regular compression.
 """
-import urllib
 import zlib
 from openlibrary.utils import olcompress
 import random
-import simplejson
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3.6
+    from urllib.request import urlopen
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 
 def wget(url):
-    return urllib.urlopen(url).read()
+    return urlopen(url).read()
 
 def do_compress(text):
     c1 = zlib.compress(text)
@@ -25,7 +34,7 @@ def test_url(label, url):
     x0, x1, x2 = do_compress(text)
     improvement = (x1-x2)/float(x1) * 100
     cols = label, name, x0, x1, x2, improvement
-    print "\t".join(str(c) for c in cols)
+    print("\t".join(str(c) for c in cols))
     return x1, x2
 
 def test_random_pattern(label, pattern, max, count):
@@ -58,8 +67,7 @@ def main():
 
     improvement = (x1-x2)/float(x1) * 100
 
-    print
-    print "Overall improvement", improvement
+    print("Overall improvement", improvement)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-"""Script to generate denormalizied works dump.
+"""
+Script to generate denormalizied works dump.
 
 USAGE:
 
@@ -26,7 +27,12 @@ CHANGELOG:
 import time
 import sys
 import gzip
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import itertools
 import os
 import logging
@@ -51,7 +57,8 @@ except ImportError:
 logger = logging.getLogger(None)
 
 class DenormalizeWorksTask(mapreduce.Task):
-    """Map reduce task to generate denormalized works dump from OL dump.
+    """
+    Map reduce task to generate denormalized works dump from OL dump.
     """
     def __init__(self, ia_metadata):
         mapreduce.Task.__init__(self)
@@ -71,12 +78,14 @@ class DenormalizeWorksTask(mapreduce.Task):
             return {"collection":[]}
 
     def close(self):
-        """Removes all the temp files created for running map-reduce.
+        """
+        Removes all the temp files created for running map-reduce.
         """
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def map(self, key, value):
-        """Takes key and json as inputs and emits (work-key, work-json) or (work-key, edition-json)
+        """
+        Takes key and json as inputs and emits (work-key, work-json) or (work-key, edition-json)
         for work and edition records respectively.
         """
         doc = simplejson.loads(value)
@@ -183,7 +192,7 @@ class AuthorsDict:
         try:
             m = self.re_author.match(key)
         except TypeError:
-            print repr(key)
+            print(repr(key))
             raise
         if m:
             index = int(m.group(1))
@@ -270,7 +279,7 @@ def main(dumpfile, ia_dumpfile):
     task = DenormalizeWorksTask(ia_metadata)
 
     for key, json in task.process(records):
-        print key + "\t" + json
+        print(key + "\t" + json)
 
     task.close()
 

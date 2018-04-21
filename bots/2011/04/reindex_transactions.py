@@ -1,4 +1,5 @@
-"""Script to reindex specified transactions in the openlibrary database.
+"""
+Script to reindex specified transactions in the openlibrary database.
 
 Some transcations/changesets in the openlibrary database have been not indexed
 because of a bug. This script fixes the old records by reindexing the given
@@ -11,7 +12,6 @@ USAGE:
 It is possible to query the database to get the transaction ids and pass them to the script
 
     $ psql openlibrary -t  -c 'select id from transaction order by id desc limit 5' | xargs python reindex_transactions.py
-
 """
 
 import logging
@@ -20,7 +20,12 @@ import os
 
 import _init_path
 
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import web
 from infogami.infobase._dbstore.save import SaveImpl
 
@@ -59,7 +64,7 @@ def verify_index(tx_id):
         tx_data = simplejson.loads(tx.data)
         index2 = compute_index(tx_data)
         if index != index2:
-            print "\t".join([str(x) for x in [tx.id, tx.action, tx.created.isoformat(), index, index2]])
+            print("\t".join([str(x) for x in [tx.id, tx.action, tx.created.isoformat(), index, index2]]))
 
 def compute_index(tx_data):
     d = []

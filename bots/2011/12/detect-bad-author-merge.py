@@ -27,7 +27,8 @@ def read_author_merges():
                 and row['data']['changeset']['kind'] == 'merge-authors')
 
 def is_bad_merge(row):
-    """A merge is bad if the difference between revision of any modified page
+    """
+    A merge is bad if the difference between revision of any modified page
     in the input and after merge is more than 1.
 
     Returns the list of keys of effected docs. It will be empty list if the merge is alright.
@@ -42,7 +43,7 @@ def main():
     for row in read_author_merges():
         keys = is_bad_merge(row)
         if keys:
-            print row['timestamp'], row['data']['changeset']['id'], " ".join(keys)
+            print(row['timestamp'], row['data']['changeset']['id'], " ".join(keys))
 
 if __name__ == '__main__':
     main()

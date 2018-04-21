@@ -1,11 +1,16 @@
-#!/usr/bin/python
-
 import _init_path
+
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 
 import sys
 from openlibrary import config
 from time import time, sleep
-import argparse, simplejson, re
+import argparse, re
 from urllib2 import URLError, urlopen
 from openlibrary.catalog.utils.query import withKey, set_query_host
 from openlibrary.solr.update_work import update_author, update_work, get_work_subjects, add_field, solr_update, AuthorRedirect
@@ -41,8 +46,8 @@ def solr_update_authors(authors_to_update):
         try:
             author_updates = ['<delete>' + ''.join('<id>%s</id>' % re_author_key.match(akey).group(1) for akey in a['redirects']) + '</delete>']
         except:
-            print 'redirects'
-            print a['redirects']
+            print('redirects')
+            print(a['redirects'])
             raise
         author_updates += update_author(a['master_key'], a=a['master'], handle_redirects=False)
     solr_update(author_updates, debug=False)
@@ -50,7 +55,7 @@ def solr_update_authors(authors_to_update):
 
 def solr_update_subjects():
     global subjects_to_update
-    print subjects_to_update
+    print(subjects_to_update)
 
     subject_add = Element("add")
     for subject_type, subject_name in subjects_to_update:
@@ -58,9 +63,9 @@ def solr_update_subjects():
         count = subject_count(subject_type, subject_name)
 
         if not subject_need_update(key, count):
-            print 'no updated needed:', (subject_type, subject_name, count)
+            print('no updated needed:', (subject_type, subject_name, count))
             continue
-        print 'updated needed:', (subject_type, subject_name, count)
+        print('updated needed:', (subject_type, subject_name, count))
 
         doc = Element("doc")
         add_field(doc, 'key', key)
@@ -70,7 +75,7 @@ def solr_update_subjects():
         subject_add.append(doc)
 
     if len(subject_add):
-        print 'updating subjects'
+        print('updating subjects')
         add_xml = tostring(subject_add).encode('utf-8')
         solr_update([add_xml], debug=False)
         solr_update(['<commit />'], debug=True)
@@ -82,18 +87,18 @@ def solr_updates(i):
     t0 = time()
     d = i['data']
     changeset = d['changeset']
-    print 'author:', d['author']
+    print('author:', d['author'])
     try:
         assert len(changeset['data']) == 2 and 'master' in changeset['data'] and 'duplicates' in changeset['data']
     except:
-        print d['changeset']
+        print(d['changeset'])
         raise
     master_key = changeset['data']['master']
     dup_keys = changeset['data']['duplicates']
     assert dup_keys
-    print 'timestamp:', i['timestamp']
-    print 'dups:', dup_keys
-    print 'records to update:', len(d['result'])
+    print('timestamp:', i['timestamp'])
+    print('dups:', dup_keys)
+    print('records to update:', len(d['result']))
 
     master = None
     obj_by_key = {}
@@ -114,7 +119,7 @@ def solr_updates(i):
     #print 'master:', master
 
     if len(d['result']) == 0:
-        print i
+        print(i)
 
     work_updates = []
     for wkey in works:
@@ -135,27 +140,26 @@ def solr_updates(i):
         solr_update(work_updates, debug=False)
 
     authors_to_update.append({ 'redirects': dup_keys, 'master_key': master_key, 'master': master})
-    print 'authors to update:', len(authors_to_update)
+    print('authors to update:', len(authors_to_update))
 
     t1 = time() - t0
     update_times.append(t1)
-    print 'update takes: %d seconds' % t1
-    print
+    print('update takes: %d seconds' % t1)
 
 while True:
     url = base + offset
 #out = open('author_redirects', 'w')
 #for url in open('author_merge_logs'):
-    print url,
+    print(url)
 
     try:
         data = urlopen(url).read()
     except URLError as inst:
         if inst.args and inst.args[0].args == (111, 'Connection refused'):
-            print 'make sure infogami server is working, connection refused from:'
-            print url
+            print('make sure infogami server is working, connection refused from:')
+            print(url)
             sys.exit(0)
-        print 'url:', url
+        print('url:', url)
         raise
     try:
         ret = simplejson.loads(data)
@@ -167,17 +171,17 @@ while True:
     data_list = ret['data']
     if len(data_list) == 0:
         if authors_to_update:
-            print 'commit'
+            print('commit')
             solr_update(['<commit/>'], debug=True)
             solr_update_authors(authors_to_update)
             authors_to_update = []
             solr_update_subjects()
 
-        print 'waiting'
+        print('waiting')
         sleep(10)
         continue
     else:
-        print
+        print("")
     for i in data_list:
         action = i.pop('action')
         if action != 'save_many':
@@ -185,7 +189,7 @@ while True:
         if i['data']['comment'] != 'merge authors':
             continue
         if 'changeset' not in i['data']:
-            print i
+            print(i)
         if i['data']['changeset']['kind'] == 'edit-book':
             continue
         if i['timestamp'] == '2010-08-05T14:37:25.139418':
@@ -194,7 +198,7 @@ while True:
             continue # no change
         solr_updates(i)
 
-        print "average update time: %.1f seconds" % (float(sum(update_times)) / float(len(update_times)))
+        print("average update time: %.1f seconds" % (float(sum(update_times)) / float(len(update_times))))
     print >> open(state_file, 'w'), offset
 
 #out.close()

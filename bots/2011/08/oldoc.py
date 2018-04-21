@@ -25,7 +25,7 @@ for name, f in sorted(functions.items()):
         try:
             doc = pydoc.text.document(f, name)
             # Remove special chars to print text as bold on the terminal
-            print re.sub("\x08.", "", doc)
+            print(re.sub("\x08.", "", doc))
         except Exception:
             # ignore errors
             pass

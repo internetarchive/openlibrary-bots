@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-"""Script to fix redirects in OL database.
+"""
+Script to fix redirects in OL database.
 
 In the OL database the redirect docs are still using /a/foo and /b/foo
 instead of /authors/foo and /books/foo. This script fixes it.
@@ -10,7 +10,12 @@ USAGE:
 """
 
 import sys
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import yaml
 import memcache
 

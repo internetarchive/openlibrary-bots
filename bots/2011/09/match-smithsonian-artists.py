@@ -3,8 +3,23 @@
 
 import web
 import csv
-import urllib
-import simplejson
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3.6
+    from urllib.request import urlopen
+try:
+    from urllib import urlencode
+except ImportError:
+    # Python 3.6
+    from urllib.parse import urlencode
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
+
 import logging
 import sys
 
@@ -19,8 +34,8 @@ def query_authors(lastname, firstname, birth_date):
     if not birth_date:
         logger.info("%s, no matches found.", (lastname, firstname, birth_date))
         return
-    url = base_url + "?" + urllib.urlencode({"q": "%s %s birth_date:%s" % (lastname, firstname, birth_date)})
-    json = urllib.urlopen(url).read()
+    url = base_url + "?" + urlencode({"q": "%s %s birth_date:%s" % (lastname, firstname, birth_date)})
+    json = urlopen(url).read()
     data = simplejson.loads(json)
     n = data['numFound']
     if n == 1:
