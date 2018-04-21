@@ -6,7 +6,12 @@ local_site = os.path.join(os.path.dirname(__file__), "..", "..", "..")
 site.addsitedir(local_site)
 
 from optparse import OptionParser
-import simplejson as json
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import pprint
 from openlibrary.api import OpenLibrary
 

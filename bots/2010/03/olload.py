@@ -1,4 +1,5 @@
-"""Script to load Open Library data into various databases.
+"""
+Script to load Open Library data into various databases.
 
 USAGE:
     python olload.py bsddb ol.db ol_cdump.txt
@@ -34,12 +35,16 @@ def load_redis(server, data):
         r.mset(chunk)
 
 def load_couchdb(url, data):
-    import urllib
+    try:
+        from urllib import urlopen
+    except ImportError:
+        # Python 3.6
+        from urllib.request import urlopen
 
     for chunk in data:
         docs = ('{"_id": "%s", ' % k + v[1:] for k, v in chunk.iteritems())
         json = '{"docs": [\n%s\n]}' % ',\n'.join(docs)
-        urllib.urlopen(url + "/_bulk_docs", json).read()
+        urlopen(url + "/_bulk_docs", json).read()
 
 def load_dummy(arg1, data):
     for chunk in data:
@@ -49,7 +54,7 @@ def parse(filename, chunk_size=10000):
     t0 = time.time()
     i = 0
     for chunk in web.group(open(filename), chunk_size):
-        print i, time.time() - t0
+        print(i, time.time() - t0)
         d = {}
         for line in chunk:
             key, type, revision, json = line.strip().split("\t")
@@ -57,7 +62,7 @@ def parse(filename, chunk_size=10000):
 
         i += len(d)
         yield d
-    print i, time.time() - t0
+    print(i, time.time() - t0)
 
 def main(dbname, param, filename):
     data = parse(filename, 10000)

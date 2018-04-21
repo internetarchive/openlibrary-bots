@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-"""Script to update documents in the Open Library database.
+"""
+Script to update documents in the Open Library database.
 
     USAGE: python update_docs.py database docs_file
 
@@ -13,7 +13,12 @@ The following example adds covers to edtions.
 
 WARNING: This script doesn't update the index tables.
 """
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import web
 import os
 import datetime
@@ -40,7 +45,7 @@ def update_docs(db, all_docs, chunk_size=10000, comment=""):
     now = datetime.datetime.utcnow()
 
     for chunk in web.group(all_docs, chunk_size):
-        print chunk
+        print(chunk)
         d = dict((doc['key'], doc) for doc in chunk)
         rows = get_docs(db, d.keys())
 

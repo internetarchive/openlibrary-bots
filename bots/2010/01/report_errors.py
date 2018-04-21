@@ -1,4 +1,6 @@
-"""Script to send report of internal errors."""
+"""
+Script to send report of internal errors.
+"""
 
 import sys
 import web
@@ -31,7 +33,6 @@ $for (msg, code), elist in error_places[:10]:
             $newline
 $if len(error_places) > 10:
     ...
-
 """
 
 hostname = socket.gethostname()
@@ -62,9 +63,9 @@ def main():
             to_address=options.email,
             subject=msg.subject,
             message=web.safestr(msg))
-        print "email sent to", ", ".join(options.email)
+        print("email sent to", ", ".join(options.email))
     else:
-        print msg
+        print(msg)
 
 def process_errors(dir, date):
     root = os.path.join("/var/log/openlibrary", dir, date)

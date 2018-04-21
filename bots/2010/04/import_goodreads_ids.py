@@ -53,4 +53,3 @@ def load(filename):
 if __name__ == "__main__":
   import sys
   load(sys.argv[1])
-

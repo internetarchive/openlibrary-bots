@@ -7,7 +7,12 @@ This scripts uses [pyaws][1] library for querying amazon.com.
 
 [1]: http://github.com/IanLewis/pyaws
 """
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import yaml
 import shelve
 import urllib2
@@ -56,7 +61,7 @@ class Summary(Command):
                 title = d['ia'].get('title')
 
                 if latest_edition['PublishedYear']:
-                    print "\t".join([k, latest_edition['ASIN'], latest_edition['PublishedYear'], repr(title)])
+                    print("\t".join([k, latest_edition['ASIN'], latest_edition['PublishedYear'], repr(title)]))
 
     def find_latest_edition(self, amazon_books):
         """Finds the latest edition from the list of amazon books.

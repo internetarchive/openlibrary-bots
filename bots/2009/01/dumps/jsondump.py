@@ -9,7 +9,7 @@ The script deals with 3 data formats.
 import sys
 import re
 
-# Import JSON for Python 3 else simplejson for Python 2
+# Import simplejson for Python 2 else json for Python 3
 try:
     import simplejson
 except ImportError:

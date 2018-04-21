@@ -5,7 +5,12 @@ USAGE: python reindex.py dbname work_keys.txt
 TODO: generalize this to work with any table.
 """
 import web
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import os
 
 def read_keys(keysfile):
@@ -121,7 +126,7 @@ def pipe(*funcs):
 
 def display(data):
     for row in data:
-        print row
+        print(row)
 
 def main(dbname, keysfile):
     global db

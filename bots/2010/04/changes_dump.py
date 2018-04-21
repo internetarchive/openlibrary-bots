@@ -4,7 +4,12 @@ USAGE: python chanages_dump.py dbname
 """
 import web
 import os
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 
 def fetch(db, query, size=10000):
     t = db.transaction()
@@ -42,7 +47,7 @@ def main(dbname):
         row.comment = row.comment or ""
         row.ip = row.ip or ""
         row.created = row.created.isoformat()
-        print simplejson.dumps(row) + "\t" + row.created
+        print(simplejson.dumps(row) + "\t" + row.created)
 
 if __name__ == "__main__":
     import sys

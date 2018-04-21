@@ -68,12 +68,12 @@ def sources():
 def iter_marc():
     rec_no = 0
     for ia in sources():
-        print ia
+        print(ia)
         for part, size in files(ia):
             full_part = ia + "/" + part
             filename = base + full_part
             assert os.path.exists(filename)
-            print filename
+            print(filename)
             f = open(filename)
             for pos, loc, data in read_marc_file(full_part, f):
                 rec_no +=1
@@ -122,7 +122,7 @@ for rec_no, pos, loc, data in iter_marc():
             continue
         for h in marc_h:
             if len(h) % 3 != 0:
-                print 'bad:', list(get_all_subfields(line))
+                print('bad:', list(get_all_subfields(line)))
                 continue
             found += ['/l/' + i for i in (h[i * 3:(i+1) * 3].lower() for i in range(len(h) / 3)) if i in langs]
         if found:

@@ -5,7 +5,12 @@ import _init_path
 from openlibrary.data.dump import read_tsv
 import web
 
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
 import sys
 
 def main(filename):
@@ -22,7 +27,7 @@ def main(filename):
 
         try:
             if cover and cover > 0:
-                print "\t".join([str(cover), key, ",".join(isbns)])
+                print("\t".join([str(cover), key, ",".join(isbns)]))
         except:
             print >> sys.stderr, doc
             print >> sys.stderr, (key, cover, isbns)

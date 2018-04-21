@@ -2,16 +2,26 @@
 """Script to compare subject info in solr and couchdb.
 """
 import sys
-import simplejson
+# Import simplejson for Python 2 else json for Python 3
+try:
+    import simplejson
+except ImportError:
+    # python 3.6
+    import json as simplejson
+
 import web
-import urllib2
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3.6
+    from urllib.request import urlopen
 import time
 
 couchdb_url = "http://ia331510:5984/works/_design/seeds/_view/seeds"
 
 def wget(url):
     print >> sys.stderr, time.asctime(), "wget", url
-    return urllib2.urlopen(url).read()
+    return urlopen(url).read()
 
 def jsonget(url):
     return simplejson.loads(wget(url))
@@ -51,7 +61,7 @@ def compare_works(subject):
         works[key] = {"key": key, "subject": subject in subjects, "solr": key in solr_works, "couch": key in couch_works}
 
     for w in sorted(works.values(), key=lambda w: (w['solr'], w['couch'], w['subject'])):
-        print w["key"], w['subject'], w['solr'], w['couch']
+        print(w["key"], w['subject'], w['solr'], w['couch'])
 
 if __name__ == "__main__":
     compare_works(sys.argv[1])
