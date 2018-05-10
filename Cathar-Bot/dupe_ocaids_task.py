@@ -62,28 +62,28 @@ def merge_if_same_edition(group):
     a_set = set(a)
     b_set = set(b)
     if a_set == b_set:
-        print "  IDENTICAL EDITIONS FOUND!"
+        print("  IDENTICAL EDITIONS FOUND!")
         docs = []
         docs.append(bot.get_redirect(get_olid(b), get_olid(a)))
         docs.append(bot.get_redirect(group[1][1], group[0][1]))
-        print " Merging editions and works:"
-        print bot.save_many(docs, "Merged duplicate OCAIDs")
-        print "  DEBUG: %s" % docs
+        print(" Merging editions and works:")
+        print(bot.save_many(docs, "Merged duplicate OCAIDs"))
+        print("  DEBUG: %s" % docs)
     else:
-        print a_set - b_set
-        print b_set - a_set
+        print(a_set - b_set)
+        print(b_set - a_set)
 
 def orphan_check(group):
     works = [ e[1] for e in group if e[1] ]
     for e in group:
         if e[1] is None:
-             print "  ORPHAN FOUND! %s" % e[0]
+             print("  ORPHAN FOUND! %s" % e[0])
              if len(works) > 1:
                  raise Exception("Multiple works to choose from!")
              else:
-                 print "  Associating %s with %s" % (e[0], works[0])
+                 print("  Associating %s with %s" % (e[0], works[0]))
                  doc = bot.get_move_edition(e[0], works[0])
-                 print bot.save_one(doc, "Associate with work") 
+                 print(bot.save_one(doc, "Associate with work")) 
                 
 
 def debug_group(group):
@@ -108,29 +108,27 @@ with open(filename, 'r') as infile:
             if last_id and ocaid != last_id:
                 # end of group, operate on complete group
                 if len(group) < 2:
-                   print "Nothing to do, length %i Group [%s]" % (len(group), last_id)
+                   print("Nothing to do, length %i Group [%s]" % (len(group), last_id))
                 else:
                    works = [ed[1] for ed in group]
                    if len(set(works)) == 1:
-                       print "Duplicate Editions only in group [%s]" % last_id
+                       print("Duplicate Editions only in group [%s]" % last_id)
                    else:
                        # Group has duplicate works and editions
           
-                       print "%s: %s" % (last_id, group)
-                       print "%i: %s" % (i, debug_group(group))
+                       print("%s: %s" % (last_id, group))
+                       print("%i: %s" % (i, debug_group(group)))
                        try:
                            merge_group(group)
                            # check for orphans:
                            orphan_check(group)
                        except Exception as e:
-                           print "EXCEPTION %s" % e
+                           print("EXCEPTION %s" % e)
 
                 group = []
-            #else:
-            #    print "[%s] %s -> %s" % (ocaid, olid, work)
-            
+            # else:
+            #    print("[%s] %s -> %s" % (ocaid, olid, work))
             last_id = ocaid
             data = bot.load_doc(olid) 
             if not is_skippable(data) and data['ocaid'] == ocaid:
                 group.append([olid, get_work(data)])
-

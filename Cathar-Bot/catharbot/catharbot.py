@@ -3,13 +3,19 @@ import json
 import olid
 #ol = OpenLibrary()
 
+# Importing Base String for Python 2 and 3
+try:
+  basestring
+except NameError:
+  basestring = str
+
 DEBUG=True
 
 class CatharBot(OpenLibrary):
 
     def get_editions_from_work(self, id):
         if DEBUG:
-            print id
+            print(id)
         editions = [e.olid for e in self.Work.get(id).editions]
         return editions
 
@@ -20,7 +26,8 @@ class CatharBot(OpenLibrary):
         return ed
 
     def get_redirect(self, from_olid, to_olid):
-        ''' from OLID, to OLID
+        ''' 
+        from OLID, to OLID
         '''
         assert olid.get_type(from_olid) == olid.get_type(to_olid)
         data = {
@@ -65,7 +72,7 @@ class CatharBot(OpenLibrary):
         doc['_comment'] = comment
         return self.session.put(self.base_url + doc['key'] + ".json", json.dumps(doc))
 
-    def is_modified(a, b):
+    def is_modified(self, a, b):
         ''' Check if a string or doc has been modified
         '''
         return a != b
