@@ -13,9 +13,7 @@ catalog, building towards a web page for every book ever published.
 
 ## Overview
 
-Open Library is an effort started in 2006 to create "one web page for
-every book ever published". It provides access to many public domain
-and out-of-print books, which can be read online.
+Open Library is an effort started in 2006 to create "one web page for every book ever published". It provides access to many public domain and out-of-print books, which can be read online.
 
 - [Learn more about the Open Library project](https://openlibrary.org/about)
 - [The Vision (Dream) of OpenLibrary](https://openlibrary.org/about/vision)
@@ -40,6 +38,7 @@ For instructions on administrating your Open Library instance and build instruct
 
 You can also find more information regarding Developer Documentation for Open Library in the Open Library [Wiki](https://github.com/internetarchive/openlibrary/wiki/)
 
+Typically every folder signifies a different bot. The folder must contain code with respect to the bot, a `README.md` file which tells the user how to run the bot and any dependecies or `requirements.txt` file which can make it easier for a user to run the bot.
 
 ## Contributing
 

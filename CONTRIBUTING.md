@@ -1,8 +1,7 @@
 # Getting Started
 
 ## Resources for Contributors
-Look through our issues related to `contributing`:
-https://github.com/internetarchive/openlibrary-bots/issues
+Look through our issues related to `contributing`: [Github Issues]( https://github.com/internetarchive/openlibrary-bots/issues)
 
 ## Want to Participate in the Community?
 - Ask here to join our Open Library slack: https://github.com/internetarchive/openlibrary/issues/686
