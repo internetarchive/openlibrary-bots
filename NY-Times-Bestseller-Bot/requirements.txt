@@ -1,0 +1,2 @@
+simplejson==3.13.2
+openlibrary==0.0.1
