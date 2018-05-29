@@ -25,3 +25,7 @@
 1. How many items in the list have neither: ia_works_id OR ia_books_id (i.e. OpenLibrary IDs)
 2. Get unique works from the items in the list
 3. We can also enforce a `ia_publish_date` > 2000 if we want to reduce the number of results returned
+
+
+## Bookcovers
+* BetterWorld Books Page

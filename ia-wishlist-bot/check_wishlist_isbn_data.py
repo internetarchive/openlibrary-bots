@@ -1,7 +1,19 @@
+"""
+Python Script to query the Wishlist ISBN Data (SQLite Database)
+
+Input: 'isbn_data.db'
+* Parameters for the same can be found on https://docs.google.com/spreadsheets/d/1GDATWbgncmQzDaTJVdJU1kVcRhJIuMs0zHUnoCITED0/edit?usp=sharing
+
+Output:
+1. general_info() - Giving the list of columns in the `isbn_data` database.
+2. find_books() - Finding Books which do not have an Open Library ID
+"""
+
 # Import the sqlite3 library
 import sqlite3
 import argparse
 
+# General Information behind the SQLite Database
 def general_info():
     db = sqlite3.connect("/storage/openlibrary/wishlist/isbn_data.db")
     cur = db.cursor
@@ -9,20 +21,24 @@ def general_info():
     table = cur.fetchone()
     print("Table name is: " + str(table))
 
+# Allows users to search for books which do not have an Open Library ID
 def find_books():
     db = sqlite3.connect("/storage/openlibrary/wishlist/isbn_data.db")
     cur = db.cursor
     id = (None, None)
-    cur.execute("SELECT * FROM data WHERE ia_books_id=? AND ia_works_id=?;",id)
+    cur.execute("SELECT * FROM data WHERE ia_books_id is ? AND ia_works_id is ?;",id)
     data = cur.fetchall()
     print("Number of books not on Open Library are: " + len(data))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--general", help="Get General Information about the table")
     parser.add_argument(
         "--find", help="Find books which do not have `ia_books_id` or `ia_works_id`")
+    
     args = parser.parse_args()
+
     if args.general:
         general_info()
     if args.find:

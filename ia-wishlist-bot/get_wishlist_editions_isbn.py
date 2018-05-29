@@ -1,3 +1,13 @@
+"""
+Python Script to get a list of ISBNs which aren't added to Open Library
+
+Input: 'wishlist_works_edition.ndjson'
+* Contains the parameters "oclc_synonyms",  "openlibrary_synonyms", "editions" -> {"isbn", "olid"}
+
+Output: 'ol_works.csv'
+* Contains the Parameter: 'isbn-13' for all the books which aren't added to Open Library
+"""
+
 import ndjson
 import csv
 import time
@@ -22,7 +32,7 @@ for i in range(len(data)):
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
-with open('out1.csv', 'w') as csvfile:
+with open('ol_works.csv', 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     for out_data in new_data:
 	    csvwriter.writerow([out_data])
