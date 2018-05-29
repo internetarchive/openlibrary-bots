@@ -12,7 +12,7 @@ with open('ol_works.csv', 'r') as csvfile:
 
 isbn_set = set(isbn_data)
 
-with open('wish_list_march_2018.ndjson') as f:
+with open('/storage/openlibrary/wishlist/wish_list_march_2018.ndjson') as f:
 	dataset = ndjson.load(f)
 
 
@@ -22,7 +22,7 @@ for data in dataset:
 	if data['isbn13'] != None:
 		y = set([data['isbn13']])
 		if isbn_set.intersection(y):
-			print("Yayyy")
+			#print("Yayyy")
 			new_data.append(data)
 
 print("--- %s seconds to process all the works ---" % (time.time() - start_time))

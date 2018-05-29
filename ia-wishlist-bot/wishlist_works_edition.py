@@ -1,17 +1,16 @@
 import ndjson
 import csv
-import numpy as np
 import time
 
 new_data = []
 
 
-with open('wishlist_works_editions.ndjson') as f:
+with open('/storage/openlibrary/wishlist/wishlist_works_editions.ndjson') as f:
 	data = ndjson.load(f)
 
 start_time = time.time()
 
-for i in range(464066):
+for i in range(len(data)):
 	flag = 0
 	if len(data[i]['openlibrary_synonyms']) == 0:
 		for edition in data[i]['editions']:
