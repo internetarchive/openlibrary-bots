@@ -12,10 +12,20 @@ import ndjson
 import csv
 import time
 
+import os
+import urllib.request
+
 new_data = []
 
+if not os.path.isdir("data"):
+	os.mkdir('data')
 
-with open('/storage/openlibrary/wishlist/wishlist_works_editions.ndjson') as f:
+if not os.path.exists('data/wishlist_works_editions.ndjson'):
+	file_name = 'data/wishlist_works_editions.ndjson'
+	urllib.request.urlretrieve(
+		'https://archive.org/download/openlibrary-bots/wishlist_works_editions.ndjson', file_name)
+
+with open('data/wishlist_works_editions.ndjson') as f:
 	data = ndjson.load(f)
 
 start_time = time.time()
@@ -32,7 +42,8 @@ for i in range(len(data)):
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
-with open('ol_works.csv', 'w') as csvfile:
+with open('data/ol_works.csv', 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
+    csvwriter.writerow(['ISBN-13'])
     for out_data in new_data:
 	    csvwriter.writerow([out_data])

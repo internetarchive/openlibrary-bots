@@ -12,11 +12,30 @@ from olclient.openlibrary import OpenLibrary
 import olclient.common as common
 import ndjson
 
+# Import os to check for file exist and 
+# urllib to donwload the file
+import os
+import urllib.request
+
+# File used in the whole script
+FILE = 'data/wish_list_march_2018.ndjson'
+
 # Creating an object of the Open Library Client
 ol = OpenLibrary()
 
+# Check if a directory called data exists
+if not os.path.isdir("data"):
+	os.mkdir('data')
+
+# If the required file is not available download the file
+if not os.path.exists(FILE):
+	file_name = FILE
+	urllib.request.urlretrieve(
+		'https://archive.org/download/openlibrary-bots/wish_list_march_2018.ndjson', file_name)
+
+
 # Use the Wishlist ndjson file
-with open('wish_list_march_2018.ndjson') as f:
+with open(FILE) as f:
 	data = ndjson.load(f)
 
 # Iterates over the size of the data
@@ -49,3 +68,6 @@ for i in range(len(data)):
 		newly_added_book.add_bookcover(new_book['bookcover'])  
 	else: 
 		bookcover_added = False
+
+	if not bookcover_added:
+		print("Bookcover has not been found for the given book")
