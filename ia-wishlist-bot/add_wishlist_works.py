@@ -48,7 +48,7 @@ with open('wishlist_works_may_2018.csv', 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     
 	# CSV File Header is Written
-	# csvwriter.writerow(['Book Name', 'Book Authors', ''])
+	# csvwriter.writerow(['book_title', 'book_authors', 'book_language', 'book_date', 'book_oclc', 'book_isbn10', 'book_isbn13'])
 
 	# CSV File Contents are being written 
     for out_data in new_data:

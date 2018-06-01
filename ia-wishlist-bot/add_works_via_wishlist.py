@@ -25,7 +25,7 @@ for i in range(len(data)):
 	new_book = data[i]
 
 	# Data of the book
-	title = new_book['title'] if new_book['title'] else u''
+	title = new_book.get('title', u'')
 	author = new_book['author'][0] if new_book['title'] else u''
 	date = new_book['date'] if new_book['date'] else u''
 	isbn10 = new_book['isbn10'] if new_book['isbn10'] else u''

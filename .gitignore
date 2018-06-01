@@ -102,3 +102,4 @@ ENV/
 *.ndjson
 *.ipynb
 *.csv
+data/
