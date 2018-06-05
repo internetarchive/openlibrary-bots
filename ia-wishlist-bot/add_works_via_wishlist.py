@@ -45,11 +45,11 @@ for i in range(len(data)):
 
 	# Data of the book
 	title = new_book.get('title', u'')
-	author = new_book['author'][0] if new_book['title'] else u''
-	date = new_book['date'] if new_book['date'] else u''
-	isbn10 = new_book['isbn10'] if new_book['isbn10'] else u''
-	isbn13 = new_book['isbn13'] if new_book['isbn13'] else u''
-	oclc = new_book['oclc'] if new_book['oclc'] else u''
+	author = new_book.get('author', u'')
+	date = new_book.get('date', u'')
+	isbn10 = new_book.get('isbn10', u'')
+	isbn13 = new_book.get('isbn13', u'')
+	oclc = new_book.get('oclc', u'')
 
 	# Define a Book Object
 	added_book = common.Book(title=title, authors=[common.Author(name=author)], publisher=u"", publish_date=date)
