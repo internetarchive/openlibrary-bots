@@ -32,7 +32,7 @@ start_time = time.time()
 
 for i in range(len(data)):
 	flag = 0
-	if len(data[i]['openlibrary_synonyms']) == 0:
+	if not len(data[i]['openlibrary_synonyms']):
 		for edition in data[i]['editions']:
 			if edition['olid'] is None:
 				flag = 1

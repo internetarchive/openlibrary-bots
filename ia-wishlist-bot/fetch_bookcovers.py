@@ -59,14 +59,12 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument("--google", help="Enter the ISBN Number to get Bookcovers using Google Books API")
-	args = parser.parse_args()
 
 	parser.add_argument("--amazon", help="Enter the ISBN Number to scrape Bookcovers using Amazon Website")
-	args = parser.parse_args()
 
 	parser.add_argument("--betterworld", help="Enter the ISBN Number to get bookcovers using Betterworld Books")
-	args = parser.parse_args()
 
+	args = parser.parse_args()
 	isbn10 = input("Value of ISBN 10")
 	isbn13 = input("Value of ISBN 13")
 

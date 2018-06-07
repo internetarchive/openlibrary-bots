@@ -32,27 +32,30 @@ if not os.path.exists(FILE):
 	file_name = FILE
 	urllib.request.urlretrieve(
 		'https://archive.org/download/openlibrary-bots/wish_list_march_2018.ndjson', file_name)
+def row2book(new_book):
+	# Data of the book
+	title = new_book.get('title', u'')
+	author = new_book.get('author', u'')
+	date = new_book.get('date', u'')
 
+	# Define a Book Object
+	added_book = common.Book(title=title, authors=[common.Author(
+		name=author)], publisher=u"", publish_date=date)
+
+	return added_book
 
 # Use the Wishlist ndjson file
 with open(FILE) as f:
 	data = ndjson.load(f)
 
 # Iterates over the size of the data
-for i in range(len(data)):
+for new_book in data:
 
-	new_book = data[i]
-
-	# Data of the book
-	title = new_book.get('title', u'')
-	author = new_book.get('author', u'')
-	date = new_book.get('date', u'')
 	isbn10 = new_book.get('isbn10', u'')
 	isbn13 = new_book.get('isbn13', u'')
 	oclc = new_book.get('oclc', u'')
 
-	# Define a Book Object
-	added_book = common.Book(title=title, authors=[common.Author(name=author)], publisher=u"", publish_date=date)
+	added_book = row2book(new_book)
 
 	# Add metadata like ISBN 10 and ISBN 13
 	added_book.add_id(u'isbn_10', isbn10)
