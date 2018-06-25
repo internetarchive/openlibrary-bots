@@ -1,0 +1,3 @@
+ndjson==0.1.0
+requests==2.11.1
+openlibrary_client==0.0.16
