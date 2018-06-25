@@ -15,13 +15,14 @@ source_path = None
 edition_prefix = None
 author_prefix = None
 
-edition_records = set ([])
+edition_records = set([])
 item_names = {}
-#edition_names = set ([])
-#author_names = {}
+# edition_names = set ([])
+# author_names = {}
 
-def setup ():
-	def getvar (name, required=True):
+
+def setup():
+    def getvar(name, required=True):
 		val = os.getenv (name)
 		if required and val is None:
 			raise Exception ("found no environment variable %s" % name)
