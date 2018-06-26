@@ -19,7 +19,10 @@ FILE = 'data/wishlist_works_may_2018.csv'
 ol = OpenLibrary()
 
 # reader = csv.reader(open(FILE, "rt"))
+# Count of books added to Open Library
 count = 0
+
+# Array to add unduplicated books
 value = []
 
 with open(FILE, "rt") as infile:

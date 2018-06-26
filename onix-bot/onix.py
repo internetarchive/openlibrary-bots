@@ -1,189 +1,150 @@
-# wrapper code for easier handling of ONIX files:
-#
-# OnixHandler -- a sax ContentHandler that produces a stream of ONIX "product" data in xmltramp objects
-#
-# OnixProduct -- a wrapper for the objects produced by OnixHandler, providing human-friendly field access
-# (mostly just providing a dictionary interface where long ("reference") names can be used even when the
-# data is encoded with opaque ("short") names.)
+import onixcheck
+import xml.etree.ElementTree as ET
+from lxml import etree
 
-from xml.sax.handler import *
-from .sax_utils import *
-from .xmltramp import *
+# File 
+FILE = 'data/SampleONIX.xml'
 
-repo_path = os.getenv ("PHAROS_REPO")
-codelists_path = "%s/%s" % (repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd")
-ref_dtd_path = "%s/%s" % (repo_path, "catalog/onix/ONIX_BookProduct_Release2.1_reference.xsd")
+"""
+Step 1: Check if there are any errors in the XML file
+"""
+errors = onixcheck.validate(FILE)
+for error in errors:
+    print(error.short)
 
-# for testing, also set URL_CACHE_DIR; see bottom.
+# Exit the script in case there are errors
+if errors:
+    print("Kindly use a correct XML File to parse")
+    exit(0)
 
-onix_codelists = None
-onix_shortnames = None
+"""
+Step 2: Parse the XML file to get all relevant features from the dataset
+"""
+tree = etree.parse(FILE)
 
-def init ():
-	f = open (codelists_path, "r")
-	onix_codelists = parse_codelists (f)
-	f.close ()
-	f = open (ref_dtd_path, "r")
-	onix_shortnames = parse_shortnames (f)
-	f.close ()
+products = tree.xpath('/ONIXMessage/Product')
 
-class OnixProduct:
-	# N.B.: this only works when using the "short" names of elements.
-	# we should check that the document uses the short DTD, and if not,
-	# use the reference names to access field values.
+# onix_record = [['Title','Publisher','City Of Publication','Country of Publication','isbn10', 'isbn13', 'Boocover Link', 'Language']]
+onix_records = [[]]
 
-	def __init__ (self, p):
-		self.p = p
+for product in products:
+    product = etree.fromstring(etree.tostring(product))
+    identifiers = product.xpath('/Product/ProductIdentifier')
+    
+    for identifier in identifiers:
+        if identifier[0].text == "02":
+            isbn10 = identifier[1].text 
+        if identifier[0].text == "15":
+            isbn13 = identifier[1].text 
 
-	@staticmethod
-	def reify_child (v):
-		if len (v._dir) == 1 and isinstance (v._dir[0], StringTypes):
-			return v._dir[0]
-		else:
-			return OnixProduct (v)
+    titles = product.xpath('/Product/Title')
+    
+    for title in titles:
+        book_title = title[1].text 
 
-	def __getitem__ (self, n):
-		slicing = False
-		if isinstance (n, SliceType):
-			slicing = True
-			reference_name = n.start
-		else:
-			reference_name = n
-		name = OnixProduct.get_shortname (reference_name) # or reference_name.lower ()
-		values = self.p[name:]
-		if slicing:
-			return map (OnixProduct.reify_child, values)
-		else:
-			if len (values) == 0:
-				raise KeyError ("no value for %s (%s)" % (reference_name, name))
-			elif len (values) > 1:
-				raise Exception ("more than one value for %s (%s)" % (reference_name, name))
-			return OnixProduct.reify_child (values[0])
+    authors = product.xpath('/Product/Title')
+    
+    book_authors = [] 
 
-	def get (self, n):
-		try:
-			return self.__getitem__ (n)
-		except KeyError:
-			return None
+    for author in authors:
+        book_authors.append(author[1].text) 
 
-	def getLineNumber (self):
-		return self.p.getLineNumber ()
+    publishers = product.xpath('/Product/Publisher')
+    
+    for publisher in publishers:
+        book_publisher = publisher[1].text 
 
-	def __unicode__ (self):
-		return self.p.__unicode__ ()
+    publication_country = product.xpath('/Product/CountryOfPublication')[0].text
+    publication_city = product.xpath('/Product/CityOfPublication')[0].text
+    
+    media_files = product.xpath('/Product/MediaFile')
 
-	def __str__ (self):
-		return self.__unicode__ ()
+    for media_file in media_files:
+        book_cover = media_file[3].text
 
-	def pi_type_name (code):
-		return onix_codelists["List5"][code][0]
+    languages = product.xpath('/Product/Language')
 
-	@staticmethod
-	def contributor_role (code):
-		return onix_codelists["List17"][code][0]
+    for language in languages:
+        book_language = language[1].text
 
-	@staticmethod
-	def get_shortname (reference_name):
-		try:
-			return onix_shortnames[reference_name]
-		except KeyError:
-			raise Exception ("unknown reference name: %s" % reference_name)
+    onix_records.append([book_title, book_publisher, publication_city, publication_country, isbn10, isbn13, book_cover, book_language, book_authors])
 
-class OnixHandler (ContentHandler):
+# print(onix_records)
+"""
+0 -> Book Title
+1 -> Book Publisher
+2 -> Publication City
+3- > Publication Country
+4 -> ISBN-10
+5 -> ISBN-13
+6 -> Book Cover
+7 -> Book Language
+8 -> Author
+"""
 
-	def __init__ (self, parser, receiver):
-		self.parser = parser
-		self.receiver = receiver
-		self.subhandler = None
-		ContentHandler.__init__ (self)
+from olclient.openlibrary import OpenLibrary
+import olclient.common as common
+import string, ast
+import requests, json
 
-	def startElementNS (self, name, qname, attrs):
-		if self.subhandler:
-			self.subhandler.startElementNS (name, qname, attrs)
-			self.subdepth += 1
-		else:
-			(uri, localname) = name
-			if localname == "product":
-				self.subhandler = xmltramp.Seeder (self.parser)
-				self.subhandler.startElementNS (name, qname, attrs)
-				self.subdepth = 1
+ol = OpenLibrary()
+count = 0 
+final_onix_records = []
 
-	def endElementNS (self, name, qname):
-		if self.subhandler:
-			self.subhandler.endElementNS (name, qname)
-			self.subdepth -= 1
-			if self.subdepth == 0:
-				self.receiver (self.subhandler.result)
-				self.subhandler = None
+"""
+Step 3: Check for ISBN Match amongst all the books.
+Step 4: Check for Author Match and Title Match
+"""
 
-	def characters (self, content):
-		if self.subhandler:
-			self.subhandler.characters (content)
+for record in onix_records:
+    work_isbn10 = ol.Edition.get(isbn=record[4])
+    work_isbn13 = ol.Edition.get(isbn=record[5])
 
-def parse_shortnames (input):
-	def schema (name, attrs):
-		def element (name, attrs):
-			def typespec (name, attrs):
-				def attribute (name, attrs):
-					if (attrs.getValueByQName ('name') == "shortname"):
-						shortname = attrs.getValueByQName ('fixed')
-						return CollectorValue (shortname)
-					else:
-						return CollectorNone ()
-				return NodeCollector ({ 'attribute': attribute, collector_any: typespec })
-			elt_name = attrs.getValueByQName ('name')
-			return NamedCollector (elt_name, { collector_any: typespec })
-		return DictCollector ({ 'element': element })
-	return collector_parse (input, { 'schema': schema })
+    correct_title = str.maketrans('', '', string.punctuation)
+    new_title = '"' + record[0].split(':')[0].translate(
+            correct_title).strip().replace(' ', '+') + '"'
 
-def parse_codelists (input):
-	def schema (name, attrs):
-		def simpleType (name, attrs):
-			def restriction (name, attrs):
-				def enumeration (name, attrs):
-					def annotation (name, attrs):
-						def documentation (name, attrs):
-							return TextCollector ()
-						return ListCollector ({ 'documentation': documentation })
-					return NamedCollector (attrs.getValueByQName (u'value'), { 'annotation': annotation })
-				return DictCollector ({ 'enumeration': enumeration })
-			return NamedCollector (attrs.getValueByQName (u'name'), { 'restriction': restriction })
-		return DictCollector ({ 'simpleType': simpleType })
-	return collector_parse (input, { 'schema': schema })
+    correct_title = record[0].split(":")[0].translate(
+        correct_title).lower().strip()
 
-init ()
+    # Author List
+    # author_list = ast.literal_eval(record[8])
+    author_list = record[8]
+    new_author = ''
 
-### testing
+    for author in author_list:
+        # Concatenate to form one big string
+        new_author = new_author + '"' + author.split(",")[0] + '"' + "OR"
 
-from xml.sax.saxutils import prepare_input_source
+    # Remove the last OR at the end of the string
+    new_author = new_author[:-2]
 
-class TestErrorHandler:
-	def error (self, exn):
-		raise exn
-	def fatalError (self, exn):
-		raise exn
-	def warning (self, exn):
-		sys.stderr.write ("warning: %s\n" % exn.getMessage)
+    if len(author_list):
+        url = "http://openlibrary.org/search.json?q=title:" + \
+            str(new_title) + "+author:" + str(new_author)
+    else:
+        url = "http://openlibrary.org/search.json?q=title:" + \
+            str(new_title)
 
-def produce_items (input, produce):
-	source = prepare_input_source (input)
+    print(url)
+    r = requests.get(url)
+    if r.status_code == 200:
+        j = json.loads(r.text)
 
-	parser = xml.sax.make_parser ()
-	parser.setFeature (xml.sax.handler.feature_namespaces, 1)
-	parser.setContentHandler (OnixHandler (parser, process_item))
-	url_cache_dir = os.getenv ("URL_CACHE_DIR")
-	if url_cache_dir:
-		sys.stderr.write ("using url cache in %s\n" % url_cache_dir)
-		parser.setEntityResolver (CachingEntityResolver (parser, url_cache_dir))
-	else:
-		sys.stderr.write ("no url_cache_dir; XML resources will always be loaded from network\n")
-	parser.setErrorHandler (TestErrorHandler ())
-	parser.parse (source)
+        match = False
+        for doc in j['docs']:
+            # Takes into account only title
+            # if doc['title_suggest'].lower() == correct_title.split(":")[0].lower().strip():
+            if doc['title_suggest'].lower() == correct_title:
+                match = True
 
-def process_item(i):
-	print(OnixProduct(i))
+        if work_isbn10 is None and work_isbn13 is None and not match and count != 1000:
+            count = count + 1
+            final_onix_records.append(record)
+            print("Count: " + str(count))
+            print(record[0])
 
-if __name__ == "__main__":
-	from sys import stdin
-	print("Reading ONIX data from standard input ...")
-	produce_items (stdin, process_item)
+"""
+Step 5: Add books to Open Library using ol-client
+Input: final_onix_records -> Array of ONIX Records
+"""
