@@ -47,14 +47,21 @@ class TestOnixParser(unittest.TestCase):
         
         self.assertTrue(expected_title == title)
 
+    def test_authors(self):
+        authors = self.op.products[0].authors
+        expected_authors = ''
+        
+        self.assertTrue(expected_authors == authors)
+
     def test_identifiers(self):
         identifiers = self.op.products[0].identifiers
         
         expected_isbn10 = "0199223955"
         expected_isbn13 = "9780199223954"
 
-        self.assertTrue(identifiers['isbn10'] == expected_isbn10)
-        self.assertTrue(identifiers['isbn13'] == expected_isbn13)
+        self.assertTrue(identifiers.get('isbn10') == expected_isbn10)
+        self.assertTrue(identifiers.get('isbn13') == expected_isbn13)
+        self.assertFalse(identifiers.get('isbn12') == expected_isbn13)
 
     def test_media_file_link(self):
         media_file_link = self.op.products[0].media_file_link
@@ -102,19 +109,30 @@ class OnixProductParser(object):
         return title[0].text if title else ''
 
     @property
+    def authors(self):
+        # authors = self.product.xpath('//ns:Author', namespaces={'ns': self.ns})
+        authors = self.product.xpath('//Author')
+        
+        book_authors = []
+
+        if authors:
+            for author in authors:
+                book_authors.append(author[1].text)
+
+        return book_authors if authors else ''
+
+    @property
     def identifiers(self):
         # identifiers = self.product.xpath('//ns:ProductIdentifier', namespaces={'ns': self.ns})
         identifiers = self.product.xpath('//ProductIdentifier')
-
-        # isbn10 = None
-        # isbn13 = None
 
         if identifiers:
             IDENTIFIER_TYPES = {'02': 'isbn10', '15': 'isbn13'}
 
             found_identifiers = {}
             for identifier in identifiers:
-                found_identifiers[IDENTIFIER_TYPES.get(identifier[0].text)] = identifier[1].text
+                if IDENTIFIER_TYPES.get(identifier[0].text):
+                    found_identifiers[IDENTIFIER_TYPES.get(identifier[0].text)] = identifier[1].text
         
         return found_identifiers if identifiers else ''
 
@@ -151,5 +169,6 @@ if __name__ == "__main__":
     print(OnixFeedParser(onix_filename).products[0].title)
     print(OnixFeedParser(onix_filename).products[0].publication_country)
     print(OnixFeedParser(onix_filename).products[0].identifiers)
+    print(OnixFeedParser(onix_filename).products[0].authors)
 
     unittest.main()
