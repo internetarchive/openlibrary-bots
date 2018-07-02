@@ -44,21 +44,34 @@ class TestOnixParser(unittest.TestCase):
     def test_title(self):
         title = self.op.products[0].title
         expected_title = "Roman Art"
+        
         self.assertTrue(expected_title == title)
+
+    def test_identifiers(self):
+        identifiers = self.op.products[0].identifiers
+        
+        expected_isbn10 = "0199223955"
+        expected_isbn13 = "9780199223954"
+
+        self.assertTrue(identifiers['isbn10'] == expected_isbn10)
+        self.assertTrue(identifiers['isbn13'] == expected_isbn13)
 
     def test_media_file_link(self):
         media_file_link = self.op.products[0].media_file_link
         expected_media_file_link = "http://assets.cambridge.org/97801985/20818/cover/9780198520818.jpg"
+        
         self.assertTrue(expected_media_file_link == media_file_link)
 
     def test_publication_country(self):
         publication_country = self.op.products[0].publication_country
         expected_publication_country = "GB"
+        
         self.assertTrue(expected_publication_country == publication_country)
 
     def test_publication_city(self):
         publication_city = self.op.products[0].publication_city
         expected_publication_city = "Oxford"
+        
         self.assertTrue(expected_publication_city == publication_city)
 
 
@@ -87,6 +100,23 @@ class OnixProductParser(object):
             # title = title[0].xpath('//ns:TitleText', namespaces={'ns': self.ns})
             title = title[0].xpath('//TitleText')
         return title[0].text if title else ''
+
+    @property
+    def identifiers(self):
+        # identifiers = self.product.xpath('//ns:ProductIdentifier', namespaces={'ns': self.ns})
+        identifiers = self.product.xpath('//ProductIdentifier')
+
+        # isbn10 = None
+        # isbn13 = None
+
+        if identifiers:
+            IDENTIFIER_TYPES = {'02': 'isbn10', '15': 'isbn13'}
+
+            found_identifiers = {}
+            for identifier in identifiers:
+                found_identifiers[IDENTIFIER_TYPES.get(identifier[0].text)] = identifier[1].text
+        
+        return found_identifiers if identifiers else ''
 
     @property
     def media_file_link(self):
@@ -120,6 +150,6 @@ if __name__ == "__main__":
     
     print(OnixFeedParser(onix_filename).products[0].title)
     print(OnixFeedParser(onix_filename).products[0].publication_country)
-    print(OnixFeedParser(onix_filename).products[0].publication_city)
+    print(OnixFeedParser(onix_filename).products[0].identifiers)
 
     unittest.main()
