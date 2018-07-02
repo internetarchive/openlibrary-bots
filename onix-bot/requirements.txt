@@ -1,0 +1,4 @@
+requests==2.11.1
+openlibrary_client==0.0.16
+onixcheck==0.9.5
+lxml==4.2.0
