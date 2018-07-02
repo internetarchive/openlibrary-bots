@@ -32,15 +32,14 @@ class TestOnixParser(unittest.TestCase):
     def setUp(self):
         self.op = OnixFeedParser(io.BytesIO(requests.get(self.TEST_ONIX_FEED_URL).content))
 
-    # def test_onix_file(self):
-    #     byte_str = io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content).read()
-    #     text_obj = byte_str.decode('UTF-8')
+    def test_onix_file(self):
+        byte_str = io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content)
 
-    #     errors = onixcheck.validate(io.StringIO(text_obj).getvalue())
-    #     for error in errors:
-    #         print(error.short)
+        errors = onixcheck.validate(byte_str.getvalue())
+        for error in errors:
+            print(error.short)
 
-    #     self.assertTrue(len(errors) == 0)
+        self.assertTrue(len(errors) == 0)
 
     def test_title(self):
         title = self.op.products[0].title
@@ -110,6 +109,7 @@ class OnixFeedParser(object):
         self.ns = ns
         # self.products = [OnixProductParser(product, ns) for product in self.onix.findall('{%s}Product' % ns)]
         self.products = [OnixProductParser(product, ns) for product in self.onix.findall('Product')]
+        # self.errors = onixcheck.validate(filename.getvalue())
 
 
 class OnixProductParser(object):
