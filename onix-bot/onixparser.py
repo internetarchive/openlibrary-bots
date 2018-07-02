@@ -47,11 +47,23 @@ class TestOnixParser(unittest.TestCase):
         
         self.assertTrue(expected_title == title)
 
+    def test_publisher(self):
+        publisher = self.op.products[0].publisher
+        expected_publisher = "Oxford University Press"
+        
+        self.assertTrue(expected_publisher == publisher)
+
     def test_authors(self):
         authors = self.op.products[0].authors
         expected_authors = ''
         
         self.assertTrue(expected_authors == authors)
+
+    def test_languages(self):
+        languages = self.op.products[0].languages
+        expected_languages = 'eng'
+        
+        self.assertTrue(expected_languages == languages)
 
     def test_identifiers(self):
         identifiers = self.op.products[0].identifiers
@@ -109,6 +121,15 @@ class OnixProductParser(object):
         return title[0].text if title else ''
 
     @property
+    def publisher(self):
+        # publisher = self.product.xpath('//ns:Publisher', namespaces={'ns': self.ns})
+        publisher = self.product.xpath('//Publisher')
+        if publisher:
+            # publisher = publisher[0].xpath('//ns:PublisherName', namespaces={'ns': self.ns})
+            publisher = publisher[0].xpath('//PublisherName')
+        return publisher[0].text if publisher else ''
+
+    @property
     def authors(self):
         # authors = self.product.xpath('//ns:Author', namespaces={'ns': self.ns})
         authors = self.product.xpath('//Author')
@@ -120,6 +141,16 @@ class OnixProductParser(object):
                 book_authors.append(author[1].text)
 
         return book_authors if authors else ''
+
+    @property
+    def languages(self):
+        # languages = self.product.xpath('//ns:Language', namespaces={'ns': self.ns})
+        languages = self.product.xpath('//Language')
+        
+        if languages:
+            languages = languages[0].xpath('//LanguageCode')
+            
+        return languages[0].text if languages else ''
 
     @property
     def identifiers(self):
@@ -170,5 +201,7 @@ if __name__ == "__main__":
     print(OnixFeedParser(onix_filename).products[0].publication_country)
     print(OnixFeedParser(onix_filename).products[0].identifiers)
     print(OnixFeedParser(onix_filename).products[0].authors)
+    print(OnixFeedParser(onix_filename).products[0].publisher)
+    print(OnixFeedParser(onix_filename).products[0].languages)
 
     unittest.main()
