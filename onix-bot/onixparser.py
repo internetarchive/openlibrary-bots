@@ -22,6 +22,7 @@ import requests
 import unittest
 import io
 import onixcheck
+import json
 
 class TestOnixParser(unittest.TestCase):
 
@@ -92,6 +93,12 @@ class TestOnixParser(unittest.TestCase):
         expected_publication_city = "Oxford"
         
         self.assertTrue(expected_publication_city == publication_city)
+
+    def test_json(self):
+        onix_json = self.op.products[0].get_json
+        expected_onix_json = json.dumps({"title": "Roman Art", "publication_country": "GB", "publication_city": "Oxford", "identifiers": {"isbn10": "0199223955", "isbn13": "9780199223954"}, "authors": "", "publishers": "Oxford University Press", "languages": "eng"})
+
+        self.assertTrue(expected_onix_json == onix_json)
 
 
 class OnixFeedParser(object):
@@ -194,14 +201,23 @@ class OnixProductParser(object):
         else:
             return ''
 
+    @property
+    def get_json(self):
+        data = {}
+
+        data['title'] = self.title
+        data['publication_country'] = self.publication_country
+        data['publication_city'] = self.publication_city
+        data['identifiers'] = self.identifiers
+        data['authors'] = self.authors
+        data['publishers'] = self.publisher
+        data['languages'] = self.languages
+
+        return json.dumps(data)
+
 if __name__ == "__main__":
     onix_filename = (sys.argv[1] if len(sys.argv) == 2 else io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content))
     
-    print(OnixFeedParser(onix_filename).products[0].title)
-    print(OnixFeedParser(onix_filename).products[0].publication_country)
-    print(OnixFeedParser(onix_filename).products[0].identifiers)
-    print(OnixFeedParser(onix_filename).products[0].authors)
-    print(OnixFeedParser(onix_filename).products[0].publisher)
-    print(OnixFeedParser(onix_filename).products[0].languages)
+    print(OnixFeedParser(onix_filename).products[0].get_json)
 
     unittest.main()
