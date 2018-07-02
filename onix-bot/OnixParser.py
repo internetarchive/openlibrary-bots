@@ -55,7 +55,7 @@ class OnixParser(object):
         for title in titles:
             book_title = title[1].text
 
-        authors = product.xpath('/Product/Title')
+        authors = product.xpath('/Product/Author')
 
         book_authors = []
 

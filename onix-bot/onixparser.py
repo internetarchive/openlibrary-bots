@@ -27,11 +27,16 @@ class TestOnixParser(unittest.TestCase):
     def setUp(self):
         self.op = OnixFeedParser(io.BytesIO(requests.get(self.TEST_ONIX_FEED_URL).content))
 
-
     def test_title(self):
         title = self.op.products[0].title
         expected_title = "This is my distinctive title."
         self.assertTrue(expected_title == title)
+
+    def test_publication_country(self):
+        publication_country = self.op.products[0].publication_country
+        expected_publication_country = ""
+        self.assertTrue(expected_publication_country == publication_country)
+
 
 class OnixFeedParser(object):
 
@@ -39,8 +44,7 @@ class OnixFeedParser(object):
         parser = etree.XMLParser(ns_clean=True)
         self.onix = etree.parse(filename, parser).getroot()
         self.ns = ns
-        self.products = [OnixProductParser(product, ns) for product in
-                         self.onix.findall('{%s}Product' % ns)]
+        self.products = [OnixProductParser(product, ns) for product in self.onix.findall('{%s}Product' % ns)]
 
 
 class OnixProductParser(object):
@@ -56,10 +60,18 @@ class OnixProductParser(object):
             title = title[0].xpath('//ns:TitleText', namespaces={'ns': self.ns})
         return title[0].text if title else ''
 
+    @property
+    def publication_country(self):
+        publication_country = self.product.xpath('//ns:CountryOfPublication', namespaces={'ns': self.ns})
+        if publication_country:
+            return publication_country[0].text
+        else:
+            return ''
 
 if __name__ == "__main__":
     onix_filename = (sys.argv[1] if len(sys.argv) == 2 else io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content))
     
     print(OnixFeedParser(onix_filename).products[0].title)
+    print(OnixFeedParser(onix_filename).products[0].publication_country)
 
-    # unittest.main()
+    unittest.main()
