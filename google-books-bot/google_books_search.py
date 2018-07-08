@@ -63,7 +63,7 @@ def _upload_ol_book(ol_book):
                          "This script doesn't yet support updating existing books -- sorry!")
 
     edition = OL.Work.create(ol_book)
-    print("Upload of {} successful".format(edition.olid))
+    print("Upload of {} successful!".format(edition.olid))
 
 
 def main():
