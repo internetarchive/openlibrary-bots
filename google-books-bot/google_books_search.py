@@ -31,7 +31,7 @@ def _ol_book_from_google_book(google_book):
     number_of_pages = google_book_info.get("pageCount")
     publisher = google_book_info.get("publisher")
     publish_date = google_book_info.get("publishedDate")
-    cover_url = google_book_info["imageLinks"].get("thumbnail")
+    cover_url = google_book_info.get("imageLinks", {}).get("thumbnail")
 
     return ol_common.Book(title=title,
                           number_of_pages=number_of_pages,
