@@ -50,6 +50,17 @@ def check_if_author_exists(author_name, author_birth_date=None, author_death_dat
 
     # return ol.get(author_olid)  # this may be None, that's OK
 
+def add_book_via_olclient(book, author_list):
+
+    # Define a Book Object
+    new_book = common.Book(title=book.get("title"), authors=author_list, publish_date=book.get("date"), language=book.get("language"))
+
+    # Add metadata like ISBN 10 and ISBN 13
+    new_book.add_id(u'isbn_10', book.get("isbn10"))
+    new_book.add_id(u'isbn_13', book.get('isbn13'))
+    new_book.add_id(u'oclc', book.get('oclc'))
+
+
 
 def process_book(book):
     # make sure we've normalized the author name (e.g. first last?)
@@ -64,7 +75,7 @@ def process_book(book):
 
 
     # TODO: add book to Open Library via olclient
-
+    add_book_via_olclient(book, author_list)
 
 def process_csv(filename):
     """This function takes a csv file which was output from our whatever process created e.g. *new_wishlist_salman_1000.csv* and converts it into a python dictionary
@@ -85,9 +96,9 @@ if __name__ == "__main__":
     # csv_row = sys.argv[1]
     book_data = process_csv(FILE)
 
-    # for data in book_data:
-    #     book = parse_wishlist_csv_row_to_dict(data)
-    #     process_book(book)
+    for data in book_data:
+        book = parse_wishlist_csv_row_to_dict(data)
+        process_book(book)
     # book = parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
 
     unittest.main()
