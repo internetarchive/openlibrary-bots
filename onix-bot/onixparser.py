@@ -23,6 +23,7 @@ import unittest
 import io
 import onixcheck
 import json
+import tempfile
 
 class TestOnixParser(unittest.TestCase):
 
@@ -35,7 +36,11 @@ class TestOnixParser(unittest.TestCase):
     def test_onix_file(self):
         byte_str = io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content)
 
-        errors = onixcheck.validate(byte_str.getvalue())
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.write(byte_str.getvalue())
+            temp.flush()
+            errors = onixcheck.validate(temp.name)
+
         for error in errors:
             print(error.short)
 
