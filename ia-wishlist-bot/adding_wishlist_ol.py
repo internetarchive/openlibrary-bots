@@ -60,7 +60,7 @@ def add_book_via_olclient(book, author_list):
     new_book.add_id(u'isbn_13', book.get('isbn13'))
     new_book.add_id(u'oclc', book.get('oclc'))
 
-
+    ol.create_book(new_book)
 
 def process_book(book):
     # make sure we've normalized the author name (e.g. first last?)
