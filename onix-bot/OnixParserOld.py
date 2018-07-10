@@ -152,6 +152,7 @@ class OnixParser(object):
                         print(record[0])
             except Exception as e:
                 print("URL Exception: URL can't be created")
+                print(e)
 
         return final_onix_records
 

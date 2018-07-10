@@ -25,6 +25,11 @@ import onixcheck
 import json
 import tempfile
 
+from olclient.openlibrary import OpenLibrary
+import olclient.common as common
+
+ol = OpenLibrary()
+
 class TestOnixParser(unittest.TestCase):
 
     # TEST_ONIX_FEED_URL = 'https://storage.googleapis.com/support-kms-prod/SNP_EFDA74818D56F47DE13B6FF3520E468126FD_3285388_en_v2'
@@ -107,14 +112,11 @@ class TestOnixParser(unittest.TestCase):
 
 class OnixFeedParser(object):
 
-    # def __init__(self, filename, ns="http://www.editeur.org/onix/2.1/reference"):
     def __init__(self, filename, ns=""):
         parser = etree.XMLParser(ns_clean=True)
         self.onix = etree.parse(filename, parser).getroot()
         self.ns = ns
-        # self.products = [OnixProductParser(product, ns) for product in self.onix.findall('{%s}Product' % ns)]
         self.products = [OnixProductParser(product, ns) for product in self.onix.findall('Product')]
-        # self.errors = onixcheck.validate(filename.getvalue())
 
 
 class OnixProductParser(object):
@@ -125,25 +127,20 @@ class OnixProductParser(object):
 
     @property
     def title(self):
-        # title = self.product.xpath('//ns:Title', namespaces={'ns': self.ns})
         title = self.product.xpath('//Title')
         if title:
-            # title = title[0].xpath('//ns:TitleText', namespaces={'ns': self.ns})
             title = title[0].xpath('//TitleText')
         return title[0].text if title else ''
 
     @property
     def publisher(self):
-        # publisher = self.product.xpath('//ns:Publisher', namespaces={'ns': self.ns})
         publisher = self.product.xpath('//Publisher')
         if publisher:
-            # publisher = publisher[0].xpath('//ns:PublisherName', namespaces={'ns': self.ns})
             publisher = publisher[0].xpath('//PublisherName')
         return publisher[0].text if publisher else ''
 
     @property
     def authors(self):
-        # authors = self.product.xpath('//ns:Author', namespaces={'ns': self.ns})
         authors = self.product.xpath('//Author')
         
         book_authors = []
@@ -156,7 +153,6 @@ class OnixProductParser(object):
 
     @property
     def languages(self):
-        # languages = self.product.xpath('//ns:Language', namespaces={'ns': self.ns})
         languages = self.product.xpath('//Language')
         
         if languages:
@@ -166,7 +162,6 @@ class OnixProductParser(object):
 
     @property
     def identifiers(self):
-        # identifiers = self.product.xpath('//ns:ProductIdentifier', namespaces={'ns': self.ns})
         identifiers = self.product.xpath('//ProductIdentifier')
 
         if identifiers:
@@ -181,16 +176,13 @@ class OnixProductParser(object):
 
     @property
     def media_file_link(self):
-        # bookcover = self.product.xpath('//ns:MediaFile', namespaces={'ns': self.ns})
         bookcover = self.product.xpath('//MediaFile')
         if bookcover:
-            # bookcover = bookcover[0].xpath('//ns:MediaFileLink', namespaces={'ns': self.ns})
             bookcover = bookcover[0].xpath('//MediaFileLink')
         return bookcover[0].text if bookcover else ''
 
     @property
     def publication_country(self):
-        # publication_country = self.product.xpath('//ns:CountryOfPublication', namespaces={'ns': self.ns})
         publication_country = self.product.xpath('//CountryOfPublication')
         if publication_country:
             return publication_country[0].text
@@ -199,7 +191,6 @@ class OnixProductParser(object):
 
     @property
     def publication_city(self):
-        # publication_city = self.product.xpath('//ns:CityOfPublication', namespaces={'ns': self.ns})
         publication_city = self.product.xpath('//CityOfPublication')
         if publication_city:
             return publication_city[0].text
@@ -220,9 +211,73 @@ class OnixProductParser(object):
 
         return json.dumps(data)
 
+
+class OnixProductBot(object):
+    def __init__(self, data):
+        self.status = 1
+        self.data = data
+
+    @property
+    def check_identifiers(self):
+        try:
+            work_isbn10 = ol.Edition.get(isbn=self.data.get('identifers').get('isbn10'))
+        except (IndexError, ValueError):
+            print("Index Error for ISBN 10")
+
+        try:
+            work_isbn13 = ol.Edition.get(
+                isbn=self.data.get('identifers').get('isbn10'))
+        except (IndexError, ValueError):
+            print("Index Error for ISBN 13")
+
+        if work_isbn10 or work_isbn13:
+            self.status = 0
+
+    @property
+    def check_title_or_author(self):
+        try:
+            correct_title = str.maketrans('', '', string.punctuation)
+            new_title = '"' + self.data.get('title').split(':')[0].translate(
+                correct_title).strip().replace(' ', '+') + '"'
+
+            correct_title = self.data.get('title').split(":")[0].translate(
+                correct_title).lower().strip()
+        except (IndexError, ValueError):
+            print("Index Error for Title")
+
+        try:
+            author_list = self.data.get('authors')
+            new_author = ''
+
+            for author in author_list:
+                # Concatenate to form one big string
+                new_author = new_author + '"' + author.split(",")[0] + '"' + "OR"
+
+            # Remove the last OR at the end of the string
+            new_author = new_author[:-2]
+        except (IndexError, ValueError):
+            print("Index Error for Authors")
+
+        if len(author_list):
+            url = "http://openlibrary.org/search.json?q=title:" + str(new_title) + "+author:" + str(new_author)
+        else:
+            url = "http://openlibrary.org/search.json?q=title:" + str(new_title)
+
+        try:
+            print(url)
+            r = requests.get(url)
+            if r.status_code == 200:
+                j = json.loads(r.text)
+        except Exception as e:
+            print("URL Exception: URL can't be created")
+            print(e)
+
+
+
 if __name__ == "__main__":
     onix_filename = (sys.argv[1] if len(sys.argv) == 2 else io.BytesIO(requests.get(TestOnixParser.TEST_ONIX_FEED_URL).content))
     
-    print(OnixFeedParser(onix_filename).products[0].get_json)
+    data = OnixFeedParser(onix_filename).products[0].get_json
+
 
     unittest.main()
