@@ -8,7 +8,7 @@ import json
 import unittest
 
 ol = OpenLibrary()
-FILE = 'ia-data/new_wishlist_salman_1000.csv'
+FILE = 'ia-data/sample_wishlist.csv'
 
 class TestWishlistAddBook(unittest.TestCase):
     def test_parse_wishlist_csv_row_to_dict(self):
@@ -93,12 +93,17 @@ def add_book_via_olclient(book, author_list, bookcover=None):
     # Define a Book Object
     new_book = common.Book(title=book.get("title"), authors=author_list, publish_date=book.get("date"), language=book.get("language"))
 
+
     # Add metadata like ISBN 10 and ISBN 13
     new_book.add_id(u'isbn_10', book.get("isbn10"))
     new_book.add_id(u'isbn_13', book.get('isbn13'))
     new_book.add_id(u'oclc', book.get('oclc'))
 
-    ol.create_book(new_book)
+    print(new_book)
+    newer_book = ol.create_book(new_book)
+
+    if bookcover:
+        newer_book.add_bookcover(bookcover)
 
 def process_book(book):
     # make sure we've normalized the author name (e.g. first last?)
@@ -106,19 +111,22 @@ def process_book(book):
     for author_name in book.get('authors'):
         author_list.append(get_author_object(author_name))
 
-    # TODO: bookcover search, etc
+    # Bookcover search, etc
     bookcover = get_bookcover(book)
 
-    # TODO: add book to Open Library via olclient
+    # Add book to Open Library via olclient
     add_book_via_olclient(book, author_list, bookcover)
 
 if __name__ == "__main__":
     # csv_row = sys.argv[1]
-    # book_data = process_csv(FILE)
+    # unittest.main()
 
-    # for data in book_data:
-    #     book = parse_wishlist_csv_row_to_dict(data)
-    #     process_book(book)
+    book_data = process_csv(FILE)
+
+    for data in book_data:
+        book = parse_wishlist_csv_row_to_dict(data)
+        process_book(book)
+
+        print("Book has been processed")
     # book = parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
 
-    unittest.main()
