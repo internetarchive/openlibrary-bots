@@ -23,7 +23,7 @@ import unittest
 import io
 import onixcheck
 import json
-import tempfile
+import tempfile, string
 
 from olclient.openlibrary import OpenLibrary
 import olclient.common as common
@@ -108,6 +108,19 @@ class TestOnixParser(unittest.TestCase):
         expected_onix_json = json.dumps({"title": "Roman Art", "publication_country": "GB", "publication_city": "Oxford", "identifiers": {"isbn10": "0199223955", "isbn13": "9780199223954"}, "authors": "", "publishers": "Oxford University Press", "languages": "eng"})
 
         self.assertTrue(expected_onix_json == onix_json)
+
+class TestOnixProductBot(unittest.TestCase):
+    TEST_ONIX_JSON = json.dumps({"title": "Roman Art", "publication_country": "GB", "publication_city": "Oxford", "identifiers": {"isbn10": "0199223955", "isbn13": "9780199223954"}, "authors": "", "publishers": "Oxford University Press", "languages": "eng"})
+    
+    def setUp(self):
+        self.opb = OnixProductBot(self.TEST_ONIX_JSON)
+        self.data = self.opb.data
+
+    def test_onix_identifiers(self):
+        expected_status = 0
+        self.opb.check_identifiers
+
+        self.assertTrue(expected_status == self.opb.status)
 
 
 class OnixFeedParser(object):
@@ -215,18 +228,19 @@ class OnixProductParser(object):
 class OnixProductBot(object):
     def __init__(self, data):
         self.status = 1
-        self.data = data
+        self.data = json.loads(data)
 
     @property
     def check_identifiers(self):
+        
         try:
-            work_isbn10 = ol.Edition.get(isbn=self.data.get('identifers').get('isbn10'))
+            work_isbn10 = ol.Edition.get(isbn=self.data.get('identifiers').get('isbn10'))
         except (IndexError, ValueError):
             print("Index Error for ISBN 10")
 
         try:
             work_isbn13 = ol.Edition.get(
-                isbn=self.data.get('identifers').get('isbn10'))
+                isbn=self.data.get('identifiers').get('isbn13'))
         except (IndexError, ValueError):
             print("Index Error for ISBN 13")
 
@@ -268,6 +282,15 @@ class OnixProductBot(object):
             r = requests.get(url)
             if r.status_code == 200:
                 j = json.loads(r.text)
+                match = False
+                for doc in j['docs']:
+                    # Takes into account only title
+                    # if doc['title_suggest'].lower() == correct_title.split(":")[0].lower().strip():
+                    if doc['title_suggest'].lower() == correct_title:
+                        match = True
+                if not match :
+                    print(self.data)
+
         except Exception as e:
             print("URL Exception: URL can't be created")
             print(e)
