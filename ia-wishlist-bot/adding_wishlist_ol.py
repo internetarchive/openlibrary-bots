@@ -192,5 +192,4 @@ if __name__ == "__main__":
         process_book(book)
 
         print("Book has been processed")
-    # book = parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
 
