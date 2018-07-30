@@ -1,3 +1,12 @@
+"""
+Python Script to add books to Open Library 
+
+Input: 'wishlist_works_may_2018.csv'
+
+Output: 'Adding books to the Open Library'
+* Open Library Objects put up on Open Library
+"""
+
 # Using the Open Library Client
 from olclient.openlibrary import OpenLibrary
 import olclient.common as common

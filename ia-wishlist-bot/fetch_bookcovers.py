@@ -3,6 +3,12 @@ Python Script to fetch Bookcovers from
 1. Google Books API
 2. Amazon Scraping Bookcovers
 3. Betterworld Books Page
+
+Input: 
+ISBNs for books to get bookcover
+
+Output:
+URL of Bookcover
 """
 
 import argparse
