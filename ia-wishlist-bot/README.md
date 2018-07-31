@@ -25,6 +25,6 @@ The IA Wishlist Bot allows users to add books to the Open Library Database where
 
 ## Fetching Bookcovers
 Bookcovers can be taken using the following methods: 
-1. **Google Books API** - Allows the Open Library Bot to fetch a Bookcover via the Google Books API. Currently being tested with 
+1. **Google Books API** - Allows the Open Library Bot to fetch a Bookcover via the Google Books API. Currently being tested with the Google API.
 2. **BetterWorld Books** - Bookcovers are fetched from the BetterWorld Books website using Web Scraping.
 3. **Amazon** - Bookcovers are directly fetched from the Amazon website using the bs4 Python Package to do web scraping.
