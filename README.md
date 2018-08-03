@@ -51,6 +51,8 @@ All source code published here is available under the terms of the GNU Affero Ge
 - IA-Wishlist Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai)).
 - ONIX Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai))
 - NY Times Bestseller Bot
+- Google Books Bot - (Maintained by [Adam](https://github.com/adamreis))
 
 ## Inactive Bots
 - [Cathar Bot](https://github.com/hornc/catharbot) - (Maintained by [Charles](https://github.com/hornc))
+- [ONIX Bot] - Deprecated (Author - Aaron Schwartz)
