@@ -46,3 +46,11 @@ Typically every folder signifies a different bot. The folder must contain code w
 ## License
 
 All source code published here is available under the terms of the GNU Affero General Public License, version 3. Please see http://gplv3.fsf.org/ for more information.
+
+## Current Active Bots
+- IA-Wishlist Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai)).
+- ONIX Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai))
+- NY Times Bestseller Bot
+
+## Inactive Bots
+- [Cathar Bot](https://github.com/hornc/catharbot) - (Maintained by [Charles](https://github.com/hornc))
