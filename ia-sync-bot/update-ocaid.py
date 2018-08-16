@@ -5,8 +5,10 @@ ol = OpenLibrary()
 
 infile = "olids-to-update.txt"
 
+# Takes an infile and writes ocaids to Open Library items and performs a sync.
+
 # infile is the json output of an archive.org search query
-# containing an 'openlibrary' (edition olid) and 'identifier' (ocaid) fields
+# containing 'openlibrary' (edition olid) and 'identifier' (ocaid) fields
 
 
 def sync_ol_to_ia(olid):
@@ -14,8 +16,9 @@ def sync_ol_to_ia(olid):
     if 'error' in r.json() and r.json()['error'] == 'No qualifying edition':
         print("%s, %s: %s" % (olid, ocaid, r.json()))
 
-start = 187
-start = 7649
+# start and end are False or line numbers in infile to begin and stop processing
+# Used in case there is a need to resume or re-run part of a batch.
+start = False
 end = False
 with open(infile) as f:
    for count, line in enumerate(f):
