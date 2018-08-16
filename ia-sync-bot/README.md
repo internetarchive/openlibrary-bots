@@ -21,7 +21,7 @@ BAD-ISBN:       u'0000000002'   OL25422504M     OL16800386W
 ```
 
 ## legacy-openlibrary-id-check.sh
-collects data from https://archive.org and https://openlibrary.org and creates lists and stats on archive.org
+Collects data from https://archive.org and https://openlibrary.org and creates lists and stats for
 items that have old-style `openlibrary` IDs, but no `openlibrary-edition`
 
 ## update-ocaid.py
