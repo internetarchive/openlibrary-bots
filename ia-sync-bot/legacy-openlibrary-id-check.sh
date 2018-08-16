@@ -21,13 +21,14 @@ if [ ! -f "$ol_dump" ]; then
 fi
 
 # Get IA items with only legacy field:
+results="legacy-openlibrary-field_$(date +%F).txt"
 echo " Getting list of archive.org items with only a legacy openlibrary field..."
-ia search "openlibrary:* AND NOT openlibrary_edition:*" -f"openlibrary" > legacy-openlibrary-field.txt
+ia search "openlibrary:* AND NOT openlibrary_edition:*" -f"openlibrary" > $results
 
 # Extract OLIDs
-egrep -o "OL[0-9]+M" legacy-openlibrary-field.txt > legacy-linked-olids.lst
+egrep -o "OL[0-9]+M" $results > legacy-linked-olids.lst
 
-# Get data of all uniq editions referenced by archive.org items with only legacy openlibrary field:
+echo "  Getting data of all uniq editions referenced by archive.org items with only legacy openlibrary field..."
 grep -Ff legacy-linked-olids.lst $ol_dump > legacy-linked-dump.txt
 
 # Count of uniq editions referenced by archive.org items with only legacy openlibrary field.
@@ -42,6 +43,13 @@ have_ocaid=$(grep -c '"ocaid"' legacy-linked-dump.txt)
 # How many don't have ocaids:
 no_ocaid=$(grep -vc '"ocaid"' legacy-linked-dump.txt)
 
+# Generate lists of missing-ocaids and orphans:
+echo lists:
+grep -v '"ocaid":' legacy-linked-dump.txt | egrep -o "OL[0-9]+M" | sort | uniq > no-ocaid.lst
+grep -v '"works":' legacy-linked-dump.txt | egrep -o "OL[0-9]+M" | sort | uniq > orphan.lst
+
+# Finally generate the list (olids-to-update.txt) to pass to the next script: update-ocaid.py
+grep -Ff no-ocaid.lst $results > olids-to-update.txt
 
 echo "Report $(date):"
 echo "Uniq editions referenced by archive.org items with only legacy openlibrary field"
