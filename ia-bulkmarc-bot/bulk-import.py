@@ -49,7 +49,7 @@ for f in ia.get_files(item):
                 result = {}
                 print("UNEXPECTED ERROR WRITTEN TO: debug_%s.html" % count)
                 with open('debug_%s.html' % count, 'w') as dout:
-                    dout.write(str(r.content))
+                    dout.write(r.content.decode())
             # log results to stdout
             print('{}: {} -- {}'.format(identifier, r.status_code, result))
             offset = result.get('next_record_offset')
