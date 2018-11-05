@@ -14,10 +14,11 @@ import sys
 from olclient.openlibrary import OpenLibrary
 from collections import namedtuple
 
-LIVE = False # False to test against a local dev OL instance
+LIVE = True # False to test against a local dev OL instance
 BULK_API = '/api/import/ia'
 item = "trent_test_marc"
 item = "OpenLibraries-Trent-MARCs"
+
 if len(sys.argv) > 1:
     item = sys.argv[1]
 
@@ -29,7 +30,7 @@ else:
     c = Credentials('openlibrary@example.com', 'admin123')
     ol = OpenLibrary(base_url=local_dev, credentials=c)
 
-limit = 0 # if non-zero, a limit to only process this many records from each file, for testing
+limit = 20 # if non-zero, a limit to only process this many records from each file, for testing
 count = 0
 
 for f in ia.get_files(item):
@@ -41,8 +42,14 @@ for f in ia.get_files(item):
         while length:
             identifier = '{}/{}:{}:{}'.format(item, f.name, offset, length)
             data = {'identifier': identifier, 'bulk_marc': 'true'}
-            r = ol.session.post(ol.base_url + BULK_API, data=data)
-            result = r.json()
+            r = ol.session.post(ol.base_url + BULK_API + '?debug=true', data=data)
+            try:
+                result = r.json()
+            except:
+                result = {}
+                print("UNEXPECTED ERROR WRITTEN TO: debug_%s.html" % count)
+                with open('debug_%s.html' % count, 'w') as dout:
+                    dout.write(str(r.content))
             # log results to stdout
             print('{}: {} -- {}'.format(identifier, r.status_code, result))
             offset = result.get('next_record_offset')
@@ -51,3 +58,5 @@ for f in ia.get_files(item):
             if limit and count >= limit:
                 # Stop if a limit has been set, and we are over it.
                 length = False
+        if limit and count >= limit:
+            break
