@@ -19,23 +19,32 @@ BULK_API = '/api/import/ia'
 item = "trent_test_marc"
 item = "OpenLibraries-Trent-MARCs"
 
+Credentials = namedtuple('Credentials', ['username', 'password'])
+
 if len(sys.argv) > 1:
     item = sys.argv[1]
 
 if LIVE:
-    ol = OpenLibrary()
+    ol = OpenLibrary(base_url='https://dev.openlibrary.org')
 else:
     local_dev = 'http://localhost:8080'
-    Credentials = namedtuple('Credentials', ['username', 'password'])
     c = Credentials('openlibrary@example.com', 'admin123')
     ol = OpenLibrary(base_url=local_dev, credentials=c)
 
-limit = 20 # if non-zero, a limit to only process this many records from each file, for testing
+limit = 10000 # if non-zero, a limit to only process this many records from each file, for testing
 count = 0
+
+completed_mrc = [
+        'lbrn.mrc',
+        'multi1.mrc',
+        'multi2.mrc',   # NOT DONE, skipping 2nd multi for now in case there are issues
+        ]
 
 for f in ia.get_files(item):
     if f.name.endswith('.mrc'):
         print('FILENAME: %s' % f.name)
+        if f.name in completed_mrc:
+            continue
         offset = 0
         length = 5 # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
 
