@@ -10,7 +10,7 @@
 """
 
 import internetarchive as ia
-import sys
+import re, sys
 from olclient.openlibrary import OpenLibrary
 from collections import namedtuple
 
@@ -25,7 +25,8 @@ if len(sys.argv) > 1:
     item = sys.argv[1]
 
 if LIVE:
-    ol = OpenLibrary(base_url='https://dev.openlibrary.org')
+    ol = OpenLibrary()
+    #ol = OpenLibrary(base_url='https://dev.openlibrary.org')
 else:
     local_dev = 'http://localhost:8080'
     c = Credentials('openlibrary@example.com', 'admin123')
@@ -37,6 +38,7 @@ count = 0
 completed_mrc = [
         'lbrn.mrc',
         'multi1.mrc',
+        'tier3.mrc',    # DONE
         'multi2.mrc',   # NOT DONE, skipping 2nd multi for now in case there are issues
         ]
 
@@ -45,10 +47,14 @@ for f in ia.get_files(item):
         print('FILENAME: %s' % f.name)
         if f.name in completed_mrc:
             continue
-        offset = 0
+        offset = 6301689 # tier1
         length = 5 # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
 
         while length:
+            count += 1
+            if limit and count >= limit:
+                # Stop if a limit has been set, and we are over it.
+                break
             identifier = '{}/{}:{}:{}'.format(item, f.name, offset, length)
             data = {'identifier': identifier, 'bulk_marc': 'true'}
             r = ol.session.post(ol.base_url + BULK_API + '?debug=true', data=data)
@@ -56,16 +62,19 @@ for f in ia.get_files(item):
                 result = r.json()
             except:
                 result = {}
-                print("UNEXPECTED ERROR WRITTEN TO: debug_%s.html" % count)
+                error_summary = re.search(r'<h2>(.*)</h2>', r.content.decode()).group(1)
+                print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: debug_%s.html" % (r.status_code, error_summary, count))
                 with open('debug_%s.html' % count, 'w') as dout:
                     dout.write(r.content.decode())
+                # Skip this record and move to the next
+                # FIXME: this fails if there are 2 errors in a row :(
+                offset = offset + length
+                length = 5
+                print("%s:%s" % (offset, length))
+                continue
             # log results to stdout
             print('{}: {} -- {}'.format(identifier, r.status_code, result))
             offset = result.get('next_record_offset')
             length = result.get('next_record_length')
-            count += 1
-            if limit and count >= limit:
-                # Stop if a limit has been set, and we are over it.
-                length = False
         if limit and count >= limit:
             break
