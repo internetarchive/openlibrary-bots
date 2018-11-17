@@ -68,6 +68,10 @@ for f in ia.get_files(item):
                     dout.write(r.content.decode())
                 # Skip this record and move to the next
                 # FIXME: this fails if there are 2 errors in a row :(
+                if length == 5:
+                    # break out of everything, 2 errors in a row
+                    count = limit
+                    break
                 offset = offset + length
                 length = 5
                 print("%s:%s" % (offset, length))
