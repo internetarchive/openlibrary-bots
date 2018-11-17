@@ -32,13 +32,16 @@ else:
     c = Credentials('openlibrary@example.com', 'admin123')
     ol = OpenLibrary(base_url=local_dev, credentials=c)
 
-limit = 10000 # if non-zero, a limit to only process this many records from each file, for testing
+limit = 50000 # if non-zero, a limit to only process this many records from each file
 count = 0
 
 completed_mrc = [
         'lbrn.mrc',
         'multi1.mrc',
+        'tier1.mrc',    # DONE
+        'tier2.mrc',    # DONE
         'tier3.mrc',    # DONE
+        'tier4.mrc',    # DONE
         'multi2.mrc',   # NOT DONE, skipping 2nd multi for now in case there are issues
         ]
 
@@ -47,7 +50,9 @@ for f in ia.get_files(item):
         print('FILENAME: %s' % f.name)
         if f.name in completed_mrc:
             continue
-        offset = 6301689 # tier1
+        offset = 0
+        if f.name == 'tier5.mrc':
+            offset = 19885954
         length = 5 # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
 
         while length:
