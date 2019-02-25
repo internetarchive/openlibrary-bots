@@ -140,6 +140,20 @@ class OnixProductParser(object):
 
     @property
     def title(self):
+        """Returns title corresponding to that product
+
+        Args:
+            None
+
+        Returns:
+            Title as string or empty string
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.title
+        """
         title = self.product.xpath('//Title')
         if title:
             title = title[0].xpath('//TitleText')
@@ -147,6 +161,20 @@ class OnixProductParser(object):
 
     @property
     def publisher(self):
+        """Returns publisher corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            Publisher as string or empty string
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.publisher
+        """
         publisher = self.product.xpath('//Publisher')
         if publisher:
             publisher = publisher[0].xpath('//PublisherName')
@@ -154,6 +182,20 @@ class OnixProductParser(object):
 
     @property
     def authors(self):
+        """Returns authors corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            Book authors as an array of authors or empty string
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.authors
+        """
         authors = self.product.xpath('//Author')
         
         book_authors = []
@@ -166,6 +208,20 @@ class OnixProductParser(object):
 
     @property
     def languages(self):
+        """Returns languages corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            Language as string or empty string
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.languages
+        """
         languages = self.product.xpath('//Language')
         
         if languages:
@@ -175,6 +231,23 @@ class OnixProductParser(object):
 
     @property
     def identifiers(self):
+        """Returns book identifiers corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            Identifiers:
+                - ISBN 10
+                - ISBN 13
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.identifiers
+        """
+
         identifiers = self.product.xpath('//ProductIdentifier')
 
         if identifiers:
@@ -189,6 +262,20 @@ class OnixProductParser(object):
 
     @property
     def media_file_link(self):
+        """Returns book cover corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            URL of the bookcover corresponding to that book or blank string
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.media_file_link
+        """
         bookcover = self.product.xpath('//MediaFile')
         if bookcover:
             bookcover = bookcover[0].xpath('//MediaFileLink')
@@ -196,6 +283,23 @@ class OnixProductParser(object):
 
     @property
     def publication_country(self):
+        """Returns publication country corresponding to that product
+        
+        TODO: 
+            Map the country code to the required country 
+
+        Args:
+            None
+
+        Returns:
+            Publication country for that particular book
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.publication_country
+        """
         publication_country = self.product.xpath('//CountryOfPublication')
         if publication_country:
             return publication_country[0].text
@@ -204,6 +308,20 @@ class OnixProductParser(object):
 
     @property
     def publication_city(self):
+        """Returns city corresponding to that product
+        
+        Args:
+            None
+
+        Returns:
+            Publication City corresponding to that book
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.publication_city
+        """
         publication_city = self.product.xpath('//CityOfPublication')
         if publication_city:
             return publication_city[0].text
@@ -212,6 +330,20 @@ class OnixProductParser(object):
 
     @property
     def get_json(self):
+        """Returns JSON of all the elements for a particular product
+        
+        Args:
+            None
+
+        Returns:
+            JSON of all the identifiers of that book
+
+        Usage:
+            >>> from onixparser import OnixFeedParser
+            >>> op = OnixFeedParser('onix_test_data.xml')
+            >>> p = op.products[0]
+            >>> p.get_json
+        """
         data = {}
 
         data['title'] = self.title
@@ -294,7 +426,6 @@ class OnixProductBot(object):
         except Exception as e:
             print("URL Exception: URL can't be created")
             print(e)
-
 
 
 if __name__ == "__main__":

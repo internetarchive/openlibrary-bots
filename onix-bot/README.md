@@ -30,7 +30,10 @@ python onixparser.py
 python onixparser.py <custom-file>.xml
 ```
 
-## Next Steps for ONIX Bot
+## Next Steps on ONIX Bot
+1. Start with referencing the `old-onix-bot` directory present which has the earlier code from ONIX Bot.
+
+## Issues for ONIX Bot
 1. Use ONIX Reference Code List to parse and obtain Language Codes - [#19](https://github.com/internetarchive/openlibrary-bots/issues/19)
 2. Add functionalities to ONIX Bot - [#12](https://github.com/internetarchive/openlibrary-bots/issues/12)
 3. Using iterparse to avoid running out of memory errors - [#17](https://github.com/internetarchive/openlibrary-bots/issues/17)

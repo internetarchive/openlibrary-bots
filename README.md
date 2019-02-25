@@ -48,11 +48,11 @@ Typically every folder signifies a different bot. The folder must contain code w
 All source code published here is available under the terms of the GNU Affero General Public License, version 3. Please see http://gplv3.fsf.org/ for more information.
 
 ## Current Active Bots
-- IA-Wishlist Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai)).
-- ONIX Bot - (Maintained by [Salman Shah](https://github.com/salman-bhai))
-- NY Times Bestseller Bot
-- Google Books Bot - (Maintained by [Adam](https://github.com/adamreis))
+- [IA-Wishlist Bot](ia-wishlist-bot/README.md) - (Maintained by [Salman Shah](https://github.com/salman-bhai)).
+- [ONIX Bot](onix-bot/README.md) - (Maintained by [Salman Shah](https://github.com/salman-bhai))
+- [NY Times Bestseller Bot](NY-Times-Bestseller-Bot/README.md) - (Maintained by [Salman Shah](https://github.com/salman-bhai))
+- [Google Books Bot](google-books-bot/README.md) - (Maintained by [Adam](https://github.com/adamreis))
 
 ## Inactive Bots
 - [Cathar Bot](https://github.com/hornc/catharbot) - (Maintained by [Charles](https://github.com/hornc))
-- [ONIX Bot] - Deprecated (Author - Aaron Schwartz)
+- [ONIX Bot](old-onix-bot/README.md) - Deprecated (Author - Aaron Schwartz)
