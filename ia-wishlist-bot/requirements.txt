@@ -1,4 +1,4 @@
 openlibrary_client==0.0.16
 ndjson==0.1.0
-requests==2.11.1
+requests==2.20.0
 beautifulsoup4==4.6.0
