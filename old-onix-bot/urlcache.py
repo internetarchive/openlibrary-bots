@@ -66,9 +66,9 @@ class URLCache:
 					tmp_data = open (tmp_data_file)
 					flock (tmp_data, LOCK_SH)
 					tmp_data.close ()
-				except OSError as e:
+				except OSError, e:
 					pass
 				return open (data_file, "r")
-			except Exception as exn:
+			except Exception, exn:
 				# in case this happens, just blow away your cache
 				raise Exception ("URLCache: sorry, corrupted state for url '%s': %s" % (url, str (exn)))

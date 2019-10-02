@@ -70,7 +70,8 @@ def process_product (p):
 
 	# author, contributors
 	for c in op["Contributor":]:
-		role_codes = sorted(c["ContributorRole":])
+		role_codes = c["ContributorRole":]
+		role_codes.sort ()
 		role_code = role_codes[0]
 
 		name = person_name (c)
