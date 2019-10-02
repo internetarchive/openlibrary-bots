@@ -40,9 +40,9 @@ def LOG(level, msg):
 
 def ensureUtf(s):
   try:
-      if isinstance(s, unicode):
+      if type(s) == unicode:
         return s.encode('utf8', 'ignore')
-  except NameError:
+  except:
     return str(s)
 
 def _request(request, parser=simplejson.loads):
