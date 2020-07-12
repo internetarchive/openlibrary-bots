@@ -55,9 +55,7 @@ class NormalizeISBNbot(OpenLibrary):
                   'JSON': 4}
         comment = 'normalize ISBN'
         with gzip.open(dump_filepath, 'rb') as fin:
-            for row_num, row in enumerate(fin):
-                if row_num < 9373:
-                    continue
+            for row in fin:
                 row = row.decode().split('\t')
                 _json = json.loads(row[header['JSON']])
                 if _json['type']['key'] != '/type/edition':
