@@ -15,7 +15,6 @@ from os import makedirs
 
 
 class NormalizeISBNbot(OpenLibrary):
-    """Useful class to normalize ISBN"""
     def __init__(self, dry_run=True, limit=1, *args, **kwargs):
         """Create logger and class variables then initialize as normal"""
         self.changed = 0
@@ -42,6 +41,8 @@ class NormalizeISBNbot(OpenLibrary):
 
     def run(self, dump_filepath: str) -> None:
         """
+        Performs ISBN normalization (removes hyphens and capitalizes letters)
+
         dump_filepath -- path to *.txt.gz dump containing editions that need to be operated on
         """
         if self.dry_run:
@@ -66,6 +67,7 @@ class NormalizeISBNbot(OpenLibrary):
                     isbns['isbn_10'] = _json.get('isbn_10', None)
                 if 'isbn_13' in _json:
                     isbns['isbn_13'] = _json.get('isbn_13', None)
+                # TODO: should this script log cases where there is an ISBN10 and no ISBN13? An ISBN13 but no ISBN10?
                 if isbns:
                     olid = _json['key'].split('/')[-1]
                     edition_obj = self.Edition.get(olid)
