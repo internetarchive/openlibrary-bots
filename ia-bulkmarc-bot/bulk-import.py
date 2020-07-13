@@ -12,49 +12,52 @@
 import argparse
 import internetarchive as ia
 import re
-import sys
 from collections import namedtuple
 from olclient.openlibrary import OpenLibrary
 
-LIVE = True  # False to test against a local dev OL instance
-BULK_API = '/api/import/ia'
 
-Credentials = namedtuple('Credentials', ['username', 'password'])
+BULK_API = '/api/import/ia'
 
 
 def get_marc21_files(item):
     return [f.name for f in ia.get_files(item) if f.name.endswith('.mrc')]
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Bulk MARC importer.')
     parser.add_argument('item', help='Source item containing MARC records')
     parser.add_argument('-i', '--info', help='List available MARC21 .mrc files on this item', action='store_true')
     parser.add_argument('-f', '--file', help='Bulk MARC file to import')
-    parser.add_argument('-l', '--limit', help='Number of records to import', type=int, default=1)
+    parser.add_argument('-n', '--number', help='Number of records to import', type=int, default=1)
     parser.add_argument('-o', '--offset', help='Offset in BYTES from which to start importing', type=int, default=0)
+    parser.add_argument('-l', '--local', help='Import to a locally running Open Library dev instance for testing (localhost:8080)', action='store_true')
 
     args = parser.parse_args()
     item = args.item
     fname = args.file
+    local_testing = args.local
 
     if args.info:
         # List MARC21 files, then quit.
+        print('Item %s has the following MARC files:' % item)
         for f in get_marc21_files(item):
             print(f)
         exit()
 
-    if LIVE:
-        ol = OpenLibrary()
-        #ol = OpenLibrary(base_url='https://dev.openlibrary.org')
-    else:
+    if local_testing:
+        Credentials = namedtuple('Credentials', ['username', 'password'])
         local_dev = 'http://localhost:8080'
         c = Credentials('openlibrary@example.com', 'admin123')
         ol = OpenLibrary(base_url=local_dev, credentials=c)
+    else:
+        ol = OpenLibrary()
+        #ol = OpenLibrary(base_url='https://dev.openlibrary.org')
 
-    limit = args.limit  # if non-zero, a limit to only process this many records from each file
-    count = 0
-
+    print('Importing to %s' % ol.base_url)
     print('FILENAME: %s' % fname)
+
+    limit = args.number  # if non-zero, a limit to only process this many records from each file
+    count = 0
     offset = args.offset
     length = 5  # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
 
