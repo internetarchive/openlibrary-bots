@@ -14,9 +14,14 @@ from olclient.openlibrary import OpenLibrary
 from os import makedirs
 
 
-class NormalizeISBNbot(OpenLibrary):
-    def __init__(self, dry_run=True, limit=1, *args, **kwargs):
-        """Create logger and class variables then initialize as normal"""
+class NormalizeISBNjob(object):
+    def __init__(self, ol=None, dry_run=True, limit=1):
+        """Create logger and class variables"""
+        if ol is None:
+            self.ol = OpenLibrary()
+        else:
+            self.ol = ol
+
         self.changed = 0
         self.dry_run = dry_run
         self.limit = limit
@@ -37,7 +42,17 @@ class NormalizeISBNbot(OpenLibrary):
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(log_formatter)
         self.logger.addHandler(file_handler)
-        super(NormalizeISBNbot, self).__init__(*args, **kwargs)
+
+    @staticmethod
+    def isbn_needs_normalization(isbn: str) -> False:
+        """
+        Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
+        Returns False otherwise
+        """
+        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+            normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
+            return normalized_isbn and normalized_isbn != isbn
+        return False
 
     def run(self, dump_filepath: str) -> None:
         """
@@ -58,32 +73,40 @@ class NormalizeISBNbot(OpenLibrary):
             for row in fin:
                 row = row.decode().split('\t')
                 _json = json.loads(row[header['JSON']])
-                if _json['type']['key'] != '/type/edition':
-                    continue
-                isbns = dict()
-                if 'isbn_10' in _json:
-                    isbns['isbn_10'] = _json.get('isbn_10', None)
-                if 'isbn_13' in _json:
-                    isbns['isbn_13'] = _json.get('isbn_13', None)
-                # TODO: should this script log cases where there is an ISBN10 and no ISBN13? An ISBN13 but no ISBN10?
-                if isbns:
-                    olid = _json['key'].split('/')[-1]
-                    edition_obj = self.Edition.get(olid)
-                    if edition_obj.type['key'] != '/type/edition':
-                        continue
-                    for isbn_type, isbn_value in isbns.items():
-                        isbn = getattr(edition_obj, isbn_type, [])
-                        for n in isbn:
-                            normalized_isbn = isbnlib.get_canonical_isbn(n)
-                            if normalized_isbn and normalized_isbn != n:  # get_canonical_isbn returns None if given invalid ISBN
-                                setattr(edition_obj, isbn_type, [normalized_isbn])
-                                self.logger.info('\t'.join([olid, n, normalized_isbn]))
-                                self.save(edition_obj, **{'comment': comment})
+                if _json['type']['key'] != '/type/edition': continue
 
-    def save(self, ol_obj, *args, **kwargs):
+                isbns_by_type = dict()
+                if 'isbn_10' in _json:
+                    isbns_by_type['isbn_10'] = _json.get('isbn_10', None)
+                if 'isbn_13' in _json:
+                    isbns_by_type['isbn_13'] = _json.get('isbn_13', None)
+                if not isbns_by_type: continue
+
+                skip_flag = True
+                for _, isbns in isbns_by_type.items():
+                    for isbn in isbns:
+                        if self.isbn_needs_normalization(isbn):
+                            skip_flag = False
+                            break
+                if skip_flag: continue
+
+                olid = _json['key'].split('/')[-1]
+                edition = self.ol.Edition.get(olid)
+                if edition.type['key'] != '/type/edition': continue
+
+                for isbn_type, isbns in isbns_by_type.items():
+                    isbns = getattr(edition, isbn_type, [])
+                    for isbn in isbns:
+                        if not self.isbn_needs_normalization(isbn): continue
+                        normalized_isbn = isbnlib.get_canonical_isbn(isbn)
+                        setattr(edition, isbn_type, [normalized_isbn])  # FIXME, what if an edition has multiple isbns that need normalization?
+                        self.logger.info('\t'.join([olid, isbn, normalized_isbn]))
+                        self.save(lambda: edition.save(comment=comment))
+
+    def save(self, save_fn):
         """Modify default save behavior based on 'limit' and 'dry_run' parameters"""
         if not self.dry_run:
-            ol_obj.save(*args, **kwargs)
+            save_fn()
         else:
             self.logger.info('Modification not made because dry_run is True')
         self.changed += 1
@@ -102,7 +125,9 @@ if __name__ == '__main__':
                         help="Don't actually perform edits on Open Library")
     _args = parser.parse_args()
 
-    bot = NormalizeISBNbot(dry_run=_args.dry_run, limit=_args.limit)
+    _ol = OpenLibrary()
+
+    bot = NormalizeISBNjob(ol=_ol, dry_run=_args.dry_run, limit=_args.limit)
     bot.console_handler.setLevel(logging.INFO)
 
     try:

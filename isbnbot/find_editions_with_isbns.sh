@@ -14,4 +14,4 @@ fi
 OL_DUMP=$1
 OUTPUT=$2
 
-zgrep ^/type/edition $OL_DUMP | grep -E '("isbn_10":|"isbn_13":)' | pv | gzip > $OUTPUT
+zgrep ^/type/edition $OL_DUMP | grep -E '"isbn_(10|13)":' |  grep -v -E '"isbn_(10|13)": \["\d+"\]' | pv | gzip > $OUTPUT
