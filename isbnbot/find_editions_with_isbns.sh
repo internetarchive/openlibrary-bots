@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 
 if [[ -z $1 ]]
@@ -14,4 +15,4 @@ fi
 OL_DUMP=$1
 OUTPUT=$2
 
-zgrep ^/type/edition $OL_DUMP | grep -E '"isbn_(10|13)":' |  grep -v -E '"isbn_(10|13)": \["\d+"\]' | pv | gzip > $OUTPUT
+zgrep ^/type/edition $OL_DUMP | grep -E '"isbn_(10|13)":' |  grep -v -E '"isbn_(10|13)": \["\d+"\]' | pv | gzip > $OUTPUTls

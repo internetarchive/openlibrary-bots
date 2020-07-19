@@ -49,10 +49,12 @@ class NormalizeISBNjob(object):
         Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
         Returns False otherwise
         """
-        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+        try:
             normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
+        except IndexError:  # get_canonical_isbn will raise this sometimes for an invalid ISBN
+            return False
+        else:
             return normalized_isbn and normalized_isbn != isbn
-        return False
 
     def run(self, dump_filepath: str) -> None:
         """
@@ -70,7 +72,7 @@ class NormalizeISBNjob(object):
                   'JSON': 4}
         comment = 'normalize ISBN'
         with gzip.open(dump_filepath, 'rb') as fin:
-            for row in fin:
+            for row_num, row in enumerate(fin):
                 row = row.decode().split('\t')
                 _json = json.loads(row[header['JSON']])
                 if _json['type']['key'] != '/type/edition': continue
@@ -110,7 +112,7 @@ class NormalizeISBNjob(object):
         else:
             self.logger.info('Modification not made because dry_run is True')
         self.changed += 1
-        if self.changed >= self.limit:
+        if self.limit and self.changed >= self.limit:
             self.logger.info('Modification limit reached. Exiting script.')
             sys.exit()
 
