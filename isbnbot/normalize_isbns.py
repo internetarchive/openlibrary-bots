@@ -14,7 +14,7 @@ from olclient.openlibrary import OpenLibrary
 from os import makedirs
 
 
-class NormalizeISBNjob(object):
+class NormalizeISBNJob(object):
     def __init__(self, ol=None, dry_run=True, limit=1):
         """Create logger and class variables"""
         if ol is None:
@@ -26,7 +26,7 @@ class NormalizeISBNjob(object):
         self.dry_run = dry_run
         self.limit = limit
 
-        job_name = sys.argv[0]
+        job_name = sys.argv[0].replace('.py', '')
         self.logger = logging.getLogger("jobs.%s" % job_name)
         self.logger.setLevel(logging.DEBUG)
         log_formatter = logging.Formatter('%(name)s;%(levelname)-8s;%(asctime)s %(message)s')
@@ -44,7 +44,7 @@ class NormalizeISBNjob(object):
         self.logger.addHandler(file_handler)
 
     @staticmethod
-    def isbn_needs_normalization(isbn: str) -> False:
+    def isbn_needs_normalization(isbn: str) -> bool:
         """
         Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
         Returns False otherwise
@@ -90,6 +90,7 @@ class NormalizeISBNjob(object):
                         if self.isbn_needs_normalization(isbn):
                             skip_flag = False
                             break
+                    if skip_flag: break
                 if skip_flag: continue
 
                 olid = _json['key'].split('/')[-1]
@@ -97,12 +98,14 @@ class NormalizeISBNjob(object):
                 if edition.type['key'] != '/type/edition': continue
 
                 for isbn_type, isbns in isbns_by_type.items():
+                    normalized_isbns = list()
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
                         if not self.isbn_needs_normalization(isbn): continue
-                        normalized_isbn = isbnlib.get_canonical_isbn(isbn)
-                        setattr(edition, isbn_type, [normalized_isbn])  # FIXME, what if an edition has multiple isbns that need normalization?
-                        self.logger.info('\t'.join([olid, isbn, normalized_isbn]))
+                        normalized_isbns.append(isbnlib.get_canonical_isbn(isbn))
+                    if normalized_isbns:
+                        setattr(edition, isbn_type, normalized_isbns)
+                        self.logger.info('\t'.join([olid, str(isbns), str(normalized_isbns)]))
                         self.save(lambda: edition.save(comment=comment))
 
     def save(self, save_fn):
@@ -129,7 +132,7 @@ if __name__ == '__main__':
 
     _ol = OpenLibrary()
 
-    bot = NormalizeISBNjob(ol=_ol, dry_run=_args.dry_run, limit=_args.limit)
+    bot = NormalizeISBNJob(ol=_ol, dry_run=_args.dry_run, limit=_args.limit)
     bot.console_handler.setLevel(logging.INFO)
 
     try:
