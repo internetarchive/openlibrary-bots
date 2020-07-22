@@ -120,18 +120,28 @@ class NormalizeISBNJob(object):
             sys.exit()
 
 
+def str2bool(input):
+    if isinstance(input, bool):
+        return input
+    if input.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif input.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--dump_path', type=str, default=None,
                         help='Path to *.txt.gz containing OpenLibrary editions data')
     parser.add_argument('--limit', type=int, default=1,
                         help='Limit number of edits performed on OpenLibrary data. Set to zero to allow unlimited edits')
-    parser.add_argument('--dry-run', action='store_false',
+    parser.add_argument('--dry-run', type=str2bool, default=True,
                         help="Don't actually perform edits on Open Library")
     _args = parser.parse_args()
 
     _ol = OpenLibrary()
-
     bot = NormalizeISBNJob(ol=_ol, dry_run=_args.dry_run, limit=_args.limit)
     bot.console_handler.setLevel(logging.INFO)
 
