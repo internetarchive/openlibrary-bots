@@ -77,6 +77,9 @@ if __name__ == '__main__':
             break
         identifier = '{}/{}:{}:{}'.format(item, fname, offset, length)
         data = {'identifier': identifier, 'bulk_marc': 'true'}
+        if barcode and barcode is not True:
+            # A local_id key has been passed to import a specific local_id barcode
+            data['local_id'] = barcode
         r = ol.session.post(ol.base_url + BULK_API + '?debug=true', data=data)
         try:
             result = r.json()
