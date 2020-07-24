@@ -18,9 +18,10 @@ from olclient.openlibrary import OpenLibrary
 
 BULK_API = '/api/import/ia'
 LOCAL_ID = re.compile(r'\/local_ids\/(\w+)')
+MARC_EXT = re.compile(r'.*\.(mrc|utf8)$')
 
 def get_marc21_files(item):
-    return [f.name for f in ia.get_files(item) if f.name.endswith('.mrc')]
+    return [f.name for f in ia.get_files(item) if MARC_EXT.match(f.name)]
 
 
 if __name__ == '__main__':
@@ -63,8 +64,8 @@ if __name__ == '__main__':
             print('Item %s has the following MARC files:' % item)
             for f in get_marc21_files(item):
                 print(f)
+        ol.session.close()
         exit()
-
 
     limit = args.number  # if non-zero, a limit to only process this many records from each file
     count = 0
