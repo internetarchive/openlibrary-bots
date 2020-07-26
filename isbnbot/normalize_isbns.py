@@ -56,6 +56,17 @@ class NormalizeISBNJob(object):
         else:
             return normalized_isbn and normalized_isbn != isbn
 
+    @staticmethod
+    def normalize_isbn(isbn: str):
+        """
+        Return a normalized ISBN. Return None if the the provided string cannot be formatted into an ISBN
+        :param isbn: A string of an ISBN
+        :return: A normalized ISBN as a string or None
+        """
+        if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
+            return isbnlib.get_canonical_isbn(isbn)
+        return None
+
     def run(self, dump_filepath: str) -> None:
         """
         Performs ISBN normalization (removes hyphens and capitalizes letters)
@@ -102,7 +113,7 @@ class NormalizeISBNJob(object):
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
                         if self.isbn_needs_normalization(isbn):
-                            normalized_isbns.append(isbnlib.get_canonical_isbn(isbn))
+                            normalized_isbns.append(self.normalize_isbn(isbn))
                         else:
                             normalized_isbns.append(isbn)
                     if normalized_isbns:
