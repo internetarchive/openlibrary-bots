@@ -101,8 +101,10 @@ class NormalizeISBNJob(object):
                     normalized_isbns = list()
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
-                        if not self.isbn_needs_normalization(isbn): continue
-                        normalized_isbns.append(isbnlib.get_canonical_isbn(isbn))
+                        if self.isbn_needs_normalization(isbn):
+                            normalized_isbns.append(isbnlib.get_canonical_isbn(isbn))
+                        else:
+                            normalized_isbns.append(isbn)
                     if normalized_isbns:
                         setattr(edition, isbn_type, normalized_isbns)
                         self.logger.info('\t'.join([olid, str(isbns), str(normalized_isbns)]))
@@ -120,12 +122,12 @@ class NormalizeISBNJob(object):
             sys.exit()
 
 
-def str2bool(input):
-    if isinstance(input, bool):
-        return input
-    if input.lower() in ('yes', 'true', 't', 'y', '1'):
+def str2bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
-    elif input.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif value.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
