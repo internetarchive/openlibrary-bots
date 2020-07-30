@@ -108,15 +108,16 @@ class NormalizeISBNJob(object):
                 edition = self.ol.Edition.get(olid)
                 if edition.type['key'] != '/type/edition': continue
 
-                for isbn_type, isbns in isbns_by_type.items():
+                for isbn_type, isbns in isbns_by_type.items():  # if an ISBN is in the wrong field this script will not move it to the appropriate one
                     normalized_isbns = list()
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
-                        if self.isbn_needs_normalization(isbn):
-                            normalized_isbns.append(self.normalize_isbn(isbn))
+                        normalized_isbn = self.normalize_isbn(isbn)
+                        if normalized_isbn is not None:
+                            normalized_isbns.append(normalized_isbn)
                         else:
                             normalized_isbns.append(isbn)
-                    if normalized_isbns:
+                    if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
                         self.logger.info('\t'.join([olid, str(isbns), str(normalized_isbns)]))
                         self.save(lambda: edition.save(comment=comment))
