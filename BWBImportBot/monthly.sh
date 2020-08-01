@@ -14,8 +14,7 @@ printf -v DATE_D '%(%Y-%m-%d)T' -1  # sets $DATE_D
 mkdir -p ${ROOT_DIR}/${DATE_M}
 cd $DATE_M
 
-# Fetch Monthly Bowker Data into dir YYYY-MM
-# previously: get-bowker.sh
+# Fetch Monthly BWB Data into dir YYYY-MM
 lftp <<EOF
 - DL
   # Comments can be added like this.
