@@ -80,16 +80,31 @@ class Biblio:
         }
         return a
 
-if __name__ == '__main__':
-    fname = sys.argv[1]
 
-    with open(fname, 'r') as f:
-        for line in f:
-            data = line.strip().split('|')
-            b = Biblio(data)
-            try:
-                print(json.dumps(b.json()))
-            except UnicodeDecodeError:
-                pass  # for now
+
+if __name__ == '__main__':
+    fnames = sys.argv[1:]
+
+    seen_isbns = set()
+
+    for fname in fnames:
+        with open(fname, 'r') as f:
+            for line in f:
+                data = line.strip().split('|')
+                b = Biblio(data)
+                isbn = b.isbn
+                if isbn in seen_isbns:
+                    print(json.dumps({
+                        "isbn": isbn,
+                        "status": "error",
+                        "reason": "duplicate_isbn"
+                    }))
+                else:
+                    try:
+                        print(json.dumps(b.json()))
+                    except UnicodeDecodeError:
+                        pass  # for now
+                    seen_isbns.add(isbn)
+
 
 
