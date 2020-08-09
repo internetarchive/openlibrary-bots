@@ -1,20 +1,12 @@
 A set of scripts to normalize (remove hypens and capitolize letters) in ISBNs.
 Currently, this makes editions discoverable via search
-
 ### How To Use
-<<<<<<< HEAD
 ```bash
 # Find Editions with ISBNs
  ./find_editions_with_isbns.sh /path/to/ol_dump.txt.gz /path/to/filtered_dump.txt.gz
 # Normalize ISBNs from Filtered Data Damp
 python normalize_isbns.py --dump_path=/path/to/filtered_dump.txt.gz --dry_run=<bool> --limit=<init>
 ```
-=======
-#### Find Editions with ISBNs
-```bash find_editions_with_isbns.sh /path/to/ol_dump.txt.gz /path/to/filtered_dump.txt.gz```
-#### Normalize ISBNs from Filtered Data Damp
-```python normalize_isbns.py --dump_path=/path/to/filtered_dump.txt.gz --dry_run=<bool> --limit=<init>```
->>>>>>> c7c152a49facdb7e73c0af64089836b028c7dbdf
 If `dry_run` is True, the script will run as normal, but no changes will be saved to OpenLibrary.
 This is for debugging purposes. By default, `dry_run` is `True`.
 `limit` is the maximum number of changes to OpenLibrary that will occur before the script quits.
