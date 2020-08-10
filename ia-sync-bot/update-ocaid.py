@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import json
 from olclient.openlibrary import OpenLibrary
 ol = OpenLibrary()
@@ -13,8 +13,13 @@ infile = "olids-to-update.txt"
 
 def sync_ol_to_ia(olid):
     r = ol.session.get(ol.base_url + "/admin/sync?edition_id=" + olid)
-    if 'error' in r.json() and r.json()['error'] == 'No qualifying edition':
-        print("%s, %s: %s" % (olid, ocaid, r.json()))
+    if r.status_code == 500:
+        content = {'error': 'HTTP 500'}
+    else:
+        content = r.json()
+    if 'error' in content and 'no changes to _meta.xml' not in content['error']:  # and r.json()['error'] == 'No qualifying edition':
+        print("%s, %s: %s" % (olid, ocaid, content))
+    return r.status_code
 
 # start and end are False or line numbers in infile to begin and stop processing
 # Used in case there is a need to resume or re-run part of a batch.
@@ -31,13 +36,13 @@ with open(infile) as f:
        if end and count > end:
            break
        # check and add ocaid to OL edition
-       print "Adding %s to %s" % (ocaid, olid)
+       print("Adding %s to %s" % (ocaid, olid))
        edition = ol.get(olid)
        #while not hasattr(edition, 'title')
        try:
            assert edition.title
        except:
-           print "]%s[" % olid
+           print("]%s[" % olid)
            break
 
        if hasattr(edition, 'ocaid'):
@@ -46,4 +51,9 @@ with open(infile) as f:
            edition.ocaid = ocaid
            edition.save('add ocaid') 
        # sync the edition
-       sync_ol_to_ia(olid)
+       r = sync_ol_to_ia(olid)
+       if r == 500:
+           edition.ocaid = ocaid
+           edition.save('update ocaid')
+           sync_ol_to_ia(olid)
+
