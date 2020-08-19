@@ -14,6 +14,9 @@ from olclient.openlibrary import OpenLibrary
 from os import makedirs
 
 
+ALLOWED_ISBN_CHARS = {'0', '1', '2','3', '4', '5', '6', '7', '8', '9', 'X', '-'}
+
+
 class NormalizeISBNJob(object):
     def __init__(self, ol=None, dry_run=True, limit=1):
         """Create logger and class variables"""
@@ -49,7 +52,9 @@ class NormalizeISBNJob(object):
         Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
         Returns False otherwise
         """
-        if isbnlib.notisbn(isbn):
+        if not set(isbn.strip()).issubset(ALLOWED_ISBN_CHARS):
+            return False
+        elif isbnlib.notisbn(isbn):
             return False
         else:
             normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
@@ -83,14 +88,12 @@ class NormalizeISBNJob(object):
                     isbns_by_type['isbn_13'] = _json.get('isbn_13', None)
                 if not isbns_by_type: continue
 
-                skip_flag = True
-                for _, isbns in isbns_by_type.items():
-                    for isbn in isbns:
-                        if self.isbn_needs_normalization(isbn):
-                            skip_flag = False
-                            break
-                    if skip_flag: break
-                if skip_flag: continue
+                needs_normalization = any([
+                    self.isbn_needs_normalization(isbn)
+                    for isbns in isbns_by_type.values()
+                    for isbn in isbns
+                ])
+                if not needs_normalization: continue
 
                 olid = _json['key'].split('/')[-1]
                 edition = self.ol.Edition.get(olid)
@@ -105,6 +108,7 @@ class NormalizeISBNJob(object):
                             normalized_isbns.append(normalized_isbn)
                         else:
                             normalized_isbns.append(isbn)
+                    normalized_isbns = list(set(normalized_isbns))  # remove duplicates
                     if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
                         self.logger.info('\t'.join([olid, str(isbns), str(normalized_isbns)]))
