@@ -14,7 +14,7 @@ from olclient.openlibrary import OpenLibrary
 from os import makedirs
 
 
-ALLOWED_ISBN_CHARS = {'0', '1', '2','3', '4', '5', '6', '7', '8', '9', 'X', '-'}
+ALLOWED_ISBN_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '-'}
 
 
 class NormalizeISBNJob(object):
@@ -108,7 +108,7 @@ class NormalizeISBNJob(object):
                             normalized_isbns.append(normalized_isbn)
                         else:
                             normalized_isbns.append(isbn)
-                    normalized_isbns = list(set(normalized_isbns))  # remove duplicates
+                    normalized_isbns = dedupe(normalized_isbns)  # remove duplicates
                     if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
                         self.logger.info('\t'.join([olid, str(isbns), str(normalized_isbns)]))
@@ -135,6 +135,15 @@ def str2bool(value):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def dedupe(input: list) -> list:
+    """Remove duplicate elements in a list and return the new list"""
+    output = list()
+    for i in input:
+        if i not in output:
+            output.append(i)
+    return output
 
 
 if __name__ == '__main__':
