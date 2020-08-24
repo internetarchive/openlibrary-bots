@@ -8,11 +8,14 @@ import isbnlib
 from dotenv import load_dotenv
 load_dotenv()
 
-auth = tweepy.OAuthHandler(os.environ.get('CONSUMER_KEY'), os.environ.get('CONSUMER_SECRET'))
-auth.set_access_token(os.environ.get('ACCESS_TOKEN'), os.environ.get('ACCESS_TOKEN_SECRET'))
+auth = tweepy.OAuthHandler(os.environ.get(
+    'CONSUMER_KEY'), os.environ.get('CONSUMER_SECRET'))
+auth.set_access_token(os.environ.get('ACCESS_TOKEN'),
+                      os.environ.get('ACCESS_TOKEN_SECRET'))
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
 FILE_NAME = 'last_seen_id.txt'
+
 
 def retrieve_last_seen_id(file_name):
     f_read = open(file_name, 'r')
@@ -20,11 +23,13 @@ def retrieve_last_seen_id(file_name):
     f_read.close()
     return last_seen_id
 
+
 def store_last_seen_id(last_seen_id, file_name):
     f_write = open(file_name, 'w')
     f_write.write(str(last_seen_id))
     f_write.close()
     return
+
 
 def reply_to_tweets():
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
@@ -33,7 +38,7 @@ def reply_to_tweets():
         mentions = api.mentions_timeline(last_seen_id, tweet_mode='extended')
     except:
         print("Exception")
-        return 
+        return
 
     for mention in reversed(mentions):
         print(str(mention.id) + '- ' + mention.full_text)
@@ -42,14 +47,15 @@ def reply_to_tweets():
         text = mention.full_text
         words = text.split()
         isbnlike = isbnlib.get_isbnlike(text, level='normal')
-        
+
         print(isbnlike)
 
         for word in words:
             if word.startswith("http"):
                 resp = requests.head(word)
                 if "amazon" in resp.headers["Location"] and "/dp/" in resp.headers["Location"]:
-                    amazon_text = isbnlib.get_isbnlike(resp.headers["Location"], level='normal')
+                    amazon_text = isbnlib.get_isbnlike(
+                        resp.headers["Location"], level='normal')
                     amazon_text = list(dict.fromkeys(amazon_text))
                     for item in amazon_text:
                         if isbnlib.is_isbn10(item) or isbnlib.is_isbn13(item):
@@ -61,11 +67,11 @@ def reply_to_tweets():
             isbn = isbnlib.canonical(isbn)
             reply_text = ""
             if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
-	    	try:
-	    		resp = requests.get("http://openlibrary.org/isbn/"+isbn+".json").json() 
+                try:
+                    resp = requests.get("http://openlibrary.org/isbn/"+isbn+".json").json()
                 except:
-	    		continue
-		if resp: 
+                    continue
+                if resp:
                     if resp.__contains__("ocaid"):
                         resp_archive = requests.get("https://archive.org/services/loans/beta/loan/?&action=availability&identifier="+resp["ocaid"]).json()
                         if resp_archive and resp_archive['lending_status']['is_readable']:
