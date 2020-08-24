@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Import simplejson for Python 2 else json for Python 3
 try:
     import urllib2
@@ -35,7 +36,7 @@ from openlibrary.api import OpenLibrary
 NYT_BEST_SELLERS_URL = "http://api.nytimes.com/svc/books/v2/lists"
 
 def LOG(level, msg):
-    print >> sys.stderr, "%s: %s" % (level, msg.encode('utf-8'))
+    print("%s: %s" % (level, msg.encode('utf-8')), file=sys.stderr)
 
 
 def ensureUtf(s):

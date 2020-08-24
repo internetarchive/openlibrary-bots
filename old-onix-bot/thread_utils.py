@@ -6,43 +6,43 @@ from threading import Thread, Lock, Condition
 class AsyncChannel:
 	# yes, i believe this is just Queue ... i was new to python and couldn't find it
 
-	def __init__ (self, buffer_size=1):
+	def __init__(self, buffer_size=1):
 		self.buffer = []
 		self.max_items = buffer_size
-		self.lock = Lock ()
-		self.not_empty = Condition (self.lock)
-		self.not_full = Condition (self.lock)
+		self.lock = Lock()
+		self.not_empty = Condition(self.lock)
+		self.not_full = Condition(self.lock)
 
-	def get (self):
-		self.lock.acquire ()
+	def get(self):
+		self.lock.acquire()
 		while len (self.buffer) == 0:
-			self.not_empty.wait ()
-		val = self.buffer.pop (0)
-		self.not_full.notifyAll ()
-		self.lock.release ()
+			self.not_empty.wait()
+		val = self.buffer.pop(0)
+		self.not_full.notifyAll()
+		self.lock.release()
 		return val
 
-	def put (self, val):
-		self.lock.acquire ()
+	def put(self, val):
+		self.lock.acquire()
 		while len (self.buffer) == self.max_items:
-			self.not_full.wait ()
-		self.buffer.append (val)
-		self.not_empty.notifyAll ()
-		self.lock.release ()
+			self.not_full.wait()
+		self.buffer.append(val)
+		self.not_empty.notifyAll()
+		self.lock.release()
 
 class ForeignException:
 
-	def __init__ (self, exc_type, exc_value, exc_traceback):
+	def __init__(self, exc_type, exc_value, exc_traceback):
 		self.exc_type = exc_type
 		self.exc_value = exc_value
 		self.exc_traceback = exc_traceback
 
-	def re_raise (self):
-		raise self.exc_type, self.exc_value, self.exc_traceback
+	def re_raise(self):
+		raise self.exc_type(self.exc_value, self.exc_traceback)
 
-def ForeignException_extract ():
+def ForeignException_extract():
 	(exc_type, exc_value, exc_traceback) = sys.exc_info()
-	return ForeignException (exc_type, exc_value, exc_traceback)
+	return ForeignException(exc_type, exc_value, exc_traceback)
 
 def threaded_generator (producer, buffer_size=1):
 	# the producer function will be invoked with a single argument, a "produce" function.
@@ -55,29 +55,29 @@ def threaded_generator (producer, buffer_size=1):
 	# keep control context between producing values.
 
 	t = None
-	chan = AsyncChannel (buffer_size)
+	chan = AsyncChannel(buffer_size)
 
-	def produce (val):
-		chan.put (val)
+	def produce(val):
+		chan.put(val)
 
-	def main ():
+	def main():
 		try:
-			producer (produce)
-			chan.put (StopIteration ())
+			producer(produce)
+			chan.put(StopIteration())
 		except:
-			chan.put (ForeignException_extract ())
+			chan.put(ForeignException_extract())
 
-	def generator ():
+	def generator():
 		while True:
-			v = chan.get ()
-			if isinstance (v, StopIteration):
+			v = chan.get()
+			if isinstance(v, StopIteration):
 				break
-			if isinstance (v, ForeignException):
-				v.re_raise ()
+			if isinstance(v, ForeignException):
+				v.re_raise()
 			else:
 				yield v
 
-	t = Thread (target=main)
-	t.setDaemon (True)
-	t.start ()
-	return generator ()
+	t = Thread(target=main)
+	t.setDaemon(True)
+	t.start()
+	return generator()
