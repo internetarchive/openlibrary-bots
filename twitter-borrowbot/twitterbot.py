@@ -61,8 +61,11 @@ def reply_to_tweets():
             isbn = isbnlib.canonical(isbn)
             reply_text = ""
             if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn):
-                resp = requests.get("http://openlibrary.org/isbn/"+isbn+".json").json() # we have to try to catch errors in response ... and retry
-                if resp: 
+	    	try:
+	    		resp = requests.get("http://openlibrary.org/isbn/"+isbn+".json").json() 
+                except:
+	    		continue
+		if resp: 
                     if resp.__contains__("ocaid"):
                         resp_archive = requests.get("https://archive.org/services/loans/beta/loan/?&action=availability&identifier="+resp["ocaid"]).json()
                         if resp_archive and resp_archive['lending_status']['is_readable']:
@@ -103,4 +106,4 @@ def reply_to_tweets():
 
 while True:
     reply_to_tweets()
-    time.sleep(2)
+    time.sleep(15)
