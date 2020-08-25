@@ -13,7 +13,7 @@ import olclient.common as common
 import ndjson
 
 # Import os to check for file exist and 
-# urllib to donwload the file
+# urllib to download the file
 import os
 import urllib.request
 
