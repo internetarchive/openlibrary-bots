@@ -91,7 +91,7 @@ def reply_to_tweets():
 
                 print('Responding back ...')
                 print(reply_text)
-                api.update_status('@' + mention.user.screen_name + ' Hi 👋 ' + reply_text, mention.id)
+                api.update_status('@' + mention.user.screen_name + ' Hi 👋 ' + reply_text, in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
     
         # -------------------- To get all replies for the tweet --------------------------------
         # replies=[]
