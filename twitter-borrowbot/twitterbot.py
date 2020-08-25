@@ -51,7 +51,7 @@ def reply_to_tweets():
         print(isbnlike)
 
         for word in words:
-            if word.startswith("http"):
+            if word.startswith("http") or word.startswith("https"):
                 resp = requests.head(word)
                 if "amazon" in resp.headers["Location"] and "/dp/" in resp.headers["Location"]:
                     amazon_text = isbnlib.get_isbnlike(
