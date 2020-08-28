@@ -73,7 +73,11 @@ def reply_to_tweets():
                     print("Error in response continuing")
                     continue
                 if resp.__contains__("ocaid"):
-                    resp_archive = requests.get("https://archive.org/services/loans/beta/loan/?&action=availability&identifier="+resp["ocaid"]).json()
+                    try:
+                        resp_archive = requests.get("https://archive.org/services/loans/loan/?&action=availability&identifier="+resp["ocaid"]).json()
+                    except:
+                        print("Error in response continuing")
+                        continue
                     if resp_archive and resp_archive['lending_status']['is_readable']:
                         reply_text = '@' + mention.user.screen_name + " you're in luck. This book appears to be available to read for free from @openlibrary: https://openlibrary.org/isbn/" + isbn
                     elif resp_archive and resp_archive['lending_status']['is_lendable']:
@@ -83,7 +87,11 @@ def reply_to_tweets():
                     else:
                         reply_text = '@' + mention.user.screen_name + " This title doesn't appear to have a free read option yet, however you can add it to your Want To Read list here: https://openlibrary.org/isbn/" + isbn
                 else:
-                    resp_advanced = requests.get("https://archive.org/advancedsearch.php?q=openlibrary_work:"+resp["works"][0]['key'].split("/")[-1]+"&fl[]=identifier&sort[]=&sort[]=&sort[]=&rows=50&page=1&output=json").json()
+                    try:
+                        resp_advanced = requests.get("https://archive.org/advancedsearch.php?q=openlibrary_work:"+resp["works"][0]['key'].split("/")[-1]+"&fl[]=identifier&sort[]=&sort[]=&sort[]=&rows=50&page=1&output=json").json()
+                    except:
+                        print("Error in response continuing")
+                        continue
                     if resp_advanced and resp_advanced["response"]["numFound"] > 1:
                         reply_text = '@' + mention.user.screen_name + " This edition doesn't appear to be available, however I've identified "+str(resp_advanced["response"]["numFound"])+" other editions which may be available here -> https://openlibrary.org" + resp["works"][0]['key']
                     else:
@@ -91,7 +99,7 @@ def reply_to_tweets():
 
                 print('Responding back ...')
                 print(reply_text)
-                api.update_status('@' + mention.user.screen_name + ' Hi 👋 ' + reply_text, in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
+                api.update_status('Hi 👋 ' + reply_text, in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
     
         # -------------------- To get all replies for the tweet --------------------------------
         # replies=[]
