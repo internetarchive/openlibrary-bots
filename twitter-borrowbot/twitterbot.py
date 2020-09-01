@@ -30,12 +30,48 @@ def store_last_seen_id(last_seen_id, file_name):
     f_write.close()
     return
 
+def check_tweet(tweet, parent=False):
+    if parent:
+        print("In parent")
+        print(tweet.full_text)
+        print(tweet.in_reply_to_status_id)
+        if tweet.in_reply_to_status_id:
+            tweet = api.get_status(tweet.in_reply_to_status_id, tweet_mode="extended")
+            print(tweet.full_text)
+        else:
+            return []
+    
+    text = tweet.full_text
+    words = text.split()
+    isbnlike = isbnlib.get_isbnlike(text, level='normal')
+
+    print(isbnlike)
+    print(words)
+
+    for word in words:
+        if word.startswith("http") or word.startswith("https"):
+            print(word)
+            resp = requests.head(word)
+            print(resp.headers["Location"])
+            if "amazon" in resp.headers["Location"] and "/dp/" in resp.headers["Location"]:
+                amazon_text = isbnlib.get_isbnlike(
+                    resp.headers["Location"], level='normal')
+                amazon_text = list(dict.fromkeys(amazon_text))
+                for item in amazon_text:
+                    if isbnlib.is_isbn10(item) or isbnlib.is_isbn13(item):
+                        isbnlike.append(item)
+
+    print(isbnlike)
+
+    return isbnlike
+
+    
 
 def reply_to_tweets():
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
 
     try:
-        mentions = api.mentions_timeline(last_seen_id, tweet_mode='extended')
+        mentions = api.mentions_timeline(last_seen_id, tweet_mode="extended")
     except:
         print("Exception")
         return
@@ -44,25 +80,14 @@ def reply_to_tweets():
         print(str(mention.id) + '- ' + mention.full_text)
         last_seen_id = mention.id
         store_last_seen_id(last_seen_id, FILE_NAME)
-        text = mention.full_text
-        words = text.split()
-        isbnlike = isbnlib.get_isbnlike(text, level='normal')
-
-        print(isbnlike)
-
-        for word in words:
-            if word.startswith("http") or word.startswith("https"):
-                resp = requests.head(word)
-                if "amazon" in resp.headers["Location"] and "/dp/" in resp.headers["Location"]:
-                    amazon_text = isbnlib.get_isbnlike(
-                        resp.headers["Location"], level='normal')
-                    amazon_text = list(dict.fromkeys(amazon_text))
-                    for item in amazon_text:
-                        if isbnlib.is_isbn10(item) or isbnlib.is_isbn13(item):
-                            isbnlike.append(item)
-
-        print(isbnlike)
-
+        isbnlike = check_tweet(mention, False)
+        if len(isbnlike) == 0:
+            isbnlike = check_tweet(mention, True)
+        if len(isbnlike) == 0:
+            print('Responding back ...')
+            print("sorry, we couldn't find a book ID to look for, learn how I work here: <github README url>")
+            api.update_status('Hi 👋 @' + mention.user.screen_name + " Sorry, we couldn't find a book ID to look for, learn how I work here: https://github.com/internetarchive/openlibrary-bots", in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
+            return
         for isbn in isbnlike:
             isbn = isbnlib.canonical(isbn)
             reply_text = ""
