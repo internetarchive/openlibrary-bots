@@ -38,12 +38,7 @@ with open(infile) as f:
        # check and add ocaid to OL edition
        print("Adding %s to %s" % (ocaid, olid))
        edition = ol.get(olid)
-       #while not hasattr(edition, 'title')
-       try:
-           assert edition.title
-       except:
-           print("]%s[" % olid)
-           break
+       assert edition.title, "Missing title in %s!" % olid
 
        if hasattr(edition, 'ocaid'):
            print("  OCAID already found: %s" % edition.ocaid)
