@@ -11,8 +11,8 @@ jobs:
     #    os: [ubuntu-latest, macos-latest, windows-latest]
     #    python-version: [2.7, 3.5, 3.6, 3.7, 3.8]  # , pypy3]
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
       - run: pip install black codespell flake8 isort pytest
       - run: black --check . || true
       # - run: black --diff . || true
@@ -27,3 +27,4 @@ jobs:
       - run: pip list --outdated
       - run: pip install -e .  # https://docs.pytest.org/en/stable/goodpractices.html
       - run: pytest .
+      - run: pytest --doctest-modules . || true
