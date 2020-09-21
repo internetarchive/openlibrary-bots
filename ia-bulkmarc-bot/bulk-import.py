@@ -92,7 +92,7 @@ if __name__ == '__main__':
             if r.status_code < 500:
                 error_summary = re.search(r'<h2>(.*)</h2>', r.content.decode()).group(1)
             else:
-                error_summary = r.text
+                error_summary = ''
             print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: debug_%s.html" % (r.status_code, error_summary, count))
             with open('debug_%s.html' % count, 'w') as dout:
                 dout.write(r.content.decode())
