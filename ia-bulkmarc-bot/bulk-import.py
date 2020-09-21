@@ -11,17 +11,31 @@
 
 import argparse
 import internetarchive as ia
+import os
 import re
 from collections import namedtuple
 from olclient.openlibrary import OpenLibrary
+from glob import glob
 
 
 BULK_API = '/api/import/ia'
 LOCAL_ID = re.compile(r'\/local_ids\/(\w+)')
 MARC_EXT = re.compile(r'.*\.(mrc|utf8)$')
 
+
 def get_marc21_files(item):
     return [f.name for f in ia.get_files(item) if MARC_EXT.match(f.name)]
+
+
+def log_error(response):
+    n = 0
+    current_errors = glob('error*.html')
+    for f in current_errors:
+        n = max(n, 1 + int(re.search(r'[0-9]+', os.path.splitext(f)[0]).group(0)))
+    name = 'error_%d.html' % n
+    with open(name, 'w') as error_log:
+        error_log.write(response.content.decode())
+    return name
 
 
 if __name__ == '__main__':
@@ -93,9 +107,9 @@ if __name__ == '__main__':
                 error_summary = re.search(r'<h2>(.*)</h2>', r.content.decode()).group(1)
             else:
                 error_summary = ''
-            print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: debug_%s.html" % (r.status_code, error_summary, count))
-            with open('debug_%s.html' % count, 'w') as dout:
-                dout.write(r.content.decode())
+            # Write error log
+            error_log = log_error(r)
+            print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
             # Skip this record and move to the next
             # FIXME: this fails if there are 2 errors in a row :(
             if length == 5:
