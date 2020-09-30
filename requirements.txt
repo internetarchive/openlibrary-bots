@@ -1,5 +1,5 @@
 git+https://github.com/internetarchive/infogami.git
-git+ https://github.com/internetarchive/openlibrary-client.git
+git+https://github.com/internetarchive/openlibrary-client.git
 internetarchive
 isbnlib
 ndjson
