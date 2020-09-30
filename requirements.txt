@@ -1,0 +1,6 @@
+git+https://github.com/internetarchive/infogami.git
+internetarchive
+isbnlib
+olclient
+ndjson
+requests
