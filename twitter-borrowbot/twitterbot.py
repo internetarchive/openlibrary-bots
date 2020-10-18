@@ -86,7 +86,10 @@ def reply_to_tweets():
         if len(isbnlike) == 0:
             print('Responding back ...')
             print("sorry, we couldn't find a book ID to look for, learn how I work here: <github README url>")
-            api.update_status('Hi 👋 @' + mention.user.screen_name + " Sorry, we couldn't find a book ID to look for, learn how I work here: https://github.com/internetarchive/openlibrary-bots", in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
+            try:
+                api.update_status('Hi 👋 @' + mention.user.screen_name + " Sorry, we couldn't find a book ID to look for, learn how I work here: https://github.com/internetarchive/openlibrary-bots", in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
+            except: 
+                pass
             return
         for isbn in isbnlike:
             isbn = isbnlib.canonical(isbn)
@@ -124,8 +127,10 @@ def reply_to_tweets():
 
                 print('Responding back ...')
                 print(reply_text)
-                api.update_status('Hi 👋 ' + reply_text, in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
-    
+                try:
+                    api.update_status('Hi 👋 ' + reply_text, in_reply_to_status_id=mention.id, auto_populate_reply_metadata=True)
+                except:
+                    pass
         # -------------------- To get all replies for the tweet --------------------------------
         # replies=[]
         # print("Replies: \n\n")
