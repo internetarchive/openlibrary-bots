@@ -1,4 +1,3 @@
-from __future__ import print_function
 # Import simplejson for Python 2 else json for Python 3
 try:
     import urllib2
@@ -36,7 +35,7 @@ from openlibrary.api import OpenLibrary
 NYT_BEST_SELLERS_URL = "http://api.nytimes.com/svc/books/v2/lists"
 
 def LOG(level, msg):
-    print("%s: %s" % (level, msg.encode('utf-8')), file=sys.stderr)
+    print("{}: {}".format(level, msg.encode('utf-8')), file=sys.stderr)
 
 
 def ensureUtf(s):
@@ -57,14 +56,14 @@ def _request(request, parser=simplejson.loads):
         results = ensureUtf(results)
         results = parser(results)
     except Exception as e:
-        LOG("ERROR", "error loading %s: %s results: %s" % (request, e, results))
+        LOG("ERROR", f"error loading {request}: {e} results: {results}")
         raise
     finally:
         conn.close()
     return results
 
 def get_nyt_bestseller_list_names():
-    url = "%s/%s.json?%s" % (NYT_BEST_SELLERS_URL,
+    url = "{}/{}.json?{}".format(NYT_BEST_SELLERS_URL,
                              "names",
                              urllib.urlencode({"api-key": NYT_API_KEY}))
     results = _request(url)
@@ -73,7 +72,7 @@ def get_nyt_bestseller_list_names():
     return [r['list_name'] for r in results['results']]
 
 def load_nyt_bestseller_list(list_name):
-    url = "%s/%s.json?%s" % (NYT_BEST_SELLERS_URL,
+    url = "{}/{}.json?{}".format(NYT_BEST_SELLERS_URL,
                              urllib.quote(list_name.replace(' ', '-')),
                              urllib.urlencode({"api-key": NYT_API_KEY}))
 
@@ -81,7 +80,7 @@ def load_nyt_bestseller_list(list_name):
     assert 'results' in results
 
     if len(results['results']) != results['num_results']:
-        LOG("ERROR", "expected %s result for %s, got %s" % (
+        LOG("ERROR", "expected {} result for {}, got {}".format(
             results['num_results'], len(results['results']), list_name))
 
     return results['results']
@@ -163,7 +162,7 @@ def write_machine_tags(ln, books):
         nyt = key_to_nyt[work['key']]
         tags = (
             "New York Times bestseller",
-            "nyt:%s=%s" % ("_".join([s.lower() for s in ln.split()]),
+            "nyt:{}={}".format("_".join([s.lower() for s in ln.split()]),
                            _get_first_bestseller_date(nyt))
         )
         if 'subjects' not in work:
@@ -179,13 +178,13 @@ def write_machine_tags(ln, books):
                             if not s.startswith(("nyt:", "nytimes:")) or s in tags]
 
         if work['key'] not in write:
-            LOG("INFO", "all tags already present, skipping %s: '%s' by %s" % (
+            LOG("INFO", "all tags already present, skipping {}: '{}' by {}".format(
                 work['key'],
                 nyt['book_details'][0]['title'], nyt['book_details'][0]['author']
             ))
         else:
-            LOG("DEBUG", "Adding tags (%s) to %s" % (", ".join(tags), work['key']))
-    LOG("INFO", "WRITING MACHINE TAGS FOR %s of %s works" % (
+            LOG("DEBUG", "Adding tags ({}) to {}".format(", ".join(tags), work['key']))
+    LOG("INFO", "WRITING MACHINE TAGS FOR {} of {} works".format(
         len(write), len(books)
     ))
     if write:
@@ -218,11 +217,11 @@ if __name__ == "__main__":
         for i, book in enumerate(load_nyt_bestseller_list(ln)):
             ol_keys = reconcile_book(book)
             if not ol_keys:
-                LOG("WARN", "unable to reconcile '%s' by %s - no OL book found" % (
+                LOG("WARN", "unable to reconcile '{}' by {} - no OL book found".format(
                     book['book_details'][0]['title'], book['book_details'][0]['author']
                 ))
             if not (key for key in ol_keys if key.startswith("/works/")):
-                LOG("WARN", "only editions for '%s' by %s: %s" % (
+                LOG("WARN", "only editions for '{}' by {}: {}".format(
                     book['book_details'][0]['title'], book['book_details'][0]['author'], ol_keys
                 ))
             results[ln].append({
@@ -231,7 +230,7 @@ if __name__ == "__main__":
                     "ol:works": (key for key in ol_keys if key.startswith("/works/"))
             })
         if results[ln]:
-            LOG("INFO", "RECONCILED %s%% of %s" % (int(len([r for r in results[ln] if r['ol:works']]) /
+            LOG("INFO", "RECONCILED {}% of {}".format(int(len([r for r in results[ln] if r['ol:works']]) /
                                                        float(len(results[ln])) * 100),
                                              ln))
             write_machine_tags(ln, results[ln])

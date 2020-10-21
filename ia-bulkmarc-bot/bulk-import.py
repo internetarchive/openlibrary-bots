@@ -93,7 +93,7 @@ if __name__ == '__main__':
         if limit and count >= limit:
             # Stop if a limit has been set, and we are over it.
             break
-        identifier = '{}/{}:{}:{}'.format(item, fname, offset, length)
+        identifier = f'{item}/{fname}:{offset}:{length}'
         data = {'identifier': identifier, 'bulk_marc': 'true'}
         if barcode and barcode is not True:
             # A local_id key has been passed to import a specific local_id barcode
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 error_summary = ''
             # Write error log
             error_log = log_error(r)
-            print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
+            print(f"UNEXPECTED ERROR {r.status_code}; [{error_summary}] WRITTEN TO: {error_log}")
             # Skip this record and move to the next
             # FIXME: this fails if there are 2 errors in a row :(
             if length == 5:
@@ -118,10 +118,10 @@ if __name__ == '__main__':
                 break
             offset = offset + length
             length = 5
-            print("%s:%s" % (offset, length))
+            print(f"{offset}:{length}")
             continue
         # log results to stdout
-        print('{}: {} -- {}'.format(identifier, r.status_code, result))
+        print(f'{identifier}: {r.status_code} -- {result}')
         offset = result.get('next_record_offset')
         length = result.get('next_record_length')
         count += 1

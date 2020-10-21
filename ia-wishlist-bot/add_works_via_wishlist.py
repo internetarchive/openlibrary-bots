@@ -34,13 +34,13 @@ if not os.path.exists(FILE):
 		'https://archive.org/download/openlibrary-bots/wish_list_march_2018.ndjson', file_name)
 def row2book(new_book):
 	# Data of the book
-	title = new_book.get('title', u'')
-	author = new_book.get('author', u'')
-	date = new_book.get('date', u'')
+	title = new_book.get('title', '')
+	author = new_book.get('author', '')
+	date = new_book.get('date', '')
 
 	# Define a Book Object
 	added_book = common.Book(title=title, authors=[common.Author(
-		name=author)], publisher=u"", publish_date=date)
+		name=author)], publisher="", publish_date=date)
 
 	return added_book
 
@@ -51,16 +51,16 @@ with open(FILE) as f:
 # Iterates over the size of the data
 for new_book in data:
 
-	isbn10 = new_book.get('isbn10', u'')
-	isbn13 = new_book.get('isbn13', u'')
-	oclc = new_book.get('oclc', u'')
+	isbn10 = new_book.get('isbn10', '')
+	isbn13 = new_book.get('isbn13', '')
+	oclc = new_book.get('oclc', '')
 
 	added_book = row2book(new_book)
 
 	# Add metadata like ISBN 10 and ISBN 13
-	added_book.add_id(u'isbn_10', isbn10)
-	added_book.add_id(u'isbn_13', isbn13)
-	added_book.add_id(u'oclc', oclc)
+	added_book.add_id('isbn_10', isbn10)
+	added_book.add_id('isbn_13', isbn13)
+	added_book.add_id('oclc', oclc)
 
 	# Call create book to create the book
 	newly_added_book = ol.create_book(added_book)

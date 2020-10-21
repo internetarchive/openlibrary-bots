@@ -116,7 +116,7 @@ class NodeCollector (Collector):
 				self.handler.push_collector (c)
 			else:
 				if self.strict:
-					raise Exception ("no handler for element '%s'; handlers: %s" % (localname, self.collector_table.keys ()))
+					raise Exception (f"no handler for element '{localname}'; handlers: {self.collector_table.keys()}")
 				else:
 					self.ignoring += 1
 	def endElementNS (self, name, qname):

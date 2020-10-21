@@ -7,7 +7,7 @@ ol = OpenLibrary()
 fname = sys.argv[1]
 delay = 3
 
-with open(fname, 'r') as f:
+with open(fname) as f:
     for line in f:
         isbn = line.strip()
         time.sleep(delay)
@@ -23,5 +23,5 @@ with open(fname, 'r') as f:
                 status = 'FOUND'
         else:
             status = 'ERROR'
-        print("%s: %s%s" % (isbn, status, " AS %s" % olid if olid else ''))
+        print("{}: {}{}".format(isbn, status, " AS %s" % olid if olid else ''))
 

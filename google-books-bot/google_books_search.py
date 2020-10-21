@@ -63,7 +63,7 @@ def _upload_ol_book(ol_book):
                          "This script doesn't yet support updating existing books -- sorry!")
 
     edition = OL.Work.create(ol_book)
-    print("Upload of {} successful!".format(edition.olid))
+    print(f"Upload of {edition.olid} successful!")
 
 
 def main():
@@ -97,7 +97,7 @@ def main():
                                                                                         number_of_considered_books))
     for i, ol_book in enumerate(ol_books):
         isbn_10 = ol_book.identifiers["isbn_10"][0]
-        print("\t{}: '{}' by {} - ISBN {}".format(i, ol_book.title, ol_book.primary_author.name, isbn_10))
+        print(f"\t{i}: '{ol_book.title}' by {ol_book.primary_author.name} - ISBN {isbn_10}")
 
     chosen_index = int(input("Which of these would you like to upload? "))
     if chosen_index > number_of_considered_books:

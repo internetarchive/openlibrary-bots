@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 """
@@ -123,7 +122,7 @@ class TestOnixProductBot(unittest.TestCase):
         self.assertTrue(expected_status == self.opb.status)
 
 
-class OnixFeedParser(object):
+class OnixFeedParser:
 
     def __init__(self, filename, ns=""):
         parser = etree.XMLParser(ns_clean=True)
@@ -132,7 +131,7 @@ class OnixFeedParser(object):
         self.products = [OnixProductParser(product, ns) for product in self.onix.findall('Product')]
 
 
-class OnixProductParser(object):
+class OnixProductParser:
 
     def __init__(self, product, ns):
         self.ns = ns
@@ -357,7 +356,7 @@ class OnixProductParser(object):
         return json.dumps(data)
 
 
-class OnixProductBot(object):
+class OnixProductBot:
     def __init__(self, data):
         self.status = 1
         self.data = json.loads(data)

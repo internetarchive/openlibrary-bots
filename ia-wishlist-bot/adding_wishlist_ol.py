@@ -120,9 +120,9 @@ def add_book_via_olclient(book, author_list, bookcover=None):
                                publish_date=book.get("date"), language=book.get("language"))
 
         # Add metadata like ISBN 10 and ISBN 13
-        new_book.add_id(u'isbn_10', book.get("isbn10"))
-        new_book.add_id(u'isbn_13', book.get('isbn13'))
-        new_book.add_id(u'oclc', book.get('oclc'))
+        new_book.add_id('isbn_10', book.get("isbn10"))
+        new_book.add_id('isbn_13', book.get('isbn13'))
+        new_book.add_id('oclc', book.get('oclc'))
 
         print(new_book)
         try:

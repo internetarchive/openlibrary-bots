@@ -49,5 +49,5 @@ with open(infile) as f:
                 bad_isbn.append(isbn)
 
         for bad in bad_isbn:
-            print(u"\t".join([u'BAD-ISBN:', repr(bad), olid, wolid]))
+            print("\t".join(['BAD-ISBN:', repr(bad), olid, wolid]))
 

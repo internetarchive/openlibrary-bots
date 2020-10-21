@@ -18,7 +18,7 @@ FILE_NAME = 'last_seen_id.txt'
 
 
 def retrieve_last_seen_id(file_name):
-    f_read = open(file_name, 'r')
+    f_read = open(file_name)
     last_seen_id = int(f_read.read().strip())
     f_read.close()
     return last_seen_id

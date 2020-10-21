@@ -56,7 +56,7 @@ class URLCache:
 
 		data_file = self.dir + "/" + str (id)
 		if os.path.exists (data_file):
-			return open (data_file, "r")
+			return open (data_file)
 		else:
 			# wait for fetch to finish
 			tmp_data_file = data_file + "-fetching"
@@ -68,7 +68,7 @@ class URLCache:
 					tmp_data.close ()
 				except OSError as e:
 					pass
-				return open (data_file, "r")
+				return open (data_file)
 			except Exception as exn:
 				# in case this happens, just blow away your cache
-				raise Exception ("URLCache: sorry, corrupted state for url '%s': %s" % (url, str (exn)))
+				raise Exception ("URLCache: sorry, corrupted state for url '{}': {}".format(url, str (exn)))

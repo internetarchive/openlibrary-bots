@@ -18,7 +18,7 @@ def sync_ol_to_ia(olid):
     else:
         content = r.json()
     if 'error' in content and 'no changes to _meta.xml' not in content['error']:  # and r.json()['error'] == 'No qualifying edition':
-        print("%s, %s: %s" % (olid, ocaid, content))
+        print(f"{olid}, {ocaid}: {content}")
     return r.status_code
 
 # start and end are False or line numbers in infile to begin and stop processing
@@ -36,7 +36,7 @@ with open(infile) as f:
        if end and count > end:
            break
        # check and add ocaid to OL edition
-       print("Adding %s to %s" % (ocaid, olid))
+       print(f"Adding {ocaid} to {olid}")
        edition = ol.get(olid)
        assert edition.title, "Missing title in %s!" % olid
 
