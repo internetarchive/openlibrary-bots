@@ -81,6 +81,11 @@ celerybeat-schedule
 
 # dotenv
 .env
+twitter-borrowbot/.env
+
+# Last seen id of the tweet
+twitter-borrowbot/last_seen_id.txt
+
 
 # virtualenv
 .venv
