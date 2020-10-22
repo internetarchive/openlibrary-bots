@@ -11,11 +11,15 @@
 
 import argparse
 import internetarchive as ia
+import json
 import os
 import re
 from collections import namedtuple
 from olclient.openlibrary import OpenLibrary
+from requests.adapters import HTTPAdapter
+from requests.exceptions import ConnectionError, HTTPError
 from glob import glob
+from time import sleep
 
 
 BULK_API = '/api/import/ia'
@@ -89,6 +93,9 @@ if __name__ == '__main__':
     offset = args.offset
     length = 5  # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
 
+
+    ol.session.mount('https://', HTTPAdapter(max_retries=10))
+
     while length:
         if limit and count >= limit:
             # Stop if a limit has been set, and we are over it.
@@ -98,30 +105,50 @@ if __name__ == '__main__':
         if barcode and barcode is not True:
             # A local_id key has been passed to import a specific local_id barcode
             data['local_id'] = barcode
-        r = ol.session.post(ol.base_url + BULK_API + '?debug=true', data=data)
+
         try:
-            result = r.json()
-        except:
+            r = ol.session.post(ol.base_url + BULK_API + '?debug=true', data=data)
+            r.raise_for_status()
+
+        except HTTPError as e:
             result = {}
-            if r.status_code < 500:
-                error_summary = re.search(r'<h2>(.*)</h2>', r.content.decode()).group(1)
-            else:
+            status = r.status_code
+            if status > 500:
                 error_summary = ''
-            # Write error log
-            error_log = log_error(r)
-            print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
-            # Skip this record and move to the next
-            # FIXME: this fails if there are 2 errors in a row :(
-            if length == 5:
-                # break out of everything, 2 errors in a row
-                count = limit
-                break
-            offset = offset + length
-            length = 5
-            print("%s:%s" % (offset, length))
+                # on 503, wait then retry
+                if r.status_code == 503:
+                    length = 5
+                    offset = offset  # repeat current import
+                    sleep(50 * 60)
+                    continue
+            elif status == 500:
+                m = re.search(r'<h2>(.*)</h2>', r.text)
+                error_summary = m.group(1) or r.text.split()[0]
+                # Write error log
+                error_log = log_error(r)
+                print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
+                # Skip this record and move to the next
+                # FIXME: this fails if there are 2 errors in a row :(
+                if length == 5:
+                    # break out of everything, 2 errors in a row
+                    count = limit
+                    break
+                offset = offset + length
+                length = 5
+                print("%s:%s" % (offset, length))
+                continue
+            else:  # 4xx errors should have json content
+                pass
+        except ConnectionError as e:
+            print("CONNECTION ERROR: %s" % e.args[0])
+            sleep(5 * 60)
             continue
         # log results to stdout
+        try:
+            result = r.json()
+            offset = result.get('next_record_offset')
+            length = result.get('next_record_length')
+        except json.decoder.JSONDecodeError:
+            result = r.content
         print('{}: {} -- {}'.format(identifier, r.status_code, result))
-        offset = result.get('next_record_offset')
-        length = result.get('next_record_length')
         count += 1
