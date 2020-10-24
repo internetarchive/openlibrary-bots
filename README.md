@@ -37,7 +37,7 @@ For instructions on administrating your Open Library instance and build instruct
 
 You can also find more information regarding Developer Documentation for Open Library in the Open Library [Wiki](https://github.com/internetarchive/openlibrary/wiki/)
 
-Typically every folder signifies a different bot. The folder must contain code with respect to the bot, a `README.md` file which tells the user how to run the bot and any dependecies or `requirements.txt` file which can make it easier for a user to run the bot.
+Typically every folder signifies a different bot. The folder must contain code with respect to the bot, a `README.md` file which tells the user how to run the bot and any dependencies or `requirements.txt` file which can make it easier for a user to run the bot.
 
 ## Contributing
 
