@@ -1,4 +1,4 @@
-A set of scripts to normalize (remove hypens and capitolize letters) in ISBNs.
+A set of scripts to normalize (remove hyphens and capitalize letters) in ISBNs.
 Currently, this makes editions discoverable via search
 ### How To Use
 ```bash

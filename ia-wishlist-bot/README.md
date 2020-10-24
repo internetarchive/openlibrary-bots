@@ -11,7 +11,7 @@ The IA Wishlist Bot allows users to add books to the Open Library Database where
 
 ### Data dependent Scripts
 
-1. `get_wishlist_works_via_isbn.py` - Python Script to find Open Library Synonymns and works which aren't added to Open Library and outputs list of ISBNs which aren't added to Open Library.
+1. `get_wishlist_works_via_isbn.py` - Python Script to find Open Library Synonyms and works which aren't added to Open Library and outputs list of ISBNs which aren't added to Open Library.
 2. `add_wishlist_works.py` - Python Script which inputs a list of ISBNs and outputs details of books to be added.
 3. `add_works_via_wishist.py` - Python Script to add works to Open Library from the Metadata collected from the Wishlist using the Open Library Client.   
 
