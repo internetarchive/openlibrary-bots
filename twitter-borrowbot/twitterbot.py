@@ -18,17 +18,14 @@ FILE_NAME = 'last_seen_id.txt'
 
 
 def retrieve_last_seen_id(file_name):
-    f_read = open(file_name, 'r')
-    last_seen_id = int(f_read.read().strip())
-    f_read.close()
-    return last_seen_id
+    with open(file_name, 'r') as f_read:
+        return int(f_read.read().strip())
 
 
 def store_last_seen_id(last_seen_id, file_name):
-    f_write = open(file_name, 'w')
-    f_write.write(str(last_seen_id))
-    f_write.close()
-    return
+    with open(file_name, 'w') as f_write:
+        f_write.write(str(last_seen_id))
+
 
 def check_tweet(tweet, parent=False):
     if parent:
@@ -49,35 +46,33 @@ def check_tweet(tweet, parent=False):
     print(words)
 
     for word in words:
-        if word.startswith("http") or word.startswith("https"):
+        if word.startswith(("http", "https")):
             print(word)
             resp = requests.head(word)
-            print(resp.headers["Location"])
-            if "amazon" in resp.headers["Location"] and "/dp/" in resp.headers["Location"]:
-                amazon_text = isbnlib.get_isbnlike(
-                    resp.headers["Location"], level='normal')
+            location = resp.headers["Location"]
+            print(location)
+            if "amazon" in location and "/dp/" in location:
+                amazon_text = isbnlib.get_isbnlike(location, level='normal')
                 amazon_text = list(dict.fromkeys(amazon_text))
                 for item in amazon_text:
                     if isbnlib.is_isbn10(item) or isbnlib.is_isbn13(item):
                         isbnlike.append(item)
 
     print(isbnlike)
-
     return isbnlike
 
-    
 
 def reply_to_tweets():
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
 
     try:
         mentions = api.mentions_timeline(last_seen_id, tweet_mode="extended")
-    except:
-        print("Exception")
+    except Exception as e:
+        print("Exception: {}".format(e))
         return
 
     for mention in reversed(mentions):
-        print(str(mention.id) + '- ' + mention.full_text)
+        print('{}- {}'.format(mention.id, mention.full_text))
         last_seen_id = mention.id
         store_last_seen_id(last_seen_id, FILE_NAME)
         isbnlike = check_tweet(mention, False)
@@ -117,8 +112,8 @@ def reply_to_tweets():
                 else:
                     try:
                         resp_advanced = requests.get("https://archive.org/advancedsearch.php?q=openlibrary_work:"+resp["works"][0]['key'].split("/")[-1]+"&fl[]=identifier&sort[]=&sort[]=&sort[]=&rows=50&page=1&output=json").json()
-                    except:
-                        print("Error in response continuing")
+                    except Exception as e:
+                        print("Error in response continuing: {}".format(e))
                         continue
                     if resp_advanced and resp_advanced["response"]["numFound"] > 1:
                         reply_text = '@' + mention.user.screen_name + " This edition doesn't appear to be available, however I've identified "+str(resp_advanced["response"]["numFound"])+" other editions which may be available here -> https://openlibrary.org" + resp["works"][0]['key']
