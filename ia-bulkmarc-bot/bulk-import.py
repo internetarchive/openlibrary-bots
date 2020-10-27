@@ -122,8 +122,9 @@ if __name__ == '__main__':
                     sleep(50 * 60)
                     continue
             elif status == 500:
-                m = re.search(r'<h2>(.*)</h2>', r.text)
-                error_summary = m.group(1) or r.text.split()[0]
+                # In debug mode 500s produce HTML with details of the error
+                m = re.search(r'<h1>(.*)</h1>', r.text)
+                error_summary = m.group(1) or r.text
                 # Write error log
                 error_log = log_error(r)
                 print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
