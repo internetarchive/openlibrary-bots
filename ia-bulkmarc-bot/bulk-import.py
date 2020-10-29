@@ -26,6 +26,9 @@ BULK_API = '/api/import/ia'
 LOCAL_ID = re.compile(r'\/local_ids\/(\w+)')
 MARC_EXT = re.compile(r'.*\.(mrc|utf8)$')
 
+SERVER_ISSUES_WAIT = 50 * 60  # seconds to wait if server is giving unexpected 5XXs likely to be resolved in time
+SHORT_CONNECT_WAIT =  5 * 60  # seconds
+
 
 def get_marc21_files(item):
     return [f.name for f in ia.get_files(item) if MARC_EXT.match(f.name)]
@@ -119,29 +122,34 @@ if __name__ == '__main__':
                 if r.status_code == 503:
                     length = 5
                     offset = offset  # repeat current import
-                    sleep(50 * 60)
+                    sleep(SERVER_ISSUES_WAIT)
                     continue
             elif status == 500:
-                m = re.search(r'<h2>(.*)</h2>', r.text)
-                error_summary = m.group(1) or r.text.split()[0]
+                # In debug mode 500s produce HTML with details of the error
+                m = re.search(r'<h1>(.*)</h1>', r.text)
+                error_summary = m and m.group(1) or r.text
                 # Write error log
                 error_log = log_error(r)
                 print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
-                # Skip this record and move to the next
+
                 # FIXME: this fails if there are 2 errors in a row :(
                 if length == 5:
                     # break out of everything, 2 errors in a row
                     count = limit
                     break
-                offset = offset + length
+                if m:  # a handled, debugged, and logged error, unlikely to be resolved by retrying later:
+                    # Skip this record and move to the next
+                    offset = offset + length
+                else:
+                    sleep(SERVER_ISSUES_WAIT)
                 length = 5
                 print("%s:%s" % (offset, length))
                 continue
-            else:  # 4xx errors should have json content
+            else:  # 4xx errors should have json content, to be handled in default 200 flow
                 pass
         except ConnectionError as e:
             print("CONNECTION ERROR: %s" % e.args[0])
-            sleep(5 * 60)
+            sleep(SHORT_CONNECT_WAIT)
             continue
         # log results to stdout
         try:
