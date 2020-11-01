@@ -45,6 +45,16 @@ def log_error(response):
     return name
 
 
+def next_record(identifier, ol):
+    """
+    identifier: '{}/{}:{}:{}'.format(item, fname, offset, length)
+    """
+    current = ol.session.get(ol.base_url + '/show-records/' + identifier)
+    m = re.search(r'<a href="\.\./[^/]+/[^:]+:([0-9]+):([0-9]+)".*Next</a>', current.text)
+    next_offset, next_length = m.groups()
+    return next_offset, next_length
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Bulk MARC importer.')
     parser.add_argument('item', help='Source item containing MARC records', nargs='?')
@@ -132,11 +142,10 @@ if __name__ == '__main__':
                 error_log = log_error(r)
                 print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
 
-                # FIXME: this fails if there are 2 errors in a row :(
                 if length == 5:
-                    # break out of everything, 2 errors in a row
-                    count = limit
-                    break
+                    # 2 500 errors in a row, skipt to next record
+                    offset, length = next_record(identifier, ol)
+                    continue
                 if m:  # a handled, debugged, and logged error, unlikely to be resolved by retrying later:
                     # Skip this record and move to the next
                     offset = offset + length
