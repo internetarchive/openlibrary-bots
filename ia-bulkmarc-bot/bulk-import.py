@@ -143,7 +143,7 @@ if __name__ == '__main__':
                 print("UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s" % (r.status_code, error_summary, error_log))
 
                 if length == 5:
-                    # 2 500 errors in a row, skipt to next record
+                    # Two 500 errors in a row: skip to next record
                     offset, length = next_record(identifier, ol)
                     continue
                 if m:  # a handled, debugged, and logged error, unlikely to be resolved by retrying later:
