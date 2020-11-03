@@ -52,7 +52,10 @@ def next_record(identifier, ol):
     current = ol.session.get(ol.base_url + '/show-records/' + identifier)
     m = re.search(r'<a href="\.\./[^/]+/[^:]+:([0-9]+):([0-9]+)".*Next</a>', current.text)
     next_offset, next_length = m.groups()
-    return next_offset, next_length
+    # Follow redirect to get actual length (next_length is always 5 to trigger the redirect)
+    r = ol.session.head(ol.base_url + '/show-records/' + re.search(r'^[^:]*', identifier).group(0) + ':%s:%s' % (next_offset, next_length))
+    next_length = re.search(r'[^:]*$', r.headers.get('Location', '5')).group(0)
+    return int(next_offset), int(next_length)
 
 
 if __name__ == '__main__':
