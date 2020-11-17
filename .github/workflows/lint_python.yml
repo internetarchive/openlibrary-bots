@@ -2,26 +2,20 @@ name: lint_python
 on:
   pull_request:
   push:
-  #  branches: [master]
+    branches: [master]
 jobs:
   lint_python:
     runs-on: ubuntu-latest
-    # strategy:
-    #  matrix:
-    #    os: [ubuntu-latest, macos-latest, windows-latest]
-    #    python-version: [2.7, 3.5, 3.6, 3.7, 3.8]  # , pypy3]
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
       - run: pip install black codespell flake8 isort pytest
       - run: black --check . || true
-      # - run: black --diff . || true
-      # - if: matrix.python-version >= 3.6
-      #  run: |
-      #    pip install black
-      #    black --check .
       - run: codespell --ignore-words-list="didnt" --skip="*.xsd" --quiet-level=2
       - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - run: isort --recursive . || true
-      - run: pip install -r requirements.txt || true
-      - run: pytest --doctest-modules . || true
+      - run: isort --profile black . || true
+      - run: pip install -r requirements.txt
+      - run: pip list --outdated
+      - run: pip install -e .  # https://docs.pytest.org/en/stable/goodpractices.html
+      - run: pytest .
+      # - run: pytest --doctest-modules . || true
