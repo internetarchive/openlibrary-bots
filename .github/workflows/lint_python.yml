@@ -18,4 +18,4 @@ jobs:
       - run: pip list --outdated
       - run: pip install -e .  # https://docs.pytest.org/en/stable/goodpractices.html
       - run: pytest .
-      - run: pytest --doctest-modules . || true
+      # - run: pytest --doctest-modules . || true
