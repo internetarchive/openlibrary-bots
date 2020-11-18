@@ -37,7 +37,6 @@ then
   get MetaData/Annotations.zip
   bye
 EOF
-EOF
 else
   echo "Skipping: BWB data already fetched..."
 fi
