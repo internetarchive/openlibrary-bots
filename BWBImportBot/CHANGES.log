@@ -1,0 +1,36 @@
+Done:
+1. All data through 2020-11 uploaded to https://archive.org/details/book-private
+2. 2020-07 - All data from 2020-07 dump imported into Open Library
+3. 2020-08 - All books published in 2020 imported from 2020-08 dump
+
+
+TODO:
+* 2020-08 - we need to import all books published before 2020
+* 2020-09 - we need to import all books starting at 1390038
+* 2020-10
+* 2020-11
+
+# Notes
+
+## 2020-09
+
+2020-09 seems to have been run against an old script which did not produce line/entry numbers in the log and so it's difficult to match up where we left off to the original dataset.
+Based on the number of "SUCCESS" entries (1,043,381) and "ERROR" entries (346,657), we can surmise that the number of records processed is ~1,390,038
+
+The last entry in the log is book https://openlibrary.org/books/OL21998825M/Global_geomorphology whose title is "Global Geomorphilogy".
+
+If we search for this in the books.jsonl source data by running the following:
+
+```
+mek@books-lists:/bwb-monthly/2020-09/Bibliographic$ grep "Global geomorphology" books.jsonl
+1390038:{"isbn_13": ["9780582301566"], "publishers": ["Taylor & Francis Group"], "languages": ["eng"], "lc_classifications": ["GB401.5"], "publish_date": "1991", "source_records": ["bwb:9780582301566"], "title": "Global Geomorphology", "number_of_pages": "560", "authors": [{"name": "Summerfield, Michael A."}], "subjects": ["Geomorphology"]}
+1491279:{"isbn_13": ["9781138837010"], "publishers": ["Taylor & Francis Group"], "languages": ["eng"], "lc_classifications": ["GB401.5.S82 2014"], "publish_date": "2015", "source_records": ["bwb:9781138837010"], "title": "Global Geomorphology", "number_of_pages": "560", "authors": [{"name": "Summerfield, Michael A."}], "subjects": ["Geomorphology"]}
+3130092:{"isbn_13": ["9781317885115"], "publishers": ["Taylor & Francis Group"], "languages": ["eng"], "lc_classifications": ["GB401.5 .S82 2014"], "publish_date": "2014", "source_records": ["bwb:9781317885115"], "title": "Global Geomorphology", "number_of_pages": "560", "authors": [{"name": "Summerfield, Michael A."}], "subjects": ["Geomorphology"]}
+3410725:{"isbn_13": ["9781317885108"], "publishers": ["Taylor & Francis Group"], "languages": ["eng"], "lc_classifications": [""], "publish_date": "2014", "source_records": ["bwb:9781317885108"], "title": "Global Geomorphology", "number_of_pages": "560", "authors": [{"name": "Summerfield, Michael A."}], "subjects": ["Geomorphology"]}
+```
+
+We get a match (title and author). The earliest appearance is line number 1,390,038 which exactly matches the total number of SUCCESS and ERROR responses we've seen.
+
+So, we're going to edit the last line of our logs to start with "1390038:" so the runner starts from this point. You can refer to `tail /bwb-monthly/2020-08/Bibliographic/import.log` for an example which ends with:
+
+1390038: SUCCESS: {"edition": {"status": "matched", "key": "/books/OL21998825M/"}, "work": {"status": "matched", "key": "/works/OL4781909W"}, "success": true}
