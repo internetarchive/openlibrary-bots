@@ -94,4 +94,5 @@ fi
 # ============
 # import to OL
 # ============
-sudo -E sh -c "${ROOT_DIR}/venv/bin/python ${SCRIPT_DIR}/import-ol.py ${ROOT_DIR}/${DATE_M}/Bibliographic/books.jsonl > ${ROOT_DIR}/${DATE_M}/Bibliographic/import.log"
+echo "Importing books from books.jsonl to Open Library"
+sudo -E sh -c "${ROOT_DIR}/venv/bin/python ${SCRIPT_DIR}/import-ol.py ${ROOT_DIR}/${DATE_M}/Bibliographic/books.jsonl >> ${ROOT_DIR}/${DATE_M}/Bibliographic/import.log" && sudo touch ${ROOT_DIR}/${DATE_M}/Bibliographic/FINISHED
