@@ -1,3 +1,9 @@
+## Progress
+
+Please see CHANGES.log for status of BWB imports.
+
+## Purpose
+
 This bot takes monthly partner data from Better World Books and imports (creates or updates) metadata records on OpenLibrary.org using the monthly.sh runner, the parse-biblio.py processor, and the import-ol.py wrapper of the /api/import json endpoint.
 
 ## Cadence
