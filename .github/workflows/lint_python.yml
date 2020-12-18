@@ -15,6 +15,7 @@ jobs:
       - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - run: isort --profile black . || true
       - run: pip install -r requirements.txt
+      - run: pip install -r twitter-borrowbot/requirements.txt
       - run: pip list --outdated
       - run: pip install -e .  # https://docs.pytest.org/en/stable/goodpractices.html
       - run: pytest .
