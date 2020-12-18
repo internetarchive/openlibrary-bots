@@ -97,6 +97,6 @@ class InternetArchive:
             if matches and matches["response"]["docs"]:
                 books = matches["response"]["docs"]
                 return next(book for book in books if book.get("openlibrary_work"))
-        except:
+        except Exception:
             print("Error fetching IA work")
         return {}
