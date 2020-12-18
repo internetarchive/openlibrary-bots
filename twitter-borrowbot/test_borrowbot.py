@@ -7,10 +7,8 @@ twitterized_url = "https://t.co/cKlQ9xJC1W?amp=1"
 goodreads_url = "https://www.goodreads.com/book/show/5544.Surely_You_re_Joking_Mr_Feynman_"
 amazon_product_url = "https://www.amazon.com/gp/product/0393316041/ref=x_gr_w_bb_glide_sin?ie=UTF8&tag=x_gr_w_bb_glide_sin-20&linkCode=as2&camp=1789&creative=9325&creativeASIN=0393316041&SubscriptionId=1MGPYB6YW3HWK55XCGG2"
 amazon_dp_url = "https://www.amazon.com/Surely-Youre-Joking-Feynman-Adventures/dp/009917331X"
-isbn = "9780393316049"
-multiple_isbns = ["9780393316049", "9780393019216"]
 
-class TestSequencer(unittest.TestCase):
+class TestBorrowBot(unittest.TestCase):
 
     def test_goodreads_to_isbn(self):
         tweet = "Hey @borrowbot, what about %s" % goodreads_url
@@ -32,6 +30,9 @@ class TestSequencer(unittest.TestCase):
         assert isbns == ["009917331X"]
 
     def test_isbns(self):
+        isbn = "9780393316049"
+        multiple_isbns = ["9780393316049", "9780393019216"]
+
         tweet = "Hey @borrowbot, what about %s" % isbn
         print(tweet)
         isbns = list(ISBNFinder.find_isbns(tweet))
@@ -44,8 +45,8 @@ class TestSequencer(unittest.TestCase):
         assert isbns == multiple_isbns
 
     def test_get_book(self):
-        tweet = "Hey @borrowbot, what about %s" % amazon_product_url
+        isbn = '0399143904'
+        tweet = "Hey @borrowbot, what about %s" % isbn
         isbn = list(ISBNFinder.find_isbns(tweet))[0]
         edition = InternetArchive.get_edition(isbn)
-        print(edition)
-        assert edition == 2
+        assert edition
