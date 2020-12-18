@@ -5,7 +5,7 @@ import requests
 
 class ISBNFinder:
 
-    SERVICES = ["amazon", "goodreads"]
+    SERVICES = ("amazon", "goodreads")
 
     @staticmethod
     def amazon(url):
