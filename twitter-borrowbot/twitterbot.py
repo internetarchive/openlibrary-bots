@@ -8,7 +8,7 @@ import tweepy
 from services import InternetArchive, ISBNFinder
 from dotenv import load_dotenv
 
-ACTIONS = ['read', 'borrow', 'preview']
+ACTIONS = ('read', 'borrow', 'preview')
 READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
 BOT_NAME = "@borrowbot"
 STATE_FILE = 'last_seen_id.txt'
