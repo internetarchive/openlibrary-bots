@@ -55,4 +55,4 @@ All source code published here is available under the terms of the GNU Affero Ge
 
 ## Inactive Bots
 - [Cathar Bot](https://github.com/hornc/catharbot) - (Maintained by [Charles](https://github.com/hornc))
-- [ONIX Bot](old-onix-bot/README.md) - Deprecated (Author - Aaron Schwartz)
+- [ONIX Bot](old-onix-bot/README.md) - Deprecated (Author - Aaron Swartz)
