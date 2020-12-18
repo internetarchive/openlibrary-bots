@@ -49,13 +49,13 @@ class Objectify(dict):
 
     def __setattr__(self, name, value):
         self[name] = value
-        
+
     def __delattr__(self, name):
         if name in self:
             del self[name]
         else:
             raise AttributeError("No such attribute: " + name)
-    
+
 class InternetArchive:
 
     IA_URL = "https://archive.org"
@@ -67,13 +67,13 @@ class InternetArchive:
         class Edition(Objectify):
             def __init__(self, kwargs):
                 super().__init__(kwargs)
-        #try:
-        ed = Edition(requests.get("https://dev.openlibrary.org/isbn/%s.json" % isbn).json())
-        ed.availability = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
-        ed.isbn = ed and isbn
-        return ed
-        #except Exception as e:
-        #    print("Failed to fetch openlibrary edition for: %s" % isbn)
+        try:
+            ed = Edition(requests.get("https://dev.openlibrary.org/isbn/%s.json" % isbn).json())
+            ed.availability = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
+            ed.isbn = ed and isbn
+            return ed
+        except Exception as e:
+            print("Failed to fetch openlibrary edition for: %s" % isbn)
 
     @classmethod
     def get_availability(cls, identifier):

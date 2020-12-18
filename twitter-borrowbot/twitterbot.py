@@ -45,7 +45,7 @@ def get_parent_tweet_of(mention):
 
 
 def get_latest_mentions(since=None):
-    since = since or get_last_seen_id(FILE_NAME)
+    since = since or get_last_seen_id(STATE_FILE)
     try:
         return api.mentions_timeline(since, tweet_mode="extended")
     except Exception as e:
@@ -126,7 +126,7 @@ def reply_to_tweets():
                 if edition and edition.availability:
                     return Tweet.edition_available(mention, edition)
 
-                work = InternetArchive.find_available_work(book)
+                work = InternetArchive.find_available_work(edition)
                 if work:
                     return Tweet.work_available(mention, work)
 
