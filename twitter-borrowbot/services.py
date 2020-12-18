@@ -34,10 +34,8 @@ class ISBNFinder:
                     isbns.extend(_isbns)
             else:
                 isbns.extend(isbnlib.get_isbnlike(token, level="normal"))
-        return list(filter(
-            lambda isbn: isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn),
-            [isbnlib.canonical(isbn) for isbn in isbns]
-        ))
+        return [isbnlib.canonical(isbn) for isbn in isbns
+                if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)]
 
 
 class InternetArchive:
