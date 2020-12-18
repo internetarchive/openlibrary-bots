@@ -35,45 +35,29 @@ class ISBNFinder:
                     isbns.extend(_isbns)
             else:
                 isbns.extend(isbnlib.get_isbnlike(token, level="normal"))
-        return filter(
+        return list(filter(
             lambda isbn: isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn),
             [isbnlib.canonical(isbn) for isbn in isbns]
-        )
+        ))
 
-class Objectify(dict):
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def __delattr__(self, name):
-        if name in self:
-            del self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
 
 class InternetArchive:
 
     IA_URL = "https://archive.org"
-    OL_URL = "http://openlibrary.org"
+    OL_URL = "https://openlibrary.org"
+    OL_DEV = "https://dev.openlibrary.org"
     MODES = ["is_readable", "is_lendable", "is_printdisabled"]
 
     @classmethod
     def get_edition(cls, isbn):
-        class Edition(Objectify):
-            def __init__(self, kwargs):
-                super().__init__(kwargs)
         try:
-            ed = Edition(requests.get("https://dev.openlibrary.org/isbn/%s.json" % isbn).json())
-            ed.availability = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
-            ed.isbn = ed and isbn
+            ed = requests.get("%s/isbn/%s.json" % (cls.OL_DEV, isbn)).json()
+            ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
+            ed["isbn"] = ed and isbn
             return ed
         except Exception as e:
             print("Failed to fetch openlibrary edition for: %s" % isbn)
+        return {}
 
     @classmethod
     def get_availability(cls, identifier):
