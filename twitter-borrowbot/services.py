@@ -20,8 +20,7 @@ class ISBNFinder:
     @staticmethod
     def goodreads(url):
         if re.findall("/book/show/([0-9]+)", url):
-            r = requests.get(url)
-            return [str(isbn) for isbn in re.findall(b"ISBN13.*>([0-9X-]+)", r.content)]
+            return re.findall("ISBN13.*>([0-9X-]+)", requests.get(url).text)
         return []
 
     @classmethod
