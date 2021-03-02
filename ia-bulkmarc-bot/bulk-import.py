@@ -68,12 +68,14 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--offset', help='Offset in BYTES from which to start importing', type=int, default=0)
     parser.add_argument('-l', '--local', help='Import to a locally running Open Library dev instance for testing (localhost:8080)', action='store_true')
     parser.add_argument('-d', '--dev', help='Import to dev.openlibrary.org Open Library dev instance for testing', action='store_true')
+    parser.add_argument('-s', '--staging', help='Import to staging.openlibrary.org Open Library staging instance for testing', action='store_true')
 
     args = parser.parse_args()
     item = args.item
     fname = args.file
     local_testing = args.local
     dev_testing = args.dev
+    staging_testing = args.staging
     barcode = args.barcode
 
     if local_testing:
@@ -81,6 +83,8 @@ if __name__ == '__main__':
         local_dev = 'http://localhost:8080'
         c = Credentials('openlibrary@example.com', 'admin123')
         ol = OpenLibrary(base_url=local_dev, credentials=c)
+    elif staging_testing:
+        ol = OpenLibrary(base_url='http://staging.openlibrary.org')
     elif dev_testing:
         ol = OpenLibrary(base_url='https://dev.openlibrary.org')
     else:
