@@ -14,6 +14,7 @@ import internetarchive as ia
 import json
 import os
 import re
+import sys
 from collections import namedtuple
 from olclient.openlibrary import OpenLibrary
 from requests.adapters import HTTPAdapter
@@ -69,6 +70,10 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--local', help='Import to a locally running Open Library dev instance for testing (localhost:8080)', action='store_true')
     parser.add_argument('-d', '--dev', help='Import to dev.openlibrary.org Open Library dev instance for testing', action='store_true')
     parser.add_argument('-s', '--staging', help='Import to staging.openlibrary.org Open Library staging instance for testing', action='store_true')
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     args = parser.parse_args()
     item = args.item
