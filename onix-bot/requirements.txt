@@ -1,5 +1,4 @@
 requests==2.25.1
-# openlibrary_client==0.0.30  # Currently causes a pip resolution conflicts
-git+https://github.com/internetarchive/openlibrary-client.git
+openlibrary-client==0.30
 onixcheck==0.9.6
 lxml==4.6.2
