@@ -12,7 +12,7 @@ jobs:
       - run: pip install --upgrade pip
       - run: pip install black codespell flake8 isort pytest
       - run: black --check . || true
-      - run: codespell --ignore-words-list="didnt" --skip="*.xsd" --quiet-level=2
+      - run: codespell --ignore-words-list="didnt" --skip="*.tsv,*.xsd" --quiet-level=2
       - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - run: isort --profile black . || true
       - run: pip install -r requirements.txt -r twitter-borrowbot/requirements.txt
