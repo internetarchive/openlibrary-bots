@@ -57,7 +57,10 @@ class NormalizeISBNJob(object):
         elif isbnlib.notisbn(isbn):
             return False
         else:
-            normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
+            try:
+                normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
+            except IndexError:  # get_canonical_isbn raises this sometimes for invalid ISBNs
+                return False
             return normalized_isbn and normalized_isbn != isbn
 
     def run(self, dump_filepath: str) -> None:
