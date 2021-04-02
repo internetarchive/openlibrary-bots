@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 import sys
 import json
@@ -73,7 +72,7 @@ class Biblio:
 
 
              'lc_classifications': [self.lc_class],
-             'number_of_pages': self.pages,
+             'pagination': self.pages,
              'languages': [self.language],
              'subjects': self.subjects,
              'source_records': ['bwb:%s' % self.isbn],
