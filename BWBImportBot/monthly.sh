@@ -1,8 +1,8 @@
 #!/bin/bash
 
-ITEM='book-private'
-ROOT_DIR=/bwb-monthly
-SCRIPT_DIR=${ROOT_DIR}/openlibrary-bots/BWBImportBot
+THIS_SCRIPT=$( readlink -m $( type -p ${0} ))  # Full path to script
+THIS_DIR=`dirname "${THIS_SCRIPT}"` # Directory script is run in
+source "${THIS_DIR}/.env"
 
 # Set vars for tmp directories and files
 printf -v TODAY_DATE_M '%(%Y-%m)T' -1  # today's YYYY-MM
@@ -26,7 +26,7 @@ then
   lftp <<EOF
   # Comments can be added like this.
   set ssl:verify-certificate no
-  open oplibrary@bwbftps.betterworldbooks.com
+  open $LFTP_SOURCE
   ls
   local echo "== MetaData =="
   ls MetaData
