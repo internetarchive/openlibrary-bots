@@ -48,7 +48,7 @@ class InternetArchive:
     @classmethod
     def get_edition(cls, isbn):
         try:
-            ed = requests.get("%s/isbn/%s.json" % (cls.OL_DEV, isbn)).json()
+            ed = requests.get("%s/isbn/%s.json" % (cls.OL_URL, isbn)).json()
             ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             ed["isbn"] = ed and isbn
             return ed

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 ACTIONS = ('read', 'borrow', 'preview')
 READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
-BOT_NAME = "@borrowbot"
+BOT_NAME = "@applesauce_bob"
 STATE_FILE = 'last_seen_id.txt'
 
 
@@ -110,16 +110,17 @@ class Tweet:
 
 def reply_to_tweets():
     mentions = get_latest_mentions()
+    print(mentions)
     for mention in reversed(mentions):
         print(str(mention.id) + ': ' + mention.full_text)
         set_last_seen_id(mention)
 
         if BOT_NAME in mention.full_text:
             isbns = ISBNFinder.find_isbns(mention.full_text)
-            if not isbns:
-                # fetch tweet's parent (TODO: or siblings) & check for isbns
-                mention = get_parent_tweet_of(mention)
-                isbns = ISBNFinder.find_isbns(mention.full_text)
+            # if not isbns:
+            #     # fetch tweet's parent (TODO: or siblings) & check for isbns
+            #     mention = get_parent_tweet_of(mention)
+            #     isbns = ISBNFinder.find_isbns(mention.full_text)
 
             for isbn in isbns:
                 edition = InternetArchive.get_edition(isbn)
@@ -136,5 +137,7 @@ def reply_to_tweets():
 
 if __name__ == "__main__":
     while True:
+        print("Replying...")
         reply_to_tweets()
+        print("Waiting...")
         time.sleep(15)
