@@ -52,6 +52,10 @@ def get_latest_mentions(since=None):
         print("Exception: %s" % e)
         return None
 
+def is_reply_to_me(mention):
+    if mention.in_reply_to_screen_name and mention.in_reply_to_screen_name == BOT_NAME[1:]:
+        return True
+    return False 
 
 class Tweet:
 
@@ -107,6 +111,17 @@ class Tweet:
             "https://github.com/internetarchive/openlibrary-bots"
         )
 
+def handle_isbn(mention, isbn):
+    edition = InternetArchive.get_edition(isbn)
+    if edition:
+        if edition.get("availability"):
+            return Tweet.edition_available(mention, edition)
+
+        work = InternetArchive.find_available_work(edition)
+        if work:
+            return Tweet.work_available(mention, work)
+        return Tweet.edition_unavailable(mention, edition)
+
 
 def reply_to_tweets():
     mentions = get_latest_mentions()
@@ -121,18 +136,13 @@ def reply_to_tweets():
             #     # fetch tweet's parent (TODO: or siblings) & check for isbns
             #     mention = get_parent_tweet_of(mention)
             #     isbns = ISBNFinder.find_isbns(mention.full_text)
-
-            for isbn in isbns:
-                edition = InternetArchive.get_edition(isbn)
-                if edition:
-                    if edition.get("availability"):
-                        return Tweet.edition_available(mention, edition)
-
-                    work = InternetArchive.find_available_work(edition)
-                    if work:
-                        return Tweet.work_available(mention, work)
-                    return Tweet.edition_unavailable(mention, edition)
-        return Tweet.edition_not_found(mention)
+            if isbns:
+                for isbn in isbns:
+                    handle_isbn(mention, isbn)
+            else:
+                if is_reply_to_me(mention):
+                    continue 
+                Tweet.edition_not_found(mention)
 
 
 if __name__ == "__main__":
