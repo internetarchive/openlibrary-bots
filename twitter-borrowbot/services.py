@@ -98,3 +98,27 @@ class InternetArchive:
         except Exception:
             print("Error fetching IA work")
         return {}
+
+
+class Logger:
+
+    DELIMITER = "(:)>>--++--++--++--++--++--<<(:)"
+
+    @classmethod
+    def __init__(cls, tweet_filename, error_filename):
+        cls.tweet_filename = tweet_filename
+        cls.error_filename = error_filename
+
+    @classmethod
+    def log_tweet(cls, message):
+        f = open(cls.tweet_filename, "a")
+        f.write(message + "\n")
+        f.write(cls.DELIMITER + "\n")
+        f.close()
+        
+    @classmethod
+    def log_error(cls, message):
+        f = open(cls.error_filename, "a")
+        f.write(message + "\n")
+        f.write(cls.DELIMITER + "\n")
+        f.close()
