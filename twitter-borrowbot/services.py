@@ -1,6 +1,7 @@
 import isbnlib
 import re
 import requests
+import datetime
 
 
 class ISBNFinder:
@@ -112,6 +113,7 @@ class Logger:
     @classmethod
     def log_tweet(cls, message):
         f = open(cls.tweet_filename, "a")
+        f.write(str(datetime.datetime.now()) + " | ")
         f.write(message + "\n")
         f.write(cls.DELIMITER + "\n")
         f.close()
@@ -119,6 +121,7 @@ class Logger:
     @classmethod
     def log_error(cls, message):
         f = open(cls.error_filename, "a")
+        f.write(str(datetime.datetime.now()) + " | ")
         f.write(message + "\n")
         f.write(cls.DELIMITER + "\n")
         f.close()
