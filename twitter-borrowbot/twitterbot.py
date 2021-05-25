@@ -2,9 +2,9 @@
 import os
 import time
 import tweepy
+from dotenv import load_dotenv
 
 from services import InternetArchive, ISBNFinder, Logger
-from dotenv import load_dotenv
 
 ACTIONS = ('read', 'borrow', 'preview')
 READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
@@ -15,6 +15,7 @@ LOGGER = Logger("./logs/tweet_logs.txt", "./logs/error_logs.txt")
 
 load_dotenv()
 
+# Authenticate
 auth = tweepy.OAuthHandler(
     os.environ.get('CONSUMER_KEY'),
     os.environ.get('CONSUMER_SECRET')
@@ -25,36 +26,7 @@ auth.set_access_token(
 )
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
-
-def get_last_seen_id():
-    with open(STATE_FILE, 'r') as fin:
-        return int(fin.read().strip())
-
-
-def set_last_seen_id(mention):
-    with open(STATE_FILE, 'w') as fout:
-        fout.write(str(mention.id))
-
-def get_parent_tweet_of(mention):
-    return api.get_status(
-        mention.in_reply_to_status_id,
-        tweet_mode="extended")
-
-
-def get_latest_mentions(since=None):
-    since = since or get_last_seen_id()
-    try:
-        return api.mentions_timeline(since, tweet_mode="extended")
-    except Exception as e:
-        print("Exception: %s" % e)
-        return None
-
-def is_reply_to_me(mention):
-    return mention.in_reply_to_status_id is api.me().id
-
-
 class Tweet:
-
     @staticmethod
     def _tweet(mention, message, debug=False):
         msg = "Hi 👋 @%s %s" % (mention.user.screen_name, message)
@@ -120,6 +92,32 @@ class Tweet:
             "\nIn short, I need an ISBN10, ISBN13, or Amazon Link"
         )
 
+def get_last_seen_id():
+    with open(STATE_FILE, 'r') as fin:
+        return int(fin.read().strip())
+
+
+def set_last_seen_id(mention):
+    with open(STATE_FILE, 'w') as fout:
+        fout.write(str(mention.id))
+
+def get_parent_tweet_of(mention):
+    return api.get_status(
+        mention.in_reply_to_status_id,
+        tweet_mode="extended")
+
+
+def get_latest_mentions(since=None):
+    since = since or get_last_seen_id()
+    try:
+        return api.mentions_timeline(since, tweet_mode="extended")
+    except Exception as e:
+        print("Exception: %s" % e)
+        return None
+
+def is_reply_to_me(mention):
+    return mention.in_reply_to_status_id is api.me().id
+
 def handle_isbn(mention, isbn):
     edition = InternetArchive.get_edition(isbn)
     if edition:
@@ -130,7 +128,6 @@ def handle_isbn(mention, isbn):
         if work:
             return Tweet.work_available(mention, work)
         return Tweet.edition_unavailable(mention, edition)
-
 
 def reply_to_tweets():
     try:
@@ -173,7 +170,6 @@ def reply_to_tweets():
 
 
 if __name__ == "__main__":
-    # print(json.dumps(api.me()._json, indent=2))
     while True:
         try:
             reply_to_tweets()
