@@ -4,8 +4,9 @@ import re
 import time
 import requests
 import tweepy
+import json
 
-from services import InternetArchive, ISBNFinder
+from services import InternetArchive, ISBNFinder, Logger
 from dotenv import load_dotenv
 
 ACTIONS = ('read', 'borrow', 'preview')
@@ -13,6 +14,7 @@ READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
 BOT_NAME = "@applesauce_bob"
 STATE_FILE = 'last_seen_id.txt'
 
+LOGGER = Logger("./logs/tweet_logs.txt", "./logs/error_logs.txt")
 
 load_dotenv()
 
@@ -37,11 +39,9 @@ def set_last_seen_id(mention):
         fout.write(str(mention.id))
 
 def get_parent_tweet_of(mention):
-    if mention.in_reply_to_status_id:
-        return api.get_status(
-            mention.in_reply_to_status_id,
-            tweet_mode="extended")
-    return []
+    return api.get_status(
+        mention.in_reply_to_status_id,
+        tweet_mode="extended")
 
 
 def get_latest_mentions(since=None):
@@ -53,22 +53,23 @@ def get_latest_mentions(since=None):
         return None
 
 def is_reply_to_me(mention):
-    if mention.in_reply_to_screen_name and mention.in_reply_to_screen_name == BOT_NAME[1:]:
-        return True
-    return False 
+    return mention.in_reply_to_status_id is api.me().id
+
 
 class Tweet:
 
     @staticmethod
     def _tweet(mention, message, debug=False):
         msg = "Hi 👋 @%s %s" % (mention.user.screen_name, message)
-        print(msg)
         if not debug:
             api.update_status(
                 msg,
                 in_reply_to_status_id=mention.id,
                 auto_populate_reply_metadata=True
             )
+        else:
+            print(msg)
+        LOGGER.log_tweet(msg)
 
     @classmethod
     def edition_available(cls, mention, edition):
@@ -103,12 +104,23 @@ class Tweet:
 
     @classmethod
     def edition_not_found(cls, mention):
-        print('Replying: Book Not found')
+        # print('Replying: Book Not found')
         cls._tweet(
             mention,
             "sorry, I was unable to spot any books! " +
             "Learn more about how I work here: " +
-            "https://github.com/internetarchive/openlibrary-bots"
+            "https://github.com/internetarchive/openlibrary-bots" +
+            "\nIn short, I need an ISBN10, ISBN13, or Amazon link"
+        )
+
+    @classmethod
+    def internal_error(cls, mention):
+        cls._tweet(
+            mention,
+            "Woops, something broke over here! " +
+            "Learn more about how I work here: " +
+            "https://github.com/internetarchive/openlibrary-bots" +
+            "\nIn short, I need an ISBN10, ISBN13, or Amazon Link"
         )
 
 def handle_isbn(mention, isbn):
@@ -124,30 +136,50 @@ def handle_isbn(mention, isbn):
 
 
 def reply_to_tweets():
-    mentions = get_latest_mentions()
-    print(mentions)
+    try:
+        mentions = get_latest_mentions()
+    except Exception as err:
+        LOGGER.log_error("Failed to get mentions: %s" % err)
+        return
+    
     for mention in reversed(mentions):
         print(str(mention.id) + ': ' + mention.full_text)
-        set_last_seen_id(mention)
+        # print(json.dumps(mention._json, indent=2))
 
-        if BOT_NAME in mention.full_text:
-            isbns = ISBNFinder.find_isbns(mention.full_text)
-            # if not isbns:
-            #     # fetch tweet's parent (TODO: or siblings) & check for isbns
-            #     mention = get_parent_tweet_of(mention)
-            #     isbns = ISBNFinder.find_isbns(mention.full_text)
-            if isbns:
-                for isbn in isbns:
-                    handle_isbn(mention, isbn)
-            else:
-                if is_reply_to_me(mention):
-                    continue 
+        try:
+            set_last_seen_id(mention)
+        except Exception as err:
+            LOGGER.log_error("Failed to set last seen id: %s" % err)
+            continue 
+        
+        if BOT_NAME in mention.full_text: # I think I can remove this line. get_latest_mentions should handle
+            try:
+                isbns = ISBNFinder.find_isbns(mention.full_text)
+                if not isbns and mention.in_reply_to_status_id: # no isbn found in tweet. Check the parent tweet
+                    parent_mention = get_parent_tweet_of(mention)
+                    isbns = ISBNFinder.find_isbns(parent_mention.full_text)
+                    if not isbns and parent_mention.user.id == api.me().id: # reply to me
+                        print("is reply to me")
+                        continue
+                if isbns:
+                    for isbn in isbns:
+                        handle_isbn(mention, isbn)
+                    continue
                 Tweet.edition_not_found(mention)
+            except Exception as err:
+                LOGGER.log_error("Failed to handle mention: %s" % err)
+                try:
+                    Tweet.internal_error(mention)
+                except:
+                    LOGGER.log_error("Failed to send internal error tweet: %s" % err)
+                continue
 
 
 if __name__ == "__main__":
+    # print(json.dumps(api.me()._json, indent=2))
     while True:
-        print("Replying...")
-        reply_to_tweets()
-        print("Waiting...")
-        time.sleep(15)
+        try:
+            reply_to_tweets()
+            time.sleep(15)
+        except Exception as err:
+            LOGGER.log_error("Failed in main: %s" % err)
