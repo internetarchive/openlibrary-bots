@@ -1,10 +1,7 @@
 #-*- encoding: utf-8 -*-
 import os
-import re
 import time
-import requests
 import tweepy
-import json
 
 from services import InternetArchive, ISBNFinder, Logger
 from dotenv import load_dotenv
