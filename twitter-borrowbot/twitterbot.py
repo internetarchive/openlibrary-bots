@@ -8,7 +8,7 @@ from services import InternetArchive, ISBNFinder, Logger
 
 ACTIONS = ('read', 'borrow', 'preview')
 READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
-BOT_NAME = "@applesauce_bob"
+BOT_NAME = "@borrowbot"
 STATE_FILE = 'last_seen_id.txt'
 
 LOGGER = Logger("./logs/tweet_logs.txt", "./logs/error_logs.txt")
