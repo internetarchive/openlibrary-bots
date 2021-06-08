@@ -8,7 +8,8 @@ class TrimTitleJob(AbstractBotJob):
     @staticmethod
     def needs_trim(
         work_title: str,
-    ) -> bool:  # it's good practice to make a check method for the pattern you're looking for
+    ) -> bool:  
+        # it's good practice to make a check method for the pattern you're looking for
         """Returns True if Edition title needs to have whitespace removed. Return false otherwise"""
         return work_title.strip() != work_title
 
@@ -22,7 +23,7 @@ class TrimTitleJob(AbstractBotJob):
                 # extract info from the dump file and check it
                 row, json_data = self.process_row(row)
                 if json_data["type"]["key"] != "/type/work":
-                    continue  # this can be done faster with a grep filter, but for this example we'll do it here
+                    continue  # this handles full dump (instead for work dump)
                 if not self.needs_trim(json_data["title"]):
                     continue
 
@@ -43,7 +44,7 @@ class TrimTitleJob(AbstractBotJob):
                 self.save(lambda: work.save(comment=comment))
 
 
-if "__name__" == "__main__":
+if __name__ == "__main__":
     job = TrimTitleJob()
 
     try:
