@@ -1,4 +1,3 @@
-
 import copy
 import gzip
 
@@ -17,20 +16,20 @@ class TrimTitleJob(AbstractBotJob):
         """Strip leading and trailing whitespace from edition titles"""
         self.dry_run_declaration()
 
-        comment = 'trim whitespace'
-        with gzip.open(self.args.file, 'rb') as fin:
+        comment = "trim whitespace"
+        with gzip.open(self.args.file, "rb") as fin:
             for row in fin:
                 # extract info from the dump file and check it
                 row, json_data = self.process_row(row)
-                if json_data['type']['key'] != '/type/work':
+                if json_data["type"]["key"] != "/type/work":
                     continue  # this can be done faster with a grep filter, but for this example we'll do it here
-                if not self.needs_trim(json_data['title']):
+                if not self.needs_trim(json_data["title"]):
                     continue
 
                 # the database may have changed since the dump was created, so call the OpenLibrary API and check again
-                olid = json_data['key'].split('/')[-1]
+                olid = json_data["key"].split("/")[-1]
                 work = self.ol.Work.get(olid)
-                if work.type['key'] != '/type/work':
+                if work.type["key"] != "/type/work":
                     continue  # skip deleted editions
                 if not self.needs_trim(work.title):
                     continue
@@ -39,12 +38,12 @@ class TrimTitleJob(AbstractBotJob):
                 old_title = copy.deepcopy(work.title)
                 work.title = work.title.strip()
                 self.logger.info(
-                    '|'.join([olid, old_title, work.title])
+                    "|".join([olid, old_title, work.title])
                 )  # don't forget to log modifications!
                 self.save(lambda: work.save(comment=comment))
 
 
-if '__name__' == '__name__':
+if "__name__" == "__main__":
     job = TrimTitleJob()
 
     try:
