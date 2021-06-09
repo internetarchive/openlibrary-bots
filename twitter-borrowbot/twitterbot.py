@@ -73,7 +73,6 @@ class Tweet:
 
     @classmethod
     def edition_not_found(cls, mention):
-        # print('Replying: Book Not found')
         cls._tweet(
             mention,
             "sorry, I was unable to spot any books! " +
