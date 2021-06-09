@@ -1,6 +1,7 @@
 import isbnlib
 import re
 import requests
+import datetime
 
 
 class ISBNFinder:
@@ -48,7 +49,7 @@ class InternetArchive:
     @classmethod
     def get_edition(cls, isbn):
         try:
-            ed = requests.get("%s/isbn/%s.json" % (cls.OL_DEV, isbn)).json()
+            ed = requests.get("%s/isbn/%s.json" % (cls.OL_URL, isbn)).json()
             ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             ed["isbn"] = ed and isbn
             return ed
@@ -98,3 +99,27 @@ class InternetArchive:
         except Exception:
             print("Error fetching IA work")
         return {}
+
+
+class Logger:
+
+    DELIMITER = "(:)>>--++--++--++--++--++--<<(:)"
+
+    @classmethod
+    def __init__(cls, tweet_filename, error_filename):
+        cls.tweet_filename = tweet_filename
+        cls.error_filename = error_filename
+
+    @classmethod
+    def log_tweet(cls, message):
+        with open(cls.tweet_filename, "a") as f:
+            f.write(str(datetime.datetime.now()) + " | ")
+            f.write(message + "\n")
+            f.write(cls.DELIMITER + "\n")
+        
+    @classmethod
+    def log_error(cls, message):
+        with open(cls.error_filename, "a") as f:
+            f.write(str(datetime.datetime.now()) + " | ")
+            f.write(message + "\n")
+            f.write(cls.DELIMITER + "\n")
