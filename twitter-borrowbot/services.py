@@ -112,11 +112,10 @@ class Logger:
 
     @classmethod
     def log_tweet(cls, message):
-        f = open(cls.tweet_filename, "a")
-        f.write(str(datetime.datetime.now()) + " | ")
-        f.write(message + "\n")
-        f.write(cls.DELIMITER + "\n")
-        f.close()
+        with open(cls.tweet_filename, "a") as f:
+            f.write(str(datetime.datetime.now()) + " | ")
+            f.write(message + "\n")
+            f.write(cls.DELIMITER + "\n")
         
     @classmethod
     def log_error(cls, message):
