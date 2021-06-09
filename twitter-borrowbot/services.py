@@ -120,8 +120,7 @@ class Logger:
         
     @classmethod
     def log_error(cls, message):
-        f = open(cls.error_filename, "a")
-        f.write(str(datetime.datetime.now()) + " | ")
-        f.write(message + "\n")
-        f.write(cls.DELIMITER + "\n")
-        f.close()
+        with open(cls.error_filename, "a") as f:
+            f.write(str(datetime.datetime.now()) + " | ")
+            f.write(message + "\n")
+            f.write(cls.DELIMITER + "\n")
