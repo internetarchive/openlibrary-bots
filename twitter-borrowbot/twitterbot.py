@@ -78,7 +78,8 @@ class Tweet:
             "sorry, I was unable to spot any books! " +
             "Learn more about how I work here: " +
             "https://github.com/internetarchive/openlibrary-bots" +
-            "\nIn short, I need an ISBN, Amazon link, or Goodreads link"
+            "\nIn short, I need an ISBN, Amazon link, or Goodreads link." +
+            "\nOr, try visiting https://openlibrary.org/ directly."
         )
 
     @classmethod
@@ -88,7 +89,8 @@ class Tweet:
             "Woops, something broke over here! " +
             "Learn more about how I work here: " +
             "https://github.com/internetarchive/openlibrary-bots" +
-            "\nIn short, I need an ISBN, Amazon link or Goodreads link"
+            "\nIn short, I need an ISBN, Amazon link or Goodreads link" +
+            "\nOr, try visiting https://openlibrary.org/ directly."
         )
 
 def get_last_seen_id():
