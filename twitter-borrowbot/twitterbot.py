@@ -151,7 +151,8 @@ def reply_to_tweets():
                 if not isbns and mention.in_reply_to_status_id:
                     parent_mention = get_parent_tweet_of(mention)
                     isbns = ISBNFinder.find_isbns(parent_mention.full_text)
-                    if not isbns and parent_mention.user.id == api.me().id: # reply to me
+                    # Reply to me
+                    if not isbns and parent_mention.user.id == api.me().id:
                         print("is reply to me")
                         continue
                 if isbns:
