@@ -137,7 +137,6 @@ def reply_to_tweets():
     
     for mention in reversed(mentions):
         print(str(mention.id) + ': ' + mention.full_text)
-        # print(json.dumps(mention._json, indent=2))
 
         try:
             set_last_seen_id(mention)
