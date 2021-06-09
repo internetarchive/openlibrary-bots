@@ -77,9 +77,7 @@ class Tweet:
             mention,
             "sorry, I was unable to spot any books! " +
             "Learn more about how I work here: " +
-            "https://github.com/internetarchive/openlibrary-bots" +
-            "\nIn short, I need an ISBN, Amazon link, or Goodreads link." +
-            "\nOr, try visiting https://openlibrary.org/ directly."
+            "https://github.com/internetarchive/openlibrary-bots"
         )
 
     @classmethod
