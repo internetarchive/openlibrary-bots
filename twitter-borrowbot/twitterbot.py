@@ -144,7 +144,8 @@ def reply_to_tweets():
             LOGGER.log_error("Failed to set last seen id: %s" % err)
             continue 
         
-        if BOT_NAME in mention.full_text: # I think I can remove this line. get_latest_mentions should handle
+        # I think I can remove this line. get_latest_mentions should handle
+        if BOT_NAME in mention.full_text:
             try:
                 isbns = ISBNFinder.find_isbns(mention.full_text)
                 # no isbn found in tweet. Check the parent tweet
