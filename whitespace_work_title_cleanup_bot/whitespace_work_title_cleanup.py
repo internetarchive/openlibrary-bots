@@ -29,7 +29,8 @@ class TrimTitleJob(AbstractBotJob):
                 if not self.needs_trim(json_data["title"]):
                     continue
 
-                # the database may have changed since the dump was created, so call the OpenLibrary API and check again
+                # the database may have changed since the dump was created, so call the
+                # OpenLibrary API and check again
                 olid = json_data["key"].split("/")[-1]
                 work = self.ol.Work.get(olid)
                 if work.type["key"] != "/type/work":
