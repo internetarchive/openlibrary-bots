@@ -52,6 +52,6 @@ if __name__ == "__main__":
 
     try:
         job.run()
-    except Exception as e:
-        job.logger.exception("")
-        raise e
+    except Exception:
+        job.logger.exception("whitespace_work_title_cleanup failed")
+        raise
