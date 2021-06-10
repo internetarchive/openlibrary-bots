@@ -7,7 +7,9 @@
 
 On Twitter, if you include `@borrowbot` in a tweet which contains an ISBN or an amazon link, it will lookup the availability on Open Library and reply to your/this tweet with the book's status (e.g. is available to borrow, etc).
 
-You can also reply to a tweet containing an ISBN or an Amazon Link by mentioning `@borrowbot` and it will look up the availability for you + reply with a tweet.
+You can also reply to a tweet containing an ISBN, an Amazon Link, or a Goodreads Link by mentioning `@borrowbot` and it will look up the availability for you + reply with a tweet.
+
+`@borrowbot` is a new feature and may still contain issues. https://openlibrary.org/ should always be your backup. If `@borrowbot` replies that an edition was not found, or if `@borrowbot` informs you that something broke, you should always try searching for the title directly on https://openlibrary.org/. 
 
 # Example
 
