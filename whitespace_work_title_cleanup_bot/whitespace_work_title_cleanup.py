@@ -41,9 +41,7 @@ class TrimTitleJob(AbstractBotJob):
                 # this edition needs editing, so fix it
                 old_title = copy.deepcopy(work.title)
                 work.title = work.title.strip()
-                self.logger.info(
-                    "|".join([olid, old_title, work.title])
-                )  # don't forget to log modifications!
+                self.logger.info("|".join((olid, old_title, work.title)))  # log the modifications
                 self.save(lambda: work.save(comment=comment))
 
 
