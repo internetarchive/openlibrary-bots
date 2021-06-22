@@ -1,4 +1,7 @@
+![example workflow](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml/badge.svg)
+
 # openlibrary-bots
+
 [Open Library](https://openlibrary.org) is an open, editable library catalog, building towards a web page for every book ever published. This repository contains cleanup bots implementing the `openlibrary-client` which allow developers to add/edit/remove different works/editions on Open Library.
 
 ## Table of Contents
