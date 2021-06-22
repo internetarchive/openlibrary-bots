@@ -1,4 +1,4 @@
-![example workflow](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml/badge.svg)
+[![example workflow](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml/badge.svg)](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml)
 
 # openlibrary-bots
 
