@@ -2,7 +2,7 @@ import isbnlib
 import re
 import requests
 import datetime
-
+from twitterbotErrors import *
 
 class ISBNFinder:
 
@@ -16,27 +16,34 @@ class ISBNFinder:
                 re.findall("/product/([0-9X]{10})/?", url)
             )
         except Exception as e:
-            print(e)
+            raise AmazonError(url, e)
 
     @staticmethod
     def goodreads(url):
-        if re.findall("/book/show/([0-9]+)", url):
-            return re.findall("ISBN13.*>([0-9X-]+)", requests.get(url).text)
-        return []
+        try:
+            if re.findall("/book/show/([0-9]+)", url):
+                return re.findall("ISBN13.*>([0-9X-]+)", requests.get(url).text)
+            return []
+        except Exception as e:
+            raise GoodreadsError(url, e)
 
+    
     @classmethod
     def find_isbns(cls, text):
-        isbns = []
-        for token in text.split():
-            if token.startswith("http"):
-                url = requests.head(token).headers.get("Location") or token
-                for service_name in cls.SERVICES:
-                    _isbns = getattr(cls, service_name)(url)
-                    isbns.extend(_isbns)
-            else:
-                isbns.extend(isbnlib.get_isbnlike(token, level="normal"))
-        return [isbnlib.canonical(isbn) for isbn in isbns
-                if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)]
+        try:
+            isbns = []
+            for token in text.split():
+                if token.startswith("http"):
+                    url = requests.head(token).headers.get("Location") or token
+                    for service_name in cls.SERVICES:
+                        _isbns = getattr(cls, service_name)(url)
+                        isbns.extend(_isbns)
+                else:
+                    isbns.extend(isbnlib.get_isbnlike(token, level="normal"))
+            return [isbnlib.canonical(isbn) for isbn in isbns
+                    if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)]
+        except Exception as e:
+            raise FindISBNError(text, e)
 
 
 class InternetArchive:
@@ -53,9 +60,10 @@ class InternetArchive:
             ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             ed["isbn"] = ed and isbn
             return ed
+        except GetAvailabilityError as e:
+            raise e
         except Exception as e:
-            print("Failed to fetch openlibrary edition for: %s" % isbn)
-        return {}
+            raise GetEditionError(isbn, e)
 
     @classmethod
     def get_availability(cls, identifier):
@@ -67,7 +75,7 @@ class InternetArchive:
                 if status.get(mode):
                     return mode
         except Exception as e:
-            print("Failed to fetch availability for: %s" % identifier)
+            raise GetAvailabilityError(identifier, e)
 
     @classmethod
     def find_available_work(cls, book):
@@ -96,30 +104,5 @@ class InternetArchive:
             if matches and matches["response"]["docs"]:
                 books = matches["response"]["docs"]
                 return next(book for book in books if book.get("openlibrary_work"))
-        except Exception:
-            print("Error fetching IA work")
-        return {}
-
-
-class Logger:
-
-    DELIMITER = "(:)>>--++--++--++--++--++--<<(:)"
-
-    @classmethod
-    def __init__(cls, tweet_filename, error_filename):
-        cls.tweet_filename = tweet_filename
-        cls.error_filename = error_filename
-
-    @classmethod
-    def log_tweet(cls, message):
-        with open(cls.tweet_filename, "a") as f:
-            f.write(str(datetime.datetime.now()) + " | ")
-            f.write(message + "\n")
-            f.write(cls.DELIMITER + "\n")
-        
-    @classmethod
-    def log_error(cls, message):
-        with open(cls.error_filename, "a") as f:
-            f.write(str(datetime.datetime.now()) + " | ")
-            f.write(message + "\n")
-            f.write(cls.DELIMITER + "\n")
+        except Exception as e:
+            raise FindAvailableWorkError(book, e)
