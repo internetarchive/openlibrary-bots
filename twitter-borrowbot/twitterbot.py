@@ -228,4 +228,4 @@ if __name__ == "__main__":
         except Exception as e:
             logging.critical(f"Failed in main loop: {e}")
         finally:
-            time.sleep(5)
+            time.sleep(15)
