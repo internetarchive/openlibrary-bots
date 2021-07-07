@@ -3,7 +3,7 @@ import os
 import time
 import tweepy
 import logging
-import twitterbotErrors as errors
+import twitterbotErrors
 from dotenv import load_dotenv
 from services import InternetArchive, ISBNFinder
 
@@ -20,9 +20,9 @@ MENTION_LIMIT = 100
 class Tweet:
 
     @staticmethod
-    def _tweet(mention, message, debug=False):
+    def _tweet(mention, message, debug=True):
         if not mention.user.screen_name or not mention.id:
-            raise errors.SendTweetError(mention=mention, error="Given mention is missing either a screen name or a status ID")
+            raise twitterbotErrors.SendTweetError(mention=mention, error="Given mention is missing either a screen name or a status ID")
         msg = "Hi 👋 @%s %s" % (mention.user.screen_name, message)
         if not debug:               
             try:
@@ -32,7 +32,7 @@ class Tweet:
                     auto_populate_reply_metadata=True
                 )
             except Exception as e:
-                raise errors.SendTweetError(mention=mention, message=msg, error=e)
+                raise twitterbotErrors.SendTweetError(mention=mention, message=msg, error=e)
         else:
             print(msg.replace("\n", " "))
         logging.info("RESPONSE: " + msg.replace("\n", " "))
@@ -93,10 +93,10 @@ def get_last_seen_id():
         with open(STATE_FILE, 'r') as fin:
             last_seen_id = fin.read().strip()
     except Exception as e:
-        raise errors.FileIOError(file=STATE_FILE, error=e)
+        raise twitterbotErrors.FileIOError(filename=STATE_FILE, error=e)
     else:
         if len(last_seen_id) < 19 or not last_seen_id.isdecimal():
-            raise errors.LastSeenIDError(file=STATE_FILE, id=last_seen_id)
+            raise twitterbotErrors.LastSeenIDError(filename=STATE_FILE, last_seen_id=last_seen_id)
         return int(last_seen_id)
         
 
@@ -105,7 +105,7 @@ def set_last_seen_id(mention):
         with open(STATE_FILE, 'w') as fout:
             fout.write(str(mention.id))
     except Exception as e:
-        raise errors.FileIOError(file=STATE_FILE, write=mention.id, error=e)
+        raise twitterbotErrors.FileIOError(filename=STATE_FILE, data=mention.id, error=e)
 
 
 def get_parent_tweet_of(mention):
@@ -114,7 +114,7 @@ def get_parent_tweet_of(mention):
             mention.in_reply_to_status_id,
             tweet_mode="extended")
     except Exception as e:
-        raise errors.GetTweetError(id=mention.in_reply_to_status_id, error=e)
+        raise twitterbotErrors.GetTweetError(tweet_id=mention.in_reply_to_status_id, error=e)
 
 
 def get_latest_mentions(since=None):
@@ -122,13 +122,13 @@ def get_latest_mentions(since=None):
         since = since or get_last_seen_id()
         mentions = API.mentions_timeline(since, tweet_mode="extended")
         if len(mentions) >= MENTION_LIMIT:
-            raise errors.TooManyMentionsError(since=since, length=len(mentions), limit=MENTION_LIMIT)
+            raise twitterbotErrors.TooManyMentionsError(since=since, mention_count=len(mentions), mention_limit=MENTION_LIMIT)
         return mentions
-    except errors.TooManyMentionsError as e:
+    except twitterbotErrors.TooManyMentionsError as e:
         logging.warning(e)
         return mentions[MENTION_LIMIT:] # MIGHT BE mentions[MENTION_LIMIT:] FIFO vs LIFO
     except Exception as e:
-        raise errors.GetMentionsError(since=since, error=e)
+        raise twitterbotErrors.GetMentionsError(since=since, error=e)
 
 
 def is_reply_to_me(mention):
@@ -137,7 +137,7 @@ def is_reply_to_me(mention):
 def handle_isbn(mention, isbn):
     try:
         edition = InternetArchive.get_edition(isbn)
-    except (errors.GetEditionError, errors.GetAvailabilityError) as e:
+    except (twitterbotErrors.GetEditionError, twitterbotErrors.GetAvailabilityError) as e:
         logging.critical(e)
         return Tweet.internal_error(mention)
         
@@ -147,7 +147,7 @@ def handle_isbn(mention, isbn):
 
         try:
             work = InternetArchive.find_available_work(edition)
-        except errors.FindAvailableWorkError as e:
+        except twitterbotErrors.FindAvailableWorkError as e:
             logging.critical(e)
             return Tweet.internal_error(mention)
 
@@ -158,7 +158,7 @@ def handle_isbn(mention, isbn):
 def reply_to_tweets():
     try:
         mentions = get_latest_mentions()
-    except errors.GetMentionsError as e:
+    except twitterbotErrors.GetMentionsError as e:
         logging.critical(e)
         return
 
@@ -168,13 +168,13 @@ def reply_to_tweets():
 
         try:
             set_last_seen_id(mention)
-        except errors.FileIOError as e:
+        except twitterbotErrors.FileIOError as e:
             logging.critical(e)
             return
         
         try:
             isbns = ISBNFinder.find_isbns(mention.full_text)
-        except errors.FindISBNError as e:
+        except twitterbotErrors.FindISBNError as e:
             logging.warning(e)
             continue
         
@@ -183,7 +183,7 @@ def reply_to_tweets():
             try:
                 parent_mention = get_parent_tweet_of(mention)
                 isbns = ISBNFinder.find_isbns(parent_mention.full_text)
-            except (errors.GetTweetError, errors.FindISBNError) as e:
+            except (twitterbotErrors.GetTweetError, twitterbotErrors.FindISBNError) as e:
                 logging.warning(e)
                 Tweet.internal_error(mention)
                 continue
@@ -197,7 +197,7 @@ def reply_to_tweets():
             for isbn in isbns:
                 try:
                     handle_isbn(mention, isbn)
-                except errors.SendTweetError as e:
+                except twitterbotErrors.SendTweetError as e:
                     logging.critical(e)
         else:
             Tweet.edition_not_found(mention)
@@ -206,7 +206,7 @@ def reply_to_tweets():
 if __name__ == "__main__":
     load_dotenv()
     if not os.environ.get('CONSUMER_KEY') or not os.environ.get('CONSUMER_SECRET') or not os.environ.get('ACCESS_TOKEN') or not os.environ.get('ACCESS_TOKEN_SECRET'):
-        raise errors.TweepyAuthenticationError(error="Missing .env file or missing necessary keys for authentication")
+        raise twitterbotErrors.TweepyAuthenticationError(error="Missing .env file or missing necessary keys for authentication")
     
     # Authenticate
     auth = tweepy.OAuthHandler(

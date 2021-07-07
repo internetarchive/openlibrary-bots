@@ -2,7 +2,7 @@ import isbnlib
 import re
 import requests
 import datetime
-from twitterbotErrors import *
+import twitterbotErrors
 
 class ISBNFinder:
 
@@ -16,7 +16,7 @@ class ISBNFinder:
                 re.findall("/product/([0-9X]{10})/?", url)
             )
         except Exception as e:
-            raise AmazonError(url, e)
+            raise twitterbotErrors.AmazonError(url, e)
 
     @staticmethod
     def goodreads(url):
@@ -25,7 +25,7 @@ class ISBNFinder:
                 return re.findall("ISBN13.*>([0-9X-]+)", requests.get(url).text)
             return []
         except Exception as e:
-            raise GoodreadsError(url, e)
+            raise twitterbotErrors.GoodreadsError(url, e)
 
     
     @classmethod
@@ -43,7 +43,7 @@ class ISBNFinder:
             return [isbnlib.canonical(isbn) for isbn in isbns
                     if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)]
         except Exception as e:
-            raise FindISBNError(text, e)
+            raise twitterbotErrors.FindISBNError(text=text, error=e)
 
 
 class InternetArchive:
@@ -60,10 +60,10 @@ class InternetArchive:
             ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             ed["isbn"] = ed and isbn
             return ed
-        except GetAvailabilityError as e:
+        except twitterbotErrors.GetAvailabilityError as e:
             raise e
         except Exception as e:
-            raise GetEditionError(isbn, e)
+            raise twitterbotErrors.GetEditionError(isbn=isbn, error=e)
 
     @classmethod
     def get_availability(cls, identifier):
@@ -75,7 +75,7 @@ class InternetArchive:
                 if status.get(mode):
                     return mode
         except Exception as e:
-            raise GetAvailabilityError(identifier, e)
+            raise twitterbotErrors.GetAvailabilityError(identifier=identifier, error=e)
 
     @classmethod
     def find_available_work(cls, book):
@@ -105,4 +105,4 @@ class InternetArchive:
                 books = matches["response"]["docs"]
                 return next(book for book in books if book.get("openlibrary_work"))
         except Exception as e:
-            raise FindAvailableWorkError(book, e)
+            raise twitterbotErrors.FindAvailableWorkError(book=book, error=e)

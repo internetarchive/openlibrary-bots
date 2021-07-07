@@ -6,27 +6,27 @@ class TweepyAuthenticationError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to Authenticate with Twitter through Tweepy >> {1}".format(type(self).__name__, self.error)
+        return f"{type(self).__name__}: Failed to Authenticate with Twitter through Tweepy >> {self.error}"
 
 class FileIOError(Error):
-    def __init__(self, file=None, write=None, error="Error not provided"):
-        self.file = file
-        self.write = write
+    def __init__(self, filename=None, data=None, error="Error not provided"):
+        self.filename = filename
+        self.data = data
         self.error = error
 
     def __str__(self):
         if self.write:
-            return "{0}: Failed to write '{1}' to file '{2}' >> {3}".format(type(self).__name__, self.write, self.file, self.error) 
-        return "{0}: Failed to read from file '{1}' >> {2}".format(type(self).__name__, self.file, self.error)
+            return f"{type(self).__name__}: Failed to write '{self.data}' to file '{self.filename}' >> {self.error}"
+        return f"{type(self).__name__}: Failed to read from file '{self.filename}' >> {self.error}"
 
     
 class LastSeenIDError(Error):
-    def __init__(self, file=None, id=None):
-        self.file = file
-        self.id = id
+    def __init__(self, filename=None, last_seen_id=None):
+        self.filename = filename
+        self.last_seen_id = last_seen_id
 
     def __str__(self):
-        return "{0}: The folowing ID '{1}' from file '{2}' is either too short or is not numeric".format(type(self).__name__, self.id, self.file)
+        return f"{type(self).__name__}: The folowing ID '{self.last_seen_id}' from file '{self.filename}' is either too short or is not numeric"
 
 
 class GetMentionsError(Error):
@@ -35,17 +35,17 @@ class GetMentionsError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Tweepy failed to get the lastest mentions since '{1}' >> {2}".format(type(self).__name__, self.since, self.error)
+        return f"{type(self).__name__}: Tweepy failed to get the lastest mentions since '{self.since}' >> {self.error}"
 
 
 class TooManyMentionsError(Error):
-    def __init__(self, since=None, length=None, limit=None):
+    def __init__(self, since=None, mention_count=None, mention_limit=None):
         self.since = since
-        self.length = length
-        self.limit = limit
+        self.mention_count = mention_count
+        self.mention_limit = mention_limit
 
     def __str__(self):
-        return "{0}: At '{1}', Tweepy pulled '{2}' mentions when the limit is '{3}' >> {4} too many mentions".format(type(self).__name__, self.since, self.length, self.limit, (self.length - self.limit))
+        return f"{type(self).__name__}: At '{self.since}', Tweepy pulled '{self.mention_count}' mentions when the limit is '{self.mention_limit}' >> {(self.mention_count - self.mention_limit)} too many mentions"
 
 
 class GoodreadsError(Error):
@@ -54,7 +54,7 @@ class GoodreadsError(Error):
         self.error=error
 
     def __str__(self):
-        return "{0}: Failed to scrape url '{1}' >> {2}".format(type(self).__name__, self.url, self.error)
+        return f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
 
 
 class AmazonError(Error):
@@ -63,7 +63,7 @@ class AmazonError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to scrape url '{1}' >> {2}".format(type(self).__name__, self.url, self.error)
+        return f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
 
 
 class FindISBNError(Error):
@@ -72,16 +72,16 @@ class FindISBNError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: text='{1}' >> {2}".format(type(self).__name__, self.text, self.error)
+        return f"{type(self).__name__}: text='{self.text}' >> {self.error}"
 
 
 class GetTweetError(Error):
-    def __init__(self, id=None, error=None):
-        self.id = id
+    def __init__(self, tweet_id=None, error=None):
+        self.tweet_id = tweet_id
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to get tweet with ID '{1}' >> {2}".format(type(self).__name__, self.id, self.error)
+        return f"{type(self).__name__}: Failed to get tweet with ID '{self.tweet_id}' >> {self.error}"
 
 
 class GetEditionError(Error):
@@ -90,7 +90,7 @@ class GetEditionError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to get edition with isbn '{1}' >> {2}".format(type(self).__name__, self.isbn, self.error)
+        return f"{type(self).__name__}: Failed to get edition with isbn '{self.isbn}' >> {self.error}"
 
 
 class GetAvailabilityError(Error):
@@ -99,7 +99,7 @@ class GetAvailabilityError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to get availability with identifier '{1}' >> {2}".format(type(self).__name__, self.identifier, self.error)
+        return f"{type(self).__name__}: Failed to get availability with identifier '{self.identifier}' >> {self.error}"
 
 
 class FindAvailableWorkError(Error):
@@ -108,7 +108,7 @@ class FindAvailableWorkError(Error):
         self.error = error
 
     def __str__(self):
-        return "{0}: Failed to get book '{1}' >> {2}".format(type(self).__name__, self.book, self.error)
+        return f"{type(self).__name__}: Failed to get book '{self.book}' >> {self.error}"
 
 
 class SendTweetError(Error):
@@ -119,5 +119,5 @@ class SendTweetError(Error):
 
     def __str__(self):
         if not self.mention.user.screen_name or not self.mention.id:
-            return "{0}: {1}".format(type(self).__name__, self.error)
-        return "{0}: Failed to send tweet '{1}' with mention id '{2}' >> {3}".format(type(self).__name__, self.message, self.mention.id, self.error)   
+            return f"{type(self).__name__}: {self.error}"
+        return f"{type(self).__name__}: Failed to send tweet '{self.message}' with mention id '{self.mention.id}' >> {self.error}"  
