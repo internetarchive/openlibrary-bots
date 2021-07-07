@@ -50,7 +50,7 @@ class Tweet:
             except Exception as e:
                 raise twitterbotErrors.SendTweetError(mention=mention, message=msg, error=e)
         else:
-        logging.info("RESPONSE: " + msg.replace("\n", " "))
+            logging.info("RESPONSE: " + msg.replace("\n", " "))
 
     @classmethod
     def edition_available(cls, mention, edition):
@@ -179,7 +179,6 @@ def reply_to_tweets():
 
     for mention in reversed(mentions):
         logging.info("MENTION FROM: " + mention.user.screen_name + " | ID: " + str(mention.id) + " --> " + mention.full_text.replace("\n", " "))
-        print(str(mention.id) + ': ' + mention.full_text)
 
         try:
             set_last_seen_id(mention)
@@ -205,7 +204,6 @@ def reply_to_tweets():
             
             # Reply to me
             if not isbns and parent_mention.user.id == API.me().id:
-                print("is reply to me")
                 logging.info(f"IS REPLY TO ME")
                 continue
         if isbns:
