@@ -16,6 +16,22 @@ LOG_FILE = "twitterbot.log"
 
 API = None
 MENTION_LIMIT = 100
+LAST_SEEN_ID_LEN = 19
+
+load_dotenv()
+if not os.environ.get('CONSUMER_KEY') or not os.environ.get('CONSUMER_SECRET') or not os.environ.get('ACCESS_TOKEN') or not os.environ.get('ACCESS_TOKEN_SECRET'):
+    raise twitterbotErrors.TweepyAuthenticationError(error="Missing .env file or missing necessary keys for authentication")
+    
+# Authenticate
+auth = tweepy.OAuthHandler(
+    os.environ.get('CONSUMER_KEY'),
+    os.environ.get('CONSUMER_SECRET')
+)
+auth.set_access_token(
+    os.environ.get('ACCESS_TOKEN'),
+    os.environ.get('ACCESS_TOKEN_SECRET')
+)
+API = tweepy.API(auth, wait_on_rate_limit=True)
 
 class Tweet:
 
@@ -94,7 +110,7 @@ def get_last_seen_id():
     except Exception as e:
         raise twitterbotErrors.FileIOError(filename=STATE_FILE, error=e)
     else:
-        if len(last_seen_id) < 19 or not last_seen_id.isdecimal():
+        if len(last_seen_id) < LAST_SEEN_ID_LEN or not last_seen_id.isdecimal():
             raise twitterbotErrors.LastSeenIDError(filename=STATE_FILE, last_seen_id=last_seen_id)
         return int(last_seen_id)
         
@@ -203,20 +219,6 @@ def reply_to_tweets():
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    if not os.environ.get('CONSUMER_KEY') or not os.environ.get('CONSUMER_SECRET') or not os.environ.get('ACCESS_TOKEN') or not os.environ.get('ACCESS_TOKEN_SECRET'):
-        raise twitterbotErrors.TweepyAuthenticationError(error="Missing .env file or missing necessary keys for authentication")
-    
-    # Authenticate
-    auth = tweepy.OAuthHandler(
-        os.environ.get('CONSUMER_KEY'),
-        os.environ.get('CONSUMER_SECRET')
-    )
-    auth.set_access_token(
-        os.environ.get('ACCESS_TOKEN'),
-        os.environ.get('ACCESS_TOKEN_SECRET')
-    )
-    API = tweepy.API(auth, wait_on_rate_limit=True)
 
     # Configure logging
     logging.basicConfig(filename=LOG_FILE, filemode='a', level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')  
