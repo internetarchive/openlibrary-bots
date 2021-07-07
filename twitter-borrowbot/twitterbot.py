@@ -34,7 +34,6 @@ class Tweet:
             except Exception as e:
                 raise twitterbotErrors.SendTweetError(mention=mention, message=msg, error=e)
         else:
-            print(msg.replace("\n", " "))
         logging.info("RESPONSE: " + msg.replace("\n", " "))
 
     @classmethod
