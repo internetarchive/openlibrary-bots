@@ -50,15 +50,3 @@ class TestBorrowBot(unittest.TestCase):
         isbn = list(ISBNFinder.find_isbns(tweet))[0]
         edition = InternetArchive.get_edition(isbn)
         assert edition
-
-    def test_failed(self):
-        isbn = "9780764361227"
-        tweet = "Hey @borrowbot, what about %s" % isbn
-        isbn = list(ISBNFinder.find_isbns(tweet))[0]
-        edition = InternetArchive.get_edition(isbn)
-        print(edition)
-        assert edition
-
-
-test = TestBorrowBot()
-test.test_failed()
