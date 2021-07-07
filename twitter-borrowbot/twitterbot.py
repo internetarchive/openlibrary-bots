@@ -20,7 +20,7 @@ MENTION_LIMIT = 100
 class Tweet:
 
     @staticmethod
-    def _tweet(mention, message, debug=True):
+    def _tweet(mention, message, debug=False):
         if not mention.user.screen_name or not mention.id:
             raise twitterbotErrors.SendTweetError(mention=mention, error="Given mention is missing either a screen name or a status ID")
         msg = "Hi 👋 @%s %s" % (mention.user.screen_name, message)
