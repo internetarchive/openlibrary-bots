@@ -35,7 +35,7 @@ class GetMentionsError(Error):
         self.error = error
 
     def __str__(self):
-        return f"{type(self).__name__}: Tweepy failed to get the lastest mentions since '{self.since}' >> {self.error}"
+        return f"{type(self).__name__}: Tweepy failed to get the latest mentions since '{self.since}' >> {self.error}"
 
 
 class TooManyMentionsError(Error):
