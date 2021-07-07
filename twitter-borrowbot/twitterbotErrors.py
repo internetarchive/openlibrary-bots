@@ -26,7 +26,7 @@ class LastSeenIDError(Error):
         self.last_seen_id = last_seen_id
 
     def __str__(self):
-        return f"{type(self).__name__}: The folowing ID '{self.last_seen_id}' from file '{self.filename}' is either too short or is not numeric"
+        return f"{type(self).__name__}: The following ID '{self.last_seen_id}' from file '{self.filename}' is either too short or is not numeric"
 
 
 class GetMentionsError(Error):
