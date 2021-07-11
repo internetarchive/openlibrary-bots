@@ -5,31 +5,27 @@ NOTE: This script assumes the Open Library Dump passed only contains editions wi
 import isbnlib
 import gzip
 import json
+import re
 
 import olclient
 
-ALLOWED_ISBN_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '-'}
-
-
 class NormalizeISBNJob(olclient.AbstractBotJob):
+
 
     @staticmethod
     def isbn_needs_normalization(isbn: str) -> bool:
         """
-        Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
+        Returns True if the given string contains one or two unformatted isbns
         Returns False otherwise
         """
-        if not set(isbn.strip()).issubset(ALLOWED_ISBN_CHARS):
-            return False
-        elif isbnlib.notisbn(isbn):
-            return False
+        if len(isbn) > 10 and parse_isbns(isbn):
+            return True
         else:
-            normalized_isbn = isbnlib.get_canonical_isbn(isbn)  # get_canonical_isbn returns None if ISBN is invalid
-            return normalized_isbn and normalized_isbn != isbn
+            return False
 
     def run(self) -> None:
         """
-        Performs ISBN normalization (removes hyphens and capitalizes letters)
+        Looks for any ISBNs with extra non-numeric characters
 
         dump_filepath -- path to *.txt.gz dump containing editions that need to be operated on
         """
@@ -74,11 +70,12 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
                     normalized_isbns = list()
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
-                        if self.isbn_needs_normalization(isbn):
-                            normalized_isbn = isbnlib.get_canonical_isbn(isbn)
-                            normalized_isbns.append(normalized_isbn)
+                        parsed = parse_isbns(isbn)
+                        if parsed:
+                            normalized_isbns.extend(parsed)
                         else:
                             normalized_isbns.append(isbn)
+
                     normalized_isbns = dedupe(normalized_isbns)  # remove duplicates
                     if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
@@ -94,6 +91,42 @@ def dedupe(input_list: list) -> list:
             output.append(i)
     return output
 
+RE_ISBN13 = re.compile('97[89]-?[0-9][-0-9]{7,9}[0-9]-?[0-9]')
+
+def parse_isbns(string):
+    """Find isbns in a string on the assumption that if you strip all non-isbn
+    characters and all that is left is valid isbns then it's unlikely to be random chance
+    if that doesn't work it will use a reasonably strict regex to look for an isbn13
+    formatted string within the full text, which should help when other numbers are present"""
+
+    # pass one: strip all non isbn characters, and see if what remains looks like an ISBN
+    isbnchars = [c for c in string if c in '0123456789Xx']
+    if len(isbnchars) < 10:
+        return []
+
+    isbnchars = ''.join(isbnchars).upper()
+    # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
+    if not isbnchars.find('X') in [-1,10,20,23,30,36]:
+        isbnchars.replace("X", "")
+
+    if len(isbnchars) % 10 == 0:
+        if all(isbnlib.is_isbn10(isbn) for isbn in split(isbnchars, 10)):
+            return split(isbnchars, 10)
+    elif len(isbnchars) % 13 == 0:
+        if all(isbnlib.is_isbn13(isbn) for isbn in split(isbnchars, 13)):
+            return split(isbnchars, 13)
+    elif len(isbnchars) == 23 and isbnlib.is_isbn13(isbnchars[:13]) and isbnlib.is_isbn10(isbnchars[13:]):
+        return [isbnchars[:13], isbnchars[13:]]
+    elif len(isbnchars) == 23 and isbnlib.is_isbn10(isbnchars[:10]) and isbnlib.is_isbn13(isbnchars[10:]):
+        return [isbnchars[:10], isbnchars[10:]]
+
+    # if we get this far then  we have 10+ isbn character but it's not a ISBN 10, 13 or a basic combination of the above
+    # just with extra padding characters. Most probably, there are some extra numbers in the string somewhere, so extract any ISBNs with a fairly strict regex
+    matches = re.findall(RE_ISBN13, string)
+    return list(isbnlib.canonical(isbn) for isbn in matches)
+
+def split(string, length):
+    return list(string[i:i+length] for i in range(0, len(string), length))
 
 if __name__ == '__main__':
     job = NormalizeISBNJob()
