@@ -1,6 +1,6 @@
 certifi==2021.5.30
 chardet==4.0.0
-idna=2.10
+idna==2.10
 isbnlib==3.10.8
 oauthlib==3.1.0
 PySocks==1.7.1
