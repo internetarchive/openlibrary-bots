@@ -18,5 +18,5 @@ jobs:
       - run: pip install -r requirements.txt -r twitter-borrowbot/requirements.txt
       - run: pip list --outdated
       - run: pip install -e .  # https://docs.pytest.org/en/stable/goodpractices.html
-      - run: pytest .
+      - run: pytest --ignore=twitter-borrowbot/test_borrowbot.py
       # - run: pytest --doctest-modules . || true
