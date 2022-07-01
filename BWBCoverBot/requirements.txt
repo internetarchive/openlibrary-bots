@@ -1,0 +1,2 @@
+sqlmodel
+git+git://github.com/internetarchive/openlibrary-client
