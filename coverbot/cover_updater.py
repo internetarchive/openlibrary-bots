@@ -9,22 +9,20 @@ import sys
 
 from olclient.openlibrary import OpenLibrary
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ol = OpenLibrary()
     filtered_ol_dump = sys.argv[1]
     output_filepath = sys.argv[2]
-    with gzip.open(filtered_ol_dump, 'rb') as fin:
-        header = {'type': 0,
-                  'key': 1,
-                  'revision': 2,
-                  'last_modified': 3,
-                  'JSON': 4}
-        with gzip.open(output_filepath, 'a') as fout:
+    with gzip.open(filtered_ol_dump, "rb") as fin:
+        header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
+        with gzip.open(output_filepath, "a") as fout:
             for row in fin:
-                row = row.decode().split('\t')
-                _json = json.loads(row[header['JSON']])
-                olid = _json['key'].split('/')[-1]
+                row = row.decode().split("\t")
+                _json = json.loads(row[header["JSON"]])
+                olid = _json["key"].split("/")[-1]
                 edition_obj = ol.Edition.get(olid)
-                if not len(getattr(edition_obj, 'covers', [])):
-                    fout.write(edition_obj.olid + '\n')
-                    edition_obj.add_bookcover('https://archive.org/download/%s/page/cover' % _json['ocaid'])
+                if not len(getattr(edition_obj, "covers", [])):
+                    fout.write(edition_obj.olid + "\n")
+                    edition_obj.add_bookcover(
+                        "https://archive.org/download/%s/page/cover" % _json["ocaid"]
+                    )
