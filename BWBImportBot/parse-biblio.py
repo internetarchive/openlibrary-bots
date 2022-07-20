@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 import json
 import sys
@@ -39,7 +40,7 @@ class Biblio:
 
     def subjects(self):
         subjects = data[91:100]
-        subjects = [s.capitalize().replace("_", ", ") for s in subjects if s]
+        subjects = [s.capitalize().replace('_', ', ') for s in subjects if s]
         # subjects += data[101:120]
         # subjects += data[153:158]
         return subjects
@@ -56,10 +57,10 @@ class Biblio:
         return authors
 
     def make_author(self, contributor):
-        author = {"name": contributor[0]}
-        if contributor[2] == "X":
+        author = {'name': contributor[0]}
+        if contributor[2] == 'X':
             # set corporate contributor
-            author["entity_type"] = "org"
+            author['entity_type'] = 'org'
         # TODO: sort out contributor types
         # AU = author
         # ED = editor
@@ -67,29 +68,29 @@ class Biblio:
 
     def json(self, decode=False):
         a = {
-            "title": self.title,
-            "isbn_13": [self.isbn],
-            "publish_date": self.publication_date,
-            "publishers": [self.publisher],
-            "authors": self.contributors(),
-            "lc_classifications": [self.lc_class],
-            "number_of_pages": self.pages,
-            "languages": [self.language],
-            "subjects": self.subjects,
-            "source_records": ["bwb:%s" % self.isbn],
+            'title': self.title,
+            'isbn_13': [self.isbn],
+            'publish_date': self.publication_date,
+            'publishers': [self.publisher],
+            'authors': self.contributors(),
+            'lc_classifications': [self.lc_class],
+            'number_of_pages': self.pages,
+            'languages': [self.language],
+            'subjects': self.subjects,
+            'source_records': ['bwb:%s' % self.isbn],
         }
         return a
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     fnames = sys.argv[1:]
 
     seen_isbns = set()
 
     for fname in fnames:
-        with open(fname) as f:
+        with open(fname, 'r') as f:
             for line in f:
-                data = line.strip().split("|")
+                data = line.strip().split('|')
                 b = Biblio(data)
                 isbn = b.isbn
                 if isbn in seen_isbns:

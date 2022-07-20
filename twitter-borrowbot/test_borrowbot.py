@@ -49,7 +49,7 @@ class TestBorrowBot(unittest.TestCase):
         assert isbns == multiple_isbns
 
     def test_get_book(self):
-        isbn = "0399143904"
+        isbn = '0399143904'
         tweet = "Hey @borrowbot, what about %s" % isbn
         isbn = list(ISBNFinder.find_isbns(tweet))[0]
         edition = InternetArchive.get_edition(isbn)

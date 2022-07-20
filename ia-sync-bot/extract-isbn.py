@@ -22,16 +22,16 @@ with open(infile) as f:
     for line in f:
         data = line.split("\t")
         book = json.loads(data[4])
-        olid = book.get("key").replace("/books/", "")
-        wolid = book.get("works", "NONE")
-        if wolid != "NONE":
-            wolid = wolid[0]["key"].replace("/works/", "")
+        olid = book.get('key').replace('/books/', '')
+        wolid = book.get('works', 'NONE')
+        if wolid != 'NONE':
+            wolid = wolid[0]['key'].replace('/works/', '')
 
         # get isbn
         good_isbn = []
         bad_isbn = []
-        isbn_13 = book.get("isbn_13", [])
-        isbn_10 = book.get("isbn_10", [])
+        isbn_13 = book.get('isbn_13', [])
+        isbn_10 = book.get('isbn_10', [])
         for isbn in isbn_13 + isbn_10:
             canonical = isbnlib.get_canonical_isbn(isbn)
             if canonical:
@@ -50,4 +50,4 @@ with open(infile) as f:
                 bad_isbn.append(isbn)
 
         for bad in bad_isbn:
-            print("\t".join(["BAD-ISBN:", repr(bad), olid, wolid]))
+            print(u"\t".join([u'BAD-ISBN:', repr(bad), olid, wolid]))

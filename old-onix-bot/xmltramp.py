@@ -12,7 +12,7 @@ except NameError:
 
 
 def isstr(f):
-    return isinstance(f, (str, str))
+    return isinstance(f, (str, type(u'')))
 
 
 def islst(f):
@@ -20,28 +20,28 @@ def islst(f):
 
 
 empty = {
-    "http://www.w3.org/1999/xhtml": [
-        "img",
-        "br",
-        "hr",
-        "meta",
-        "link",
-        "base",
-        "param",
-        "input",
-        "col",
-        "area",
+    'http://www.w3.org/1999/xhtml': [
+        'img',
+        'br',
+        'hr',
+        'meta',
+        'link',
+        'base',
+        'param',
+        'input',
+        'col',
+        'area',
     ]
 }
 
 
 def quote(x, elt=True):
-    if elt and "<" in x and len(x) > 24 and x.find("]]>") == -1:
+    if elt and '<' in x and len(x) > 24 and x.find(']]>') == -1:
         return "<![CDATA[" + x + "]]>"
     else:
-        x = x.replace("&", "&amp;").replace("<", "&lt;").replace("]]>", "]]&gt;")
+        x = x.replace('&', '&amp;').replace('<', '&lt;').replace(']]>', ']]&gt;')
     if not elt:
-        x = x.replace('"', "&quot;")
+        x = x.replace('"', '&quot;')
     return x
 
 
@@ -76,43 +76,43 @@ class Element:
         def qname(name, inprefixes):
             if islst(name):
                 if inprefixes[name[0]] is not None:
-                    return inprefixes[name[0]] + ":" + name[1]
+                    return inprefixes[name[0]] + ':' + name[1]
                 else:
                     return name[1]
             else:
                 return name
 
         def arep(a, inprefixes, addns=1):
-            out = ""
+            out = ''
 
             for p in self._prefixes.keys():
                 if not p in inprefixes.keys():
                     if addns:
-                        out += " xmlns"
+                        out += ' xmlns'
                     if addns and self._prefixes[p]:
-                        out += ":" + self._prefixes[p]
+                        out += ':' + self._prefixes[p]
                     if addns:
                         out += '="' + quote(p, False) + '"'
                     inprefixes[p] = self._prefixes[p]
 
             for k in a.keys():
-                out += " " + qname(k, inprefixes) + '="' + quote(a[k], False) + '"'
+                out += ' ' + qname(k, inprefixes) + '="' + quote(a[k], False) + '"'
 
             return out
 
-        inprefixes = inprefixes or {"http://www.w3.org/XML/1998/namespace": "xml"}
+        inprefixes = inprefixes or {u'http://www.w3.org/XML/1998/namespace': 'xml'}
 
         # need to call first to set inprefixes:
         attributes = arep(self._attrs, inprefixes, recursive)
-        out = "<" + qname(self._name, inprefixes) + attributes
+        out = '<' + qname(self._name, inprefixes) + attributes
 
         if not self._dir and (
             self._name[0] in empty.keys() and self._name[1] in empty[self._name[0]]
         ):
-            out += " />"
+            out += ' />'
             return out
 
-        out += ">"
+        out += '>'
 
         if recursive:
             content = 0
@@ -120,7 +120,7 @@ class Element:
                 if isinstance(x, Element):
                     content = 1
 
-            pad = "\n" + ("\t" * recursive)
+            pad = '\n' + ('\t' * recursive)
             for x in self._dir:
                 if multiline and content:
                     out += pad
@@ -131,33 +131,33 @@ class Element:
                 else:
                     raise TypeError("I wasn't expecting " + repr(x) + ".")
             if multiline and content:
-                out += "\n" + ("\t" * (recursive - 1))
+                out += '\n' + ('\t' * (recursive - 1))
         else:
             if self._dir:
-                out += "..."
+                out += '...'
 
-        out += "</" + qname(self._name, inprefixes) + ">"
+        out += '</' + qname(self._name, inprefixes) + '>'
 
         return out
 
     def __unicode__(self):
-        text = ""
+        text = ''
         for x in self._dir:
             text += unicode(x)
-        return " ".join(text.split())
+        return ' '.join(text.split())
 
     def __str__(self):
-        return self.__unicode__().encode("utf-8")
+        return self.__unicode__().encode('utf-8')
 
     def __getattr__(self, n):
-        if n[0] == "_":
+        if n[0] == '_':
             raise AttributeError("Use foo['" + n + "'] to access the child element.")
         if self._dNS:
             n = (self._dNS, n)
         for x in self._dir:
             if isinstance(x, Element) and x._name == n:
                 return x
-        raise AttributeError("No child element named %s" % repr(n))
+        raise AttributeError('No child element named %s' % repr(n))
 
     def __hasattr__(self, n):
         for x in self._dir:
@@ -166,17 +166,17 @@ class Element:
         return False
 
     def __setattr__(self, n, v):
-        if n[0] == "_":
+        if n[0] == '_':
             self.__dict__[n] = v
         else:
             self[n] = v
 
     def __getitem__(self, n):
-        if isinstance(n, int):  # d[1] == d._dir[1]
+        if isinstance(n, type(0)):  # d[1] == d._dir[1]
             return self._dir[n]
         elif isinstance(n, slice(0).__class__):
             # numerical slices
-            if isinstance(n.start, int):
+            if isinstance(n.start, type(0)):
                 return self._dir[n.start : n.stop]
 
             # d['foo':] == all <foo>s
@@ -197,7 +197,7 @@ class Element:
             raise KeyError
 
     def __setitem__(self, n, v):
-        if isinstance(n, int):  # d[1]
+        if isinstance(n, type(0)):  # d[1]
             self._dir[n] = v
         elif isinstance(n, slice(0).__class__):
             # d['foo':] adds a new foo
@@ -230,7 +230,7 @@ class Element:
                 del self[i]
 
     def __delitem__(self, n):
-        if isinstance(n, int):
+        if isinstance(n, type(0)):
             del self._dir[n]
         elif isinstance(n, slice(0).__class__):
             # delete all <foo>s
@@ -294,7 +294,7 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
         else:
             self.getLineNumber = lambda: None
         self.stack = []
-        self.ch = ""
+        self.ch = ''
         self.prefixes = {}
         ContentHandler.__init__(self)
 
@@ -308,7 +308,7 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
 
     def startElementNS(self, name, qname, attrs):
         ch = self.ch
-        self.ch = ""
+        self.ch = ''
         if ch and not ch.isspace():
             self.stack[-1]._dir.append(ch)
 
@@ -326,7 +326,7 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
 
     def endElementNS(self, name, qname):
         ch = self.ch
-        self.ch = ""
+        self.ch = ''
         if ch and not ch.isspace():
             self.stack[-1]._dir.append(ch)
 
@@ -363,20 +363,20 @@ def load(url):
 
 
 def unittest():
-    parse("<doc>a<baz>f<b>o</b>ob<b>a</b>r</baz>a</doc>").__repr__(
+    parse('<doc>a<baz>f<b>o</b>ob<b>a</b>r</baz>a</doc>').__repr__(
         1, 1
-    ) == "<doc>\n\ta<baz>\n\t\tf<b>o</b>ob<b>a</b>r\n\t</baz>a\n</doc>"
+    ) == '<doc>\n\ta<baz>\n\t\tf<b>o</b>ob<b>a</b>r\n\t</baz>a\n</doc>'
 
     assert str(parse("<doc />")) == ""
     assert str(parse("<doc>I <b>love</b> you.</doc>")) == "I love you."
     assert parse("<doc>\nmom\nwow\n</doc>")[0].strip() == "mom\nwow"
-    assert str(parse("<bing>  <bang> <bong>center</bong> </bang>  </bing>")) == "center"
-    assert str(parse("<doc>\xcf\x80</doc>")) == "\xcf\x80"
+    assert str(parse('<bing>  <bang> <bong>center</bong> </bang>  </bing>')) == "center"
+    assert str(parse('<doc>\xcf\x80</doc>')) == '\xcf\x80'
 
     d = Element(
-        "foo",
-        attrs={"foo": "bar"},
-        children=["hit with a", Element("bar"), Element("bar")],
+        'foo',
+        attrs={'foo': 'bar'},
+        children=['hit with a', Element('bar'), Element('bar')],
     )
 
     try:
@@ -384,33 +384,33 @@ def unittest():
         raise Exception("ExpectedError", "but found success. Damn.")
     except AttributeError:
         pass
-    assert d.bar._name == "bar"
+    assert d.bar._name == 'bar'
     try:
         d.doesnotexist
         raise Exception("ExpectedError", "but found success. Damn.")
     except AttributeError:
         pass
 
-    assert hasattr(d, "bar") == True
+    assert hasattr(d, 'bar') == True
 
-    assert d("foo") == "bar"
-    d(silly="yes")
-    assert d("silly") == "yes"
+    assert d('foo') == 'bar'
+    d(silly='yes')
+    assert d('silly') == 'yes'
     assert d() == d._attrs
 
-    assert d[0] == "hit with a"
-    d[0] = "ice cream"
-    assert d[0] == "ice cream"
+    assert d[0] == 'hit with a'
+    d[0] = 'ice cream'
+    assert d[0] == 'ice cream'
     del d[0]
     assert d[0]._name == "bar"
     assert len(d[:]) == len(d._dir)
     assert len(d[1:]) == len(d._dir) - 1
-    assert len(d["bar":]) == 2
-    d["bar":] = "baz"
-    assert len(d["bar":]) == 3
-    assert d["bar"]._name == "bar"
+    assert len(d['bar':]) == 2
+    d['bar':] = 'baz'
+    assert len(d['bar':]) == 3
+    assert d['bar']._name == 'bar'
 
-    d = Element("foo")
+    d = Element('foo')
 
     doc = Namespace("http://example.org/bar")
     bbc = Namespace("http://example.org/bbc")
@@ -439,7 +439,7 @@ def unittest():
 
     assert repr(parse("<doc xml:lang='en' />")) == '<doc xml:lang="en"></doc>'
 
-    assert str(d.author) == str(d["author"]) == "John Polk and John Palfrey"
+    assert str(d.author) == str(d['author']) == "John Polk and John Palfrey"
     assert d.author._name == doc.author
     assert str(d[dc.creator]) == "John Polk"
     assert d[dc.creator]._name == dc.creator
@@ -454,15 +454,15 @@ def unittest():
     d[bbc.show](bbc.station, "5")
     assert d[bbc.show](bbc.station) == "5"
 
-    e = Element("e")
+    e = Element('e')
     e.c = '<img src="foo">'
     assert e.__repr__(1) == '<e><c>&lt;img src="foo"></c></e>'
-    e.c = "2 > 4"
-    assert e.__repr__(1) == "<e><c>2 > 4</c></e>"
-    e.c = "CDATA sections are <em>closed</em> with ]]>."
+    e.c = '2 > 4'
+    assert e.__repr__(1) == '<e><c>2 > 4</c></e>'
+    e.c = 'CDATA sections are <em>closed</em> with ]]>.'
     assert (
         e.__repr__(1)
-        == "<e><c>CDATA sections are &lt;em>closed&lt;/em> with ]]&gt;.</c></e>"
+        == '<e><c>CDATA sections are &lt;em>closed&lt;/em> with ]]&gt;.</c></e>'
     )
     e.c = parse(
         '<div xmlns="http://www.w3.org/1999/xhtml">i<br /><span></span>love<br />you</div>'
@@ -472,14 +472,14 @@ def unittest():
         == '<e><c><div xmlns="http://www.w3.org/1999/xhtml">i<br /><span></span>love<br />you</div></c></e>'
     )
 
-    e = Element("e")
-    e("c", 'that "sucks"')
+    e = Element('e')
+    e('c', 'that "sucks"')
     assert e.__repr__(1) == '<e c="that &quot;sucks&quot;"></e>'
 
     assert quote("]]>") == "]]&gt;"
     assert (
-        quote("< dkdkdsd dkd sksdksdfsd fsdfdsf]]> kfdfkg >")
-        == "&lt; dkdkdsd dkd sksdksdfsd fsdfdsf]]&gt; kfdfkg >"
+        quote('< dkdkdsd dkd sksdksdfsd fsdfdsf]]> kfdfkg >')
+        == '&lt; dkdkdsd dkd sksdksdfsd fsdfdsf]]&gt; kfdfkg >'
     )
 
     assert parse('<x a="&lt;"></x>').__repr__(1) == '<x a="&lt;"></x>'
@@ -489,5 +489,5 @@ def unittest():
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest()

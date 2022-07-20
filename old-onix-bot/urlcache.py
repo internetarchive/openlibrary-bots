@@ -57,7 +57,7 @@ class URLCache:
 
         data_file = self.dir + "/" + str(id)
         if os.path.exists(data_file):
-            return open(data_file)
+            return open(data_file, "r")
         else:
             # wait for fetch to finish
             tmp_data_file = data_file + "-fetching"
@@ -69,7 +69,7 @@ class URLCache:
                     tmp_data.close()
                 except OSError as e:
                     pass
-                return open(data_file)
+                return open(data_file, "r")
             except Exception as exn:
                 # in case this happens, just blow away your cache
                 raise Exception(

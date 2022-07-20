@@ -21,7 +21,7 @@ import requests
 from olclient.openlibrary import OpenLibrary
 
 # File used in the whole script
-FILE = "data/wishlist_works_may_2018.csv"
+FILE = 'data/wishlist_works_may_2018.csv'
 
 # Creating an object of the Open Library Client
 ol = OpenLibrary()
@@ -33,7 +33,7 @@ count = 0
 # Array to add unduplicated books
 value = []
 
-with open(FILE) as infile:
+with open(FILE, "rt") as infile:
     reader = csv.reader(infile)
     next(reader, None)
     for row in reader:
@@ -44,10 +44,10 @@ with open(FILE) as infile:
         work1 = ol.Edition.get(isbn=row[6])
         # correct_title = row[0].replace(".", "").replace("'", "").replace(",","").replace("!","")
         # new_title = '"' + correct_title.split(":")[0].replace(" ", "+") + '"'
-        correct_title = str.maketrans("", "", string.punctuation)
+        correct_title = str.maketrans('', '', string.punctuation)
         new_title = (
             '"'
-            + row[0].split(":")[0].translate(correct_title).strip().replace(" ", "+")
+            + row[0].split(':')[0].translate(correct_title).strip().replace(' ', '+')
             + '"'
         )
 
@@ -55,7 +55,7 @@ with open(FILE) as infile:
 
         # Author List
         author_list = ast.literal_eval(row[1])
-        new_author = ""
+        new_author = ''
 
         for author in author_list:
             # Concatenate to form one big string
@@ -80,10 +80,10 @@ with open(FILE) as infile:
             j = json.loads(r.text)
 
             match = False
-            for doc in j["docs"]:
+            for doc in j['docs']:
                 # Takes into account only title
                 # if doc['title_suggest'].lower() == correct_title.split(":")[0].lower().strip():
-                if doc["title_suggest"].lower() == correct_title:
+                if doc['title_suggest'].lower() == correct_title:
                     match = True
 
             if work is None and work1 is None and not match and count != 1000:

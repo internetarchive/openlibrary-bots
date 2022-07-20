@@ -12,8 +12,8 @@ from .sax_utils import *
 from .xmltramp import *
 
 repo_path = os.getenv("PHAROS_REPO")
-codelists_path = "{}/{}".format(repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd")
-ref_dtd_path = "{}/{}".format(
+codelists_path = "%s/%s" % (repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd")
+ref_dtd_path = "%s/%s" % (
     repo_path,
     "catalog/onix/ONIX_BookProduct_Release2.1_reference.xsd",
 )
@@ -25,10 +25,10 @@ onix_shortnames = None
 
 
 def init():
-    f = open(codelists_path)
+    f = open(codelists_path, "r")
     onix_codelists = parse_codelists(f)
     f.close()
-    f = open(ref_dtd_path)
+    f = open(ref_dtd_path, "r")
     onix_shortnames = parse_shortnames(f)
     f.close()
 
@@ -61,10 +61,10 @@ class OnixProduct:
             return map(OnixProduct.reify_child, values)
         else:
             if len(values) == 0:
-                raise KeyError(f"no value for {reference_name} ({name})")
+                raise KeyError("no value for %s (%s)" % (reference_name, name))
             elif len(values) > 1:
                 raise Exception(
-                    f"more than one value for {reference_name} ({name})"
+                    "more than one value for %s (%s)" % (reference_name, name)
                 )
             return OnixProduct.reify_child(values[0])
 
@@ -134,20 +134,20 @@ def parse_shortnames(input):
         def element(name, attrs):
             def typespec(name, attrs):
                 def attribute(name, attrs):
-                    if attrs.getValueByQName("name") == "shortname":
-                        shortname = attrs.getValueByQName("fixed")
+                    if attrs.getValueByQName('name') == "shortname":
+                        shortname = attrs.getValueByQName('fixed')
                         return CollectorValue(shortname)
                     else:
                         return CollectorNone()
 
-                return NodeCollector({"attribute": attribute, collector_any: typespec})
+                return NodeCollector({'attribute': attribute, collector_any: typespec})
 
-            elt_name = attrs.getValueByQName("name")
+            elt_name = attrs.getValueByQName('name')
             return NamedCollector(elt_name, {collector_any: typespec})
 
-        return DictCollector({"element": element})
+        return DictCollector({'element': element})
 
-    return collector_parse(input, {"schema": schema})
+    return collector_parse(input, {'schema': schema})
 
 
 def parse_codelists(input):
@@ -159,21 +159,21 @@ def parse_codelists(input):
                         def documentation(name, attrs):
                             return TextCollector()
 
-                        return ListCollector({"documentation": documentation})
+                        return ListCollector({'documentation': documentation})
 
                     return NamedCollector(
-                        attrs.getValueByQName("value"), {"annotation": annotation}
+                        attrs.getValueByQName(u'value'), {'annotation': annotation}
                     )
 
-                return DictCollector({"enumeration": enumeration})
+                return DictCollector({'enumeration': enumeration})
 
             return NamedCollector(
-                attrs.getValueByQName("name"), {"restriction": restriction}
+                attrs.getValueByQName(u'name'), {'restriction': restriction}
             )
 
-        return DictCollector({"simpleType": simpleType})
+        return DictCollector({'simpleType': simpleType})
 
-    return collector_parse(input, {"schema": schema})
+    return collector_parse(input, {'schema': schema})
 
 
 init()
