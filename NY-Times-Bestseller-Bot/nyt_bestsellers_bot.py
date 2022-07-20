@@ -31,11 +31,6 @@ site.addsitedir(local_site)
 
 from optparse import OptionParser
 
-try:
-    basestring
-except NameError:
-    basestring = str
-
 import pprint
 
 from openlibrary.api import OpenLibrary
@@ -49,7 +44,7 @@ def LOG(level, msg):
 
 def ensureUtf(s):
     try:
-        if isinstance(s, unicode):
+        if isinstance(s, str):
             return s.encode('utf8', 'ignore')
     except NameError:
         return str(s)
@@ -60,7 +55,7 @@ def _request(request, parser=simplejson.loads):
         urllib2.Request(
             request, None, headers={"Referrer": "http://www.openlibrary.org"}
         )
-        if isinstance(request, basestring)
+        if isinstance(request, str)
         else request
     )
     results = None

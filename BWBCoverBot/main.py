@@ -1,9 +1,9 @@
-import datetime
+from __future__ import annotations
+
 import logging
 import os
 import sys
-import zipfile
-from typing import List
+from datetime import datetime
 from zipfile import ZipFile, ZipInfo
 
 from olclient import OpenLibrary, config
@@ -15,10 +15,10 @@ logging.basicConfig(
     handlers=[logging.FileHandler("bwb-cover-bot-debug.log"), logging.StreamHandler()],
 )
 
-ol_access_key = os.environ['OL_ACCESS_KEY']
-ol_secret_key = os.environ['OL_SECRET_KEY']
 ol = OpenLibrary(
-    credentials=config.Credentials(access=ol_access_key, secret=ol_secret_key)
+    credentials=config.Credentials(
+        access=os.environ['OL_ACCESS_KEY'], secret=os.environ['OL_SECRET_KEY']
+    )
 )
 
 
@@ -44,7 +44,7 @@ def update_cover_for_edition(
         f'https://openlibrary.org/books/{edition_olid}/-/add-cover',
         files=form_data_body,
     )
-    is_update_success: bool = resp.ok and b'Saved!' in resp.content
+    is_update_success: bool = resp.ok and 'Saved!' in resp.text
     return is_update_success
 
 
@@ -52,9 +52,8 @@ def is_cover_already_stored(isbn_13: str) -> bool:
     statement = select(EditionCoverData).where(EditionCoverData.isbn_13 == isbn_13)
     edition_cover_data = db_session.execute(statement).first()
     return (
-        (edition_cover_data is not None)
-        and (len(edition_cover_data) == 1)
-        and (edition_cover_data[0].cover_exists is True)
+        len(edition_cover_data or []) == 1
+        and edition_cover_data[0].cover_exists is True
     )
 
 
@@ -67,12 +66,7 @@ def verify_and_update_cover(isbn_13: str, archive_contents: ZipFile) -> None:
         return
     edition_olid = ol_edition.olid
     # TODO: double check this
-    cover_exists = (
-        hasattr(ol_edition, 'covers')
-        and (ol_edition.covers is not None)
-        and (ol_edition.covers != [-1])
-    )
-
+    cover_exists = getattr(ol_edition, 'covers', None) not in (None, [-1])
     if cover_exists is True:
         db_session.bulk_save_objects(
             [EditionCoverData(isbn_13=isbn_13, cover_exists=True)]
@@ -96,11 +90,9 @@ def verify_and_update_cover(isbn_13: str, archive_contents: ZipFile) -> None:
 
 
 def parser_for_zip_with_isbns(cover_zip_path: str) -> None:
-    logging.info(
-        f"start time: {datetime.datetime.now().timestamp()} for {cover_zip_path}"
-    )
-    archive_contents: ZipFile = zipfile.ZipFile(cover_zip_path, 'r')
-    file_list: List[ZipInfo] = archive_contents.filelist
+    logging.info(f"start time: {datetime.now().timestamp()} for {cover_zip_path}")
+    archive_contents = ZipFile(cover_zip_path, 'r')
+    file_list: list[ZipInfo] = archive_contents.filelist
 
     processed_file_list = []
     for file in file_list:
@@ -116,9 +108,7 @@ def parser_for_zip_with_isbns(cover_zip_path: str) -> None:
                 f'file: {file.filename}, zip path: {cover_zip_path}. Error: {e}'
             )
 
-    logging.info(
-        f"end time: {datetime.datetime.now().timestamp()} for {cover_zip_path}"
-    )
+    logging.info(f"end time: {datetime.now().timestamp()} for {cover_zip_path}")
 
 
 if __name__ == '__main__':
