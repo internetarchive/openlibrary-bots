@@ -12,8 +12,8 @@ from .sax_utils import *
 from .xmltramp import *
 
 repo_path = os.getenv("PHAROS_REPO")
-codelists_path = "%s/%s" % (repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd")
-ref_dtd_path = "%s/%s" % (
+codelists_path = "{}/{}".format(repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd")
+ref_dtd_path = "{}/{}".format(
     repo_path,
     "catalog/onix/ONIX_BookProduct_Release2.1_reference.xsd",
 )
@@ -25,10 +25,10 @@ onix_shortnames = None
 
 
 def init():
-    f = open(codelists_path, "r")
+    f = open(codelists_path)
     onix_codelists = parse_codelists(f)
     f.close()
-    f = open(ref_dtd_path, "r")
+    f = open(ref_dtd_path)
     onix_shortnames = parse_shortnames(f)
     f.close()
 
@@ -61,10 +61,10 @@ class OnixProduct:
             return map(OnixProduct.reify_child, values)
         else:
             if len(values) == 0:
-                raise KeyError("no value for %s (%s)" % (reference_name, name))
+                raise KeyError(f"no value for {reference_name} ({name})")
             elif len(values) > 1:
                 raise Exception(
-                    "more than one value for %s (%s)" % (reference_name, name)
+                    f"more than one value for {reference_name} ({name})"
                 )
             return OnixProduct.reify_child(values[0])
 

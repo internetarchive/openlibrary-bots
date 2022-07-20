@@ -16,7 +16,7 @@ from olclient.openlibrary import OpenLibrary
 ALLOWED_ISBN_CHARS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "X", "x", "-"}
 
 
-class NormalizeISBNJob(object):
+class NormalizeISBNJob:
     def __init__(self, ol=None, dry_run=True, limit=1):
         """Create logger and class variables"""
         if ol is None:
@@ -41,7 +41,7 @@ class NormalizeISBNJob(object):
         log_dir = "logs/jobs/%s" % job_name
         makedirs(log_dir, exist_ok=True)
         log_file_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir + "/%s_%s.log" % (job_name, log_file_datetime)
+        log_file = log_dir + f"/{job_name}_{log_file_datetime}.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(log_formatter)

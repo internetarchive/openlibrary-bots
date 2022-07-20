@@ -292,8 +292,8 @@ def elt_get(e, tag, reference_name):
         return None
 
 
-re_by = re.compile("^\s*by\s+", re.IGNORECASE)
-re_iname = re.compile("^(.*),\s*(.*)$")
+re_by = re.compile(r"^\s*by\s+", re.IGNORECASE)
+re_iname = re.compile(r"^(.*),\s*(.*)$")
 
 
 def add_val(o, key, val):

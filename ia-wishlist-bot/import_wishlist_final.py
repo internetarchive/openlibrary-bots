@@ -33,7 +33,7 @@ count = 0
 # Array to add unduplicated books
 value = []
 
-with open(FILE, "rt") as infile:
+with open(FILE) as infile:
     reader = csv.reader(infile)
     next(reader, None)
     for row in reader:

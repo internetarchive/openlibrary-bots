@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 # Import simplejson for Python 2 else json for Python 3
 try:
     import urllib2
@@ -44,7 +42,7 @@ NYT_BEST_SELLERS_URL = "http://api.nytimes.com/svc/books/v2/lists"
 
 
 def LOG(level, msg):
-    print("%s: %s" % (level, msg.encode("utf-8")), file=sys.stderr)
+    print("{}: {}".format(level, msg.encode("utf-8")), file=sys.stderr)
 
 
 def ensureUtf(s):
@@ -70,7 +68,7 @@ def _request(request, parser=simplejson.loads):
         results = ensureUtf(results)
         results = parser(results)
     except Exception as e:
-        LOG("ERROR", "error loading %s: %s results: %s" % (request, e, results))
+        LOG("ERROR", f"error loading {request}: {e} results: {results}")
         raise
     finally:
         conn.close()
@@ -78,7 +76,7 @@ def _request(request, parser=simplejson.loads):
 
 
 def get_nyt_bestseller_list_names():
-    url = "%s/%s.json?%s" % (
+    url = "{}/{}.json?{}".format(
         NYT_BEST_SELLERS_URL,
         "names",
         urllib.urlencode({"api-key": NYT_API_KEY}),
@@ -90,7 +88,7 @@ def get_nyt_bestseller_list_names():
 
 
 def load_nyt_bestseller_list(list_name):
-    url = "%s/%s.json?%s" % (
+    url = "{}/{}.json?{}".format(
         NYT_BEST_SELLERS_URL,
         urllib.quote(list_name.replace(" ", "-")),
         urllib.urlencode({"api-key": NYT_API_KEY}),
@@ -229,8 +227,8 @@ def write_machine_tags(ln, books):
                 ),
             )
         else:
-            LOG("DEBUG", "Adding tags (%s) to %s" % (", ".join(tags), work["key"]))
-    LOG("INFO", "WRITING MACHINE TAGS FOR %s of %s works" % (len(write), len(books)))
+            LOG("DEBUG", "Adding tags ({}) to {}".format(", ".join(tags), work["key"]))
+    LOG("INFO", f"WRITING MACHINE TAGS FOR {len(write)} of {len(books)} works")
     if write:
         OL.save_many(
             write.values(), comment="Adding tags to New York Times %s bestsellers" % ln
