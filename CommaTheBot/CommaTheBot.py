@@ -21,7 +21,7 @@ class CommaTheBotJob(AbstractBotJob):
         self.pattern = re.compile(rf"^([\w ,]*), ?({'|'.join(articles)})$")
 
     def needs_fixing(self, edition_title: str) -> bool:
-        if edition_title == None: return False # no title given
+        if edition_title is None: return False # no title given
 
         return True if(self.pattern.search(edition_title)) else False
 
