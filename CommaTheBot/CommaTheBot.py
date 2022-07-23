@@ -18,7 +18,7 @@ class CommaTheBotJob(AbstractBotJob):
             '[Ll]os', '[Ll]as', '[Ll]es',
         ]
 
-        self.pattern = re.compile(rf"^([\w ,]*), ?({'|'.join(articles)})$")
+        self.pattern = re.compile(rf"^([\w ,]+), ?({'|'.join(articles)})$")
 
     def needs_fixing(self, edition_title: str) -> bool:
         if edition_title is None: return False # no title given
