@@ -41,10 +41,10 @@ def process_product(p):
     o = {}  # the Open Library item we're producing
 
     # record id
-    o['source_record_lineno'] = p.getLineNumber()
+    o["source_record_lineno"] = p.getLineNumber()
 
     # title, subtitle
-    tt = [t for t in op["Title":] if t["TitleType"] == '01']
+    tt = [t for t in op["Title":] if t["TitleType"] == "01"]
     if len(tt) > 1:
         raise Exception("more than one distinctive title")
     elif len(tt) == 0:
@@ -53,21 +53,21 @@ def process_product(p):
     prefix = t.get("TitlePrefix")
     if prefix:
         prefix = prefix.strip()
-        o['title_prefix_len'] = len(prefix) + 1  # prefix plus space
-        o['title'] = prefix + " " + t["TitleWithoutPrefix"].strip()
+        o["title_prefix_len"] = len(prefix) + 1  # prefix plus space
+        o["title"] = prefix + " " + t["TitleWithoutPrefix"].strip()
     else:
         title = t.get("TitleText")
         if title:
-            o['title'] = title
+            o["title"] = title
     subtitle = t.get("Subtitle")
     if subtitle:
-        o['subtitle'] = subtitle
+        o["subtitle"] = subtitle
 
     # id codes (ISBN, etc.)
     for pi in op["ProductIdentifier":]:
         pi_type = pi["ProductIDType"]
         pi_val = pi["IDValue"]
-        if pi_type != '01':
+        if pi_type != "01":
             type_name = str(OnixProduct.pi_type_name(pi_type)).replace("-", "_")
             o[type_name] = pi_val
 
@@ -81,7 +81,7 @@ def process_product(p):
             warn("=====> no name for contributor at line %d" % c.getLineNumber())
             continue
 
-        if role_code != 'A01':
+        if role_code != "A01":
             role = OnixProduct.contributor_role(role_code)
             add_val(o, "contributions", role + ": " + name)
             continue
@@ -130,7 +130,7 @@ def process_product(p):
         # ... but this is the only way to get author names for one of the catalogs
         if contrib:
             author = {}
-            author["name"] = re_by.sub('', contrib)
+            author["name"] = re_by.sub("", contrib)
             add_val(o, "authors", author)
 
     # edition

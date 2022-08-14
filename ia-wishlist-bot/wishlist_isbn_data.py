@@ -36,14 +36,14 @@ def find_books():
     print("Number of books not on Open Library are: " + len(data))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if not os.path.isdir("data"):
-        os.mkdir('data')
+        os.mkdir("data")
 
-    if not os.path.exists('data/isbn_data.db'):
-        file_name = 'data/isbn_data.db'
+    if not os.path.exists("data/isbn_data.db"):
+        file_name = "data/isbn_data.db"
         urllib.request.urlretrieve(
-            'https://archive.org/download/openlibrary-bots/isbn_data.db', file_name
+            "https://archive.org/download/openlibrary-bots/isbn_data.db", file_name
         )
 
     parser = argparse.ArgumentParser()

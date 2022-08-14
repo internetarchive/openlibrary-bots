@@ -36,7 +36,7 @@ class TestOnixParser(unittest.TestCase):
 
     # TEST_ONIX_FEED_URL = 'https://storage.googleapis.com/support-kms-prod/SNP_EFDA74818D56F47DE13B6FF3520E468126FD_3285388_en_v2'
     TEST_ONIX_FEED_URL = (
-        'https://ia801503.us.archive.org/2/items/onix-bot/SampleONIX.xml'
+        "https://ia801503.us.archive.org/2/items/onix-bot/SampleONIX.xml"
     )
 
     def setUp(self):
@@ -71,13 +71,13 @@ class TestOnixParser(unittest.TestCase):
 
     def test_authors(self):
         authors = self.op.products[0].authors
-        expected_authors = ''
+        expected_authors = ""
 
         self.assertTrue(expected_authors == authors)
 
     def test_languages(self):
         languages = self.op.products[0].languages
-        expected_languages = 'eng'
+        expected_languages = "eng"
 
         self.assertTrue(expected_languages == languages)
 
@@ -87,9 +87,9 @@ class TestOnixParser(unittest.TestCase):
         expected_isbn10 = "0199223955"
         expected_isbn13 = "9780199223954"
 
-        self.assertTrue(identifiers.get('isbn10') == expected_isbn10)
-        self.assertTrue(identifiers.get('isbn13') == expected_isbn13)
-        self.assertFalse(identifiers.get('isbn12') == expected_isbn13)
+        self.assertTrue(identifiers.get("isbn10") == expected_isbn10)
+        self.assertTrue(identifiers.get("isbn13") == expected_isbn13)
+        self.assertFalse(identifiers.get("isbn12") == expected_isbn13)
 
     def test_media_file_link(self):
         media_file_link = self.op.products[0].media_file_link
@@ -158,7 +158,7 @@ class OnixFeedParser(object):
         self.onix = etree.parse(filename, parser).getroot()
         self.ns = ns
         self.products = [
-            OnixProductParser(product, ns) for product in self.onix.findall('Product')
+            OnixProductParser(product, ns) for product in self.onix.findall("Product")
         ]
 
 
@@ -183,10 +183,10 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.title
         """
-        title = self.product.xpath('//Title')
+        title = self.product.xpath("//Title")
         if title:
-            title = title[0].xpath('//TitleText')
-        return title[0].text if title else ''
+            title = title[0].xpath("//TitleText")
+        return title[0].text if title else ""
 
     @property
     def publisher(self):
@@ -204,10 +204,10 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.publisher
         """
-        publisher = self.product.xpath('//Publisher')
+        publisher = self.product.xpath("//Publisher")
         if publisher:
-            publisher = publisher[0].xpath('//PublisherName')
-        return publisher[0].text if publisher else ''
+            publisher = publisher[0].xpath("//PublisherName")
+        return publisher[0].text if publisher else ""
 
     @property
     def authors(self):
@@ -225,7 +225,7 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.authors
         """
-        authors = self.product.xpath('//Author')
+        authors = self.product.xpath("//Author")
 
         book_authors = []
 
@@ -233,7 +233,7 @@ class OnixProductParser(object):
             for author in authors:
                 book_authors.append(author[1].text)
 
-        return book_authors if authors else ''
+        return book_authors if authors else ""
 
     @property
     def languages(self):
@@ -251,12 +251,12 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.languages
         """
-        languages = self.product.xpath('//Language')
+        languages = self.product.xpath("//Language")
 
         if languages:
-            languages = languages[0].xpath('//LanguageCode')
+            languages = languages[0].xpath("//LanguageCode")
 
-        return languages[0].text if languages else ''
+        return languages[0].text if languages else ""
 
     @property
     def identifiers(self):
@@ -277,10 +277,10 @@ class OnixProductParser(object):
             >>> p.identifiers
         """
 
-        identifiers = self.product.xpath('//ProductIdentifier')
+        identifiers = self.product.xpath("//ProductIdentifier")
 
         if identifiers:
-            IDENTIFIER_TYPES = {'02': 'isbn10', '15': 'isbn13'}
+            IDENTIFIER_TYPES = {"02": "isbn10", "15": "isbn13"}
 
             found_identifiers = {}
             for identifier in identifiers:
@@ -289,7 +289,7 @@ class OnixProductParser(object):
                         IDENTIFIER_TYPES.get(identifier[0].text)
                     ] = identifier[1].text
 
-        return found_identifiers if identifiers else ''
+        return found_identifiers if identifiers else ""
 
     @property
     def media_file_link(self):
@@ -307,10 +307,10 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.media_file_link
         """
-        bookcover = self.product.xpath('//MediaFile')
+        bookcover = self.product.xpath("//MediaFile")
         if bookcover:
-            bookcover = bookcover[0].xpath('//MediaFileLink')
-        return bookcover[0].text if bookcover else ''
+            bookcover = bookcover[0].xpath("//MediaFileLink")
+        return bookcover[0].text if bookcover else ""
 
     @property
     def publication_country(self):
@@ -331,11 +331,11 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.publication_country
         """
-        publication_country = self.product.xpath('//CountryOfPublication')
+        publication_country = self.product.xpath("//CountryOfPublication")
         if publication_country:
             return publication_country[0].text
         else:
-            return ''
+            return ""
 
     @property
     def publication_city(self):
@@ -353,11 +353,11 @@ class OnixProductParser(object):
             >>> p = op.products[0]
             >>> p.publication_city
         """
-        publication_city = self.product.xpath('//CityOfPublication')
+        publication_city = self.product.xpath("//CityOfPublication")
         if publication_city:
             return publication_city[0].text
         else:
-            return ''
+            return ""
 
     @property
     def get_json(self):
@@ -377,13 +377,13 @@ class OnixProductParser(object):
         """
         data = {}
 
-        data['title'] = self.title
-        data['publication_country'] = self.publication_country
-        data['publication_city'] = self.publication_city
-        data['identifiers'] = self.identifiers
-        data['authors'] = self.authors
-        data['publishers'] = self.publisher
-        data['languages'] = self.languages
+        data["title"] = self.title
+        data["publication_country"] = self.publication_country
+        data["publication_city"] = self.publication_city
+        data["identifiers"] = self.identifiers
+        data["authors"] = self.authors
+        data["publishers"] = self.publisher
+        data["languages"] = self.languages
 
         return json.dumps(data)
 
@@ -398,14 +398,14 @@ class OnixProductBot(object):
 
         try:
             work_isbn10 = ol.Edition.get(
-                isbn=self.data.get('identifiers').get('isbn10')
+                isbn=self.data.get("identifiers").get("isbn10")
             )
         except (IndexError, ValueError):
             print("Index Error for ISBN 10")
 
         try:
             work_isbn13 = ol.Edition.get(
-                isbn=self.data.get('identifiers').get('isbn13')
+                isbn=self.data.get("identifiers").get("isbn13")
             )
         except (IndexError, ValueError):
             print("Index Error for ISBN 13")
@@ -416,19 +416,19 @@ class OnixProductBot(object):
     @property
     def check_title_or_author(self):
         try:
-            correct_title = str.maketrans('', '', string.punctuation)
+            correct_title = str.maketrans("", "", string.punctuation)
             new_title = (
                 '"'
-                + self.data.get('title')
-                .split(':')[0]
+                + self.data.get("title")
+                .split(":")[0]
                 .translate(correct_title)
                 .strip()
-                .replace(' ', '+')
+                .replace(" ", "+")
                 + '"'
             )
 
             correct_title = (
-                self.data.get('title')
+                self.data.get("title")
                 .split(":")[0]
                 .translate(correct_title)
                 .lower()
@@ -438,8 +438,8 @@ class OnixProductBot(object):
             print("Index Error for Title")
 
         try:
-            author_list = self.data.get('authors')
-            new_author = ''
+            author_list = self.data.get("authors")
+            new_author = ""
 
             for author in author_list:
                 # Concatenate to form one big string
@@ -466,10 +466,10 @@ class OnixProductBot(object):
             if r.status_code == 200:
                 j = json.loads(r.text)
                 match = False
-                for doc in j['docs']:
+                for doc in j["docs"]:
                     # Takes into account only title
                     # if doc['title_suggest'].lower() == correct_title.split(":")[0].lower().strip():
-                    if doc['title_suggest'].lower() == correct_title:
+                    if doc["title_suggest"].lower() == correct_title:
                         match = True
                 if not match:
                     print(self.data)

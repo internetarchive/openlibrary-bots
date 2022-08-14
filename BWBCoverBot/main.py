@@ -11,13 +11,13 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s %(levelname)s:%(message)s',
+    format="%(asctime)s %(levelname)s:%(message)s",
     handlers=[logging.FileHandler("bwb-cover-bot-debug.log"), logging.StreamHandler()],
 )
 
 ol = OpenLibrary(
     credentials=config.Credentials(
-        access=os.environ['OL_ACCESS_KEY'], secret=os.environ['OL_SECRET_KEY']
+        access=os.environ["OL_ACCESS_KEY"], secret=os.environ["OL_SECRET_KEY"]
     )
 )
 
@@ -41,10 +41,10 @@ def update_cover_for_edition(
         "upload": (None, "Submit"),
     }
     resp = ol.session.post(
-        f'https://openlibrary.org/books/{edition_olid}/-/add-cover',
+        f"https://openlibrary.org/books/{edition_olid}/-/add-cover",
         files=form_data_body,
     )
-    is_update_success: bool = resp.ok and 'Saved!' in resp.text
+    is_update_success: bool = resp.ok and "Saved!" in resp.text
     return is_update_success
 
 
@@ -66,62 +66,62 @@ def verify_and_update_cover(isbn_13: str, archive_contents: ZipFile) -> None:
         return
     edition_olid = ol_edition.olid
     # TODO: double check this
-    cover_exists = getattr(ol_edition, 'covers', None) not in (None, [-1])
+    cover_exists = getattr(ol_edition, "covers", None) not in (None, [-1])
     if cover_exists is True:
         db_session.bulk_save_objects(
             [EditionCoverData(isbn_13=isbn_13, cover_exists=True)]
         )
         db_session.commit()
-        logging.debug(f'cover exists in OL for {isbn_13}')
+        logging.debug(f"cover exists in OL for {isbn_13}")
         return
 
     is_success = update_cover_for_edition(
         edition_olid=edition_olid,
-        cover_data=archive_contents.read(f'{isbn_13}.jpg'),
-        file_name=f'{isbn_13}.jpg',
-        mime_type='image/jpeg',
+        cover_data=archive_contents.read(f"{isbn_13}.jpg"),
+        file_name=f"{isbn_13}.jpg",
+        mime_type="image/jpeg",
     )
     db_session.bulk_save_objects(
         [EditionCoverData(isbn_13=isbn_13, cover_exists=is_success)]
     )
     db_session.commit()
-    logging.info(f'cover update status {is_success} for {isbn_13}')
+    logging.info(f"cover update status {is_success} for {isbn_13}")
     return
 
 
 def parser_for_zip_with_isbns(cover_zip_path: str) -> None:
     logging.info(f"start time: {datetime.now().timestamp()} for {cover_zip_path}")
-    archive_contents = ZipFile(cover_zip_path, 'r')
+    archive_contents = ZipFile(cover_zip_path, "r")
     file_list: list[ZipInfo] = archive_contents.filelist
 
     processed_file_list = []
     for file in file_list:
         logging.info(
-            f'processing {file.filename}, processed {len(processed_file_list)} files'
+            f"processing {file.filename}, processed {len(processed_file_list)} files"
         )
         try:
-            isbn_of_file: str = file.filename.split('.')[0]
+            isbn_of_file: str = file.filename.split(".")[0]
             verify_and_update_cover(isbn_of_file, archive_contents)
             processed_file_list.append(processed_file_list)
         except Exception as e:
             logging.error(
-                f'file: {file.filename}, zip path: {cover_zip_path}. Error: {e}'
+                f"file: {file.filename}, zip path: {cover_zip_path}. Error: {e}"
             )
 
     logging.info(f"end time: {datetime.now().timestamp()} for {cover_zip_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = sys.argv
     if len(args) != 2:
-        raise Exception('python main.py <zip path>')
+        raise Exception("python main.py <zip path>")
 
     user_provided_path = args[1]
     zip_paths = (
         [
             os.path.join(user_provided_path, f)
             for f in os.listdir(user_provided_path)
-            if f.endswith('.zip')
+            if f.endswith(".zip")
         ]
         if os.path.isdir(user_provided_path)
         else [user_provided_path]

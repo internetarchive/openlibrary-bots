@@ -8,10 +8,10 @@ import twitterbotErrors
 from dotenv import load_dotenv
 from services import InternetArchive, ISBNFinder
 
-ACTIONS = ('read', 'borrow', 'preview')
+ACTIONS = ("read", "borrow", "preview")
 READ_OPTIONS = dict(zip(InternetArchive.MODES, ACTIONS))
 BOT_NAME = "@borrowbot"
-STATE_FILE = 'last_seen_id.txt'
+STATE_FILE = "last_seen_id.txt"
 
 LOG_FILE = "twitterbot.log"
 
@@ -21,10 +21,10 @@ LAST_SEEN_ID_LEN = 19
 
 load_dotenv()
 if (
-    not os.environ.get('CONSUMER_KEY')
-    or not os.environ.get('CONSUMER_SECRET')
-    or not os.environ.get('ACCESS_TOKEN')
-    or not os.environ.get('ACCESS_TOKEN_SECRET')
+    not os.environ.get("CONSUMER_KEY")
+    or not os.environ.get("CONSUMER_SECRET")
+    or not os.environ.get("ACCESS_TOKEN")
+    or not os.environ.get("ACCESS_TOKEN_SECRET")
 ):
     raise twitterbotErrors.TweepyAuthenticationError(
         error="Missing .env file or missing necessary keys for authentication"
@@ -32,10 +32,10 @@ if (
 
 # Authenticate
 auth = tweepy.OAuthHandler(
-    os.environ.get('CONSUMER_KEY'), os.environ.get('CONSUMER_SECRET')
+    os.environ.get("CONSUMER_KEY"), os.environ.get("CONSUMER_SECRET")
 )
 auth.set_access_token(
-    os.environ.get('ACCESS_TOKEN'), os.environ.get('ACCESS_TOKEN_SECRET')
+    os.environ.get("ACCESS_TOKEN"), os.environ.get("ACCESS_TOKEN_SECRET")
 )
 API = tweepy.API(auth, wait_on_rate_limit=True)
 
@@ -66,7 +66,7 @@ class Tweet:
     @classmethod
     def edition_available(cls, mention, edition):
         action = READ_OPTIONS[edition.get("availability")]
-        print('Replying: Edition %sable' % action)
+        print("Replying: Edition %sable" % action)
         cls._tweet(
             mention,
             "you're in luck. "
@@ -82,7 +82,7 @@ class Tweet:
             "this exact edition doesn't appear to be available, "
             "however it seems a similar edition may be: "
             + "https://openlibrary.org/work/"
-            + work.get('openlibrary_work'),
+            + work.get("openlibrary_work"),
         )
 
     @classmethod
@@ -117,7 +117,7 @@ class Tweet:
 
 def get_last_seen_id():
     try:
-        with open(STATE_FILE, 'r') as fin:
+        with open(STATE_FILE, "r") as fin:
             last_seen_id = fin.read().strip()
     except Exception as e:
         raise twitterbotErrors.FileIOError(filename=STATE_FILE, error=e)
@@ -131,7 +131,7 @@ def get_last_seen_id():
 
 def set_last_seen_id(mention):
     try:
-        with open(STATE_FILE, 'w') as fout:
+        with open(STATE_FILE, "w") as fout:
             fout.write(str(mention.id))
     except Exception as e:
         raise twitterbotErrors.FileIOError(
@@ -256,9 +256,9 @@ if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(
         filename=LOG_FILE,
-        filemode='a',
+        filemode="a",
         level=logging.INFO,
-        format='%(asctime)s | %(levelname)s | %(message)s',
+        format="%(asctime)s | %(levelname)s | %(message)s",
     )
 
     while True:

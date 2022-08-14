@@ -29,9 +29,8 @@ import sys
 local_site = os.path.join(os.path.dirname(__file__), "..", "..", "..")
 site.addsitedir(local_site)
 
-from optparse import OptionParser
-
 import pprint
+from optparse import OptionParser
 
 from openlibrary.api import OpenLibrary
 
@@ -39,13 +38,13 @@ NYT_BEST_SELLERS_URL = "http://api.nytimes.com/svc/books/v2/lists"
 
 
 def LOG(level, msg):
-    print("%s: %s" % (level, msg.encode('utf-8')), file=sys.stderr)
+    print("%s: %s" % (level, msg.encode("utf-8")), file=sys.stderr)
 
 
 def ensureUtf(s):
     try:
         if isinstance(s, str):
-            return s.encode('utf8', 'ignore')
+            return s.encode("utf8", "ignore")
     except NameError:
         return str(s)
 
@@ -79,29 +78,29 @@ def get_nyt_bestseller_list_names():
         urllib.urlencode({"api-key": NYT_API_KEY}),
     )
     results = _request(url)
-    assert 'results' in results
-    assert len(results['results']) == results['num_results']
-    return [r['list_name'] for r in results['results']]
+    assert "results" in results
+    assert len(results["results"]) == results["num_results"]
+    return [r["list_name"] for r in results["results"]]
 
 
 def load_nyt_bestseller_list(list_name):
     url = "%s/%s.json?%s" % (
         NYT_BEST_SELLERS_URL,
-        urllib.quote(list_name.replace(' ', '-')),
+        urllib.quote(list_name.replace(" ", "-")),
         urllib.urlencode({"api-key": NYT_API_KEY}),
     )
 
     results = _request(url)
-    assert 'results' in results
+    assert "results" in results
 
-    if len(results['results']) != results['num_results']:
+    if len(results["results"]) != results["num_results"]:
         LOG(
             "ERROR",
             "expected %s result for %s, got %s"
-            % (results['num_results'], len(results['results']), list_name),
+            % (results["num_results"], len(results["results"]), list_name),
         )
 
-    return results['results']
+    return results["results"]
 
 
 def _do_ol_query(type="/type/edition", **query):
@@ -111,47 +110,47 @@ def _do_ol_query(type="/type/edition", **query):
 
 def reconcile_authors(authors):
     result = set()
-    result.update(_do_ol_query(type='/type/author', name=authors.upper()))
+    result.update(_do_ol_query(type="/type/author", name=authors.upper()))
     authors = " ".join([a.capitalize() for a in authors.split()])
-    result.update(_do_ol_query(type='/type/author', name=authors))
+    result.update(_do_ol_query(type="/type/author", name=authors))
     return result
 
 
 def reconcile_book(book):
     result = set()
-    for isbn10 in (x['isbn10'] for x in book['isbns']):
+    for isbn10 in (x["isbn10"] for x in book["isbns"]):
         for edition in _do_ol_query(works={"title": None}, isbn_10=isbn10):
-            result.add(edition['key'])
-            result.update([x['key'] for x in edition['works'] or []])
+            result.add(edition["key"])
+            result.update([x["key"] for x in edition["works"] or []])
 
     if result:
         LOG("INFO", "RECONCILED BY ISBN10: %s" % str(result))
         return result
 
-    for isbn13 in (x['isbn13'] for x in book['isbns']):
+    for isbn13 in (x["isbn13"] for x in book["isbns"]):
         for edition in _do_ol_query(works={"title": None}, isbn_13=str(isbn13)):
-            result.add(edition['key'])
-            result.update([x['key'] for x in edition['works'] or []])
+            result.add(edition["key"])
+            result.update([x["key"] for x in edition["works"] or []])
 
     if result:
         LOG("INFO", "RECONCILED BY ISBN13: %s" % str(result))
         return result
 
-    authors = reconcile_authors(book['book_details'][0]['author'])
+    authors = reconcile_authors(book["book_details"][0]["author"])
     if not authors:
         authors = set()
         for a in re.split(
             "(?: (?:and|with) )|(?:,|&)|(?:^edited|others$)",
-            book['book_details'][0]['author'],
+            book["book_details"][0]["author"],
         ):
             authors.update(reconcile_authors(a))
 
     if not authors:
-        LOG("INFO", "NO AUTHOR: %s" % pprint.pformat(book['book_details']))
+        LOG("INFO", "NO AUTHOR: %s" % pprint.pformat(book["book_details"]))
         return []
 
     for a in authors:
-        title = book['book_details'][0]['title']
+        title = book["book_details"][0]["title"]
         r = []
         r.extend(
             _do_ol_query(
@@ -165,15 +164,15 @@ def reconcile_book(book):
             )
         )
         if r:
-            result.update([x['key'] for x in r])
+            result.update([x["key"] for x in r])
             LOG("INFO", "RECONCILED BY AUTHOR: %s" % str(result))
             return result
     return result
 
 
 def _get_first_bestseller_date(nyt):
-    bd = nyt['bestsellers_date']
-    wol = nyt['weeks_on_list']
+    bd = nyt["bestsellers_date"]
+    wol = nyt["weeks_on_list"]
     bd = datetime.datetime.strptime(bd, "%Y-%m-%d")
     wol = datetime.timedelta(days=wol * 7)
     result = bd - wol
@@ -183,13 +182,13 @@ def _get_first_bestseller_date(nyt):
 def write_machine_tags(ln, books):
     key_to_nyt = {}
     for book in books:
-        for work in book['ol:works']:
-            key_to_nyt[work] = book['nyt']
+        for work in book["ol:works"]:
+            key_to_nyt[work] = book["nyt"]
 
     works = OL.get_many(list(set(key_to_nyt.keys())))
     write = {}
     for work in works.values():
-        nyt = key_to_nyt[work['key']]
+        nyt = key_to_nyt[work["key"]]
         tags = (
             "New York Times bestseller",
             "nyt:%s=%s"
@@ -198,33 +197,33 @@ def write_machine_tags(ln, books):
                 _get_first_bestseller_date(nyt),
             ),
         )
-        if 'subjects' not in work:
-            work['subjects'] = list(tags)
-            write[work['key']] = work
+        if "subjects" not in work:
+            work["subjects"] = list(tags)
+            write[work["key"]] = work
         else:
             for tag in tags:
-                if tag not in work['subjects']:
-                    work['subjects'].append(tag)
-                    write[work['key']] = work
+                if tag not in work["subjects"]:
+                    work["subjects"].append(tag)
+                    write[work["key"]] = work
         # clean up any broken tags
-        work['subjects'] = [
+        work["subjects"] = [
             s
-            for s in work['subjects']
+            for s in work["subjects"]
             if not s.startswith(("nyt:", "nytimes:")) or s in tags
         ]
 
-        if work['key'] not in write:
+        if work["key"] not in write:
             LOG(
                 "INFO",
                 "all tags already present, skipping %s: '%s' by %s"
                 % (
-                    work['key'],
-                    nyt['book_details'][0]['title'],
-                    nyt['book_details'][0]['author'],
+                    work["key"],
+                    nyt["book_details"][0]["title"],
+                    nyt["book_details"][0]["author"],
                 ),
             )
         else:
-            LOG("DEBUG", "Adding tags (%s) to %s" % (", ".join(tags), work['key']))
+            LOG("DEBUG", "Adding tags (%s) to %s" % (", ".join(tags), work["key"]))
     LOG("INFO", "WRITING MACHINE TAGS FOR %s of %s works" % (len(write), len(books)))
     if write:
         OL.save_many(
@@ -280,8 +279,8 @@ if __name__ == "__main__":
                     "WARN",
                     "unable to reconcile '%s' by %s - no OL book found"
                     % (
-                        book['book_details'][0]['title'],
-                        book['book_details'][0]['author'],
+                        book["book_details"][0]["title"],
+                        book["book_details"][0]["author"],
                     ),
                 )
             if not (key for key in ol_keys if key.startswith("/works/")):
@@ -289,8 +288,8 @@ if __name__ == "__main__":
                     "WARN",
                     "only editions for '%s' by %s: %s"
                     % (
-                        book['book_details'][0]['title'],
-                        book['book_details'][0]['author'],
+                        book["book_details"][0]["title"],
+                        book["book_details"][0]["author"],
                         ol_keys,
                     ),
                 )
@@ -307,7 +306,7 @@ if __name__ == "__main__":
                 "RECONCILED %s%% of %s"
                 % (
                     int(
-                        len([r for r in results[ln] if r['ol:works']])
+                        len([r for r in results[ln] if r["ol:works"]])
                         / float(len(results[ln]))
                         * 100
                     ),

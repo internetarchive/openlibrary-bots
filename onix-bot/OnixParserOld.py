@@ -8,7 +8,7 @@ import requests
 from lxml import etree
 from olclient.openlibrary import OpenLibrary
 
-FILE = 'data/SampleONIX.xml'
+FILE = "data/SampleONIX.xml"
 ol = OpenLibrary()
 
 
@@ -36,18 +36,18 @@ class OnixParser(object):
 
         tree = etree.parse(filename)
 
-        self.products = tree.xpath('/ONIXMessage/Product')
+        self.products = tree.xpath("/ONIXMessage/Product")
         self.onix_records = [[]]
 
     def parse_product(self, product):
         product = etree.fromstring(etree.tostring(product))
-        identifiers = product.xpath('/Product/ProductIdentifier')
+        identifiers = product.xpath("/Product/ProductIdentifier")
 
         isbn10 = None
         isbn13 = None
         book_cover = None
 
-        IDENTIFIER_TYPES = {'02': 'isbn10', '15': 'isbn13'}
+        IDENTIFIER_TYPES = {"02": "isbn10", "15": "isbn13"}
 
         found_identifiers = {}
         for identifier in identifiers:
@@ -55,32 +55,32 @@ class OnixParser(object):
                 1
             ].text
 
-        titles = product.xpath('/Product/Title')
+        titles = product.xpath("/Product/Title")
 
         for title in titles:
             book_title = title[1].text
 
-        authors = product.xpath('/Product/Author')
+        authors = product.xpath("/Product/Author")
 
         book_authors = []
 
         for author in authors:
             book_authors.append(author[1].text)
 
-        publishers = product.xpath('/Product/Publisher')
+        publishers = product.xpath("/Product/Publisher")
 
         for publisher in publishers:
             book_publisher = publisher[1].text
 
-        publication_country = product.xpath('/Product/CountryOfPublication')[0].text
-        publication_city = product.xpath('/Product/CityOfPublication')[0].text
+        publication_country = product.xpath("/Product/CountryOfPublication")[0].text
+        publication_city = product.xpath("/Product/CityOfPublication")[0].text
 
-        media_files = product.xpath('/Product/MediaFile')
+        media_files = product.xpath("/Product/MediaFile")
 
         for media_file in media_files:
             book_cover = media_file[3].text
 
-        languages = product.xpath('/Product/Language')
+        languages = product.xpath("/Product/Language")
 
         for language in languages:
             book_language = language[1].text
@@ -90,8 +90,8 @@ class OnixParser(object):
             book_publisher,
             publication_city,
             publication_country,
-            found_identifiers.get('isbn10'),
-            found_identifiers.get('isbn13'),
+            found_identifiers.get("isbn10"),
+            found_identifiers.get("isbn13"),
             book_cover,
             book_language,
             book_authors,
@@ -119,14 +119,14 @@ class OnixParser(object):
                 print("Index Error for ISBN 13")
 
             try:
-                correct_title = str.maketrans('', '', string.punctuation)
+                correct_title = str.maketrans("", "", string.punctuation)
                 new_title = (
                     '"'
                     + record[0]
-                    .split(':')[0]
+                    .split(":")[0]
                     .translate(correct_title)
                     .strip()
-                    .replace(' ', '+')
+                    .replace(" ", "+")
                     + '"'
                 )
 
@@ -138,7 +138,7 @@ class OnixParser(object):
 
             try:
                 author_list = record[8]
-                new_author = ''
+                new_author = ""
 
                 for author in author_list:
                     # Concatenate to form one big string
@@ -166,10 +166,10 @@ class OnixParser(object):
                     j = json.loads(r.text)
 
                     match = False
-                    for doc in j['docs']:
+                    for doc in j["docs"]:
                         # Takes into account only title
                         # if doc['title_suggest'].lower() == correct_title.split(":")[0].lower().strip():
-                        if doc['title_suggest'].lower() == correct_title:
+                        if doc["title_suggest"].lower() == correct_title:
                             match = True
 
                     if (
@@ -189,7 +189,7 @@ class OnixParser(object):
         return final_onix_records
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     onix = OnixParser(FILE)
     onix.get_attributes()

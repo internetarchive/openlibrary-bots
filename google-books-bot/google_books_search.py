@@ -93,9 +93,9 @@ def main():
     parser.add_argument("--google_api_key", help="Your Google API key", required=True)
     args = parser.parse_args()
 
-    google_books_service = build('books', 'v1', developerKey=args.google_api_key)
+    google_books_service = build("books", "v1", developerKey=args.google_api_key)
     google_books_request = google_books_service.volumes().list(
-        source='public', q=args.query
+        source="public", q=args.query
     )
     google_books_response = google_books_request.execute()
 

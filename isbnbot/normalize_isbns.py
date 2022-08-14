@@ -13,7 +13,7 @@ from os import makedirs
 import isbnlib
 from olclient.openlibrary import OpenLibrary
 
-ALLOWED_ISBN_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '-'}
+ALLOWED_ISBN_CHARS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "X", "x", "-"}
 
 
 class NormalizeISBNJob(object):
@@ -28,20 +28,20 @@ class NormalizeISBNJob(object):
         self.dry_run = dry_run
         self.limit = limit
 
-        job_name = sys.argv[0].replace('.py', '')
+        job_name = sys.argv[0].replace(".py", "")
         self.logger = logging.getLogger("jobs.%s" % job_name)
         self.logger.setLevel(logging.DEBUG)
         log_formatter = logging.Formatter(
-            '%(name)s;%(levelname)-8s;%(asctime)s %(message)s'
+            "%(name)s;%(levelname)-8s;%(asctime)s %(message)s"
         )
         self.console_handler = logging.StreamHandler()
         self.console_handler.setLevel(logging.WARN)
         self.console_handler.setFormatter(log_formatter)
         self.logger.addHandler(self.console_handler)
-        log_dir = 'logs/jobs/%s' % job_name
+        log_dir = "logs/jobs/%s" % job_name
         makedirs(log_dir, exist_ok=True)
         log_file_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir + '/%s_%s.log' % (job_name, log_file_datetime)
+        log_file = log_dir + "/%s_%s.log" % (job_name, log_file_datetime)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(log_formatter)
@@ -71,23 +71,23 @@ class NormalizeISBNJob(object):
         """
         if self.dry_run:
             self.logger.info(
-                'dry_run set to TRUE. Script will run, but no data will be modified.'
+                "dry_run set to TRUE. Script will run, but no data will be modified."
             )
 
-        header = {'type': 0, 'key': 1, 'revision': 2, 'last_modified': 3, 'JSON': 4}
-        comment = 'normalize ISBN'
-        with gzip.open(dump_filepath, 'rb') as fin:
+        header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
+        comment = "normalize ISBN"
+        with gzip.open(dump_filepath, "rb") as fin:
             for row_num, row in enumerate(fin):
-                row = row.decode().split('\t')
-                _json = json.loads(row[header['JSON']])
-                if _json['type']['key'] != '/type/edition':
+                row = row.decode().split("\t")
+                _json = json.loads(row[header["JSON"]])
+                if _json["type"]["key"] != "/type/edition":
                     continue
 
                 isbns_by_type = dict()
-                if 'isbn_10' in _json:
-                    isbns_by_type['isbn_10'] = _json.get('isbn_10', None)
-                if 'isbn_13' in _json:
-                    isbns_by_type['isbn_13'] = _json.get('isbn_13', None)
+                if "isbn_10" in _json:
+                    isbns_by_type["isbn_10"] = _json.get("isbn_10", None)
+                if "isbn_13" in _json:
+                    isbns_by_type["isbn_13"] = _json.get("isbn_13", None)
                 if not isbns_by_type:
                     continue
 
@@ -101,9 +101,9 @@ class NormalizeISBNJob(object):
                 if not needs_normalization:
                     continue
 
-                olid = _json['key'].split('/')[-1]
+                olid = _json["key"].split("/")[-1]
                 edition = self.ol.Edition.get(olid)
-                if edition.type['key'] != '/type/edition':
+                if edition.type["key"] != "/type/edition":
                     continue
 
                 for (
@@ -124,7 +124,7 @@ class NormalizeISBNJob(object):
                     if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
                         self.logger.info(
-                            '\t'.join([olid, str(isbns), str(normalized_isbns)])
+                            "\t".join([olid, str(isbns), str(normalized_isbns)])
                         )
                         self.save(lambda: edition.save(comment=comment))
 
@@ -133,22 +133,22 @@ class NormalizeISBNJob(object):
         if not self.dry_run:
             save_fn()
         else:
-            self.logger.info('Modification not made because dry_run is True')
+            self.logger.info("Modification not made because dry_run is True")
         self.changed += 1
         if self.limit and self.changed >= self.limit:
-            self.logger.info('Modification limit reached. Exiting script.')
+            self.logger.info("Modification limit reached. Exiting script.")
             sys.exit()
 
 
 def str2bool(value):
     if isinstance(value, bool):
         return value
-    if value.lower() in ('yes', 'true', 't', 'y', '1'):
+    if value.lower() in ("yes", "true", "t", "y", "1"):
         return True
-    elif value.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif value.lower() in ("no", "false", "f", "n", "0"):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def dedupe(input: list) -> list:
@@ -160,22 +160,22 @@ def dedupe(input: list) -> list:
     return output
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--dump_path',
+        "--dump_path",
         type=str,
         default=None,
-        help='Path to *.txt.gz containing OpenLibrary editions data',
+        help="Path to *.txt.gz containing OpenLibrary editions data",
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
         default=1,
-        help='Limit number of edits performed on OpenLibrary data. Set to zero to allow unlimited edits',
+        help="Limit number of edits performed on OpenLibrary data. Set to zero to allow unlimited edits",
     )
     parser.add_argument(
-        '--dry-run',
+        "--dry-run",
         type=str2bool,
         default=True,
         help="Don't actually perform edits on Open Library",
