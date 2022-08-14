@@ -134,20 +134,20 @@ def parse_shortnames(input):
         def element(name, attrs):
             def typespec(name, attrs):
                 def attribute(name, attrs):
-                    if attrs.getValueByQName('name') == "shortname":
-                        shortname = attrs.getValueByQName('fixed')
+                    if attrs.getValueByQName("name") == "shortname":
+                        shortname = attrs.getValueByQName("fixed")
                         return CollectorValue(shortname)
                     else:
                         return CollectorNone()
 
-                return NodeCollector({'attribute': attribute, collector_any: typespec})
+                return NodeCollector({"attribute": attribute, collector_any: typespec})
 
-            elt_name = attrs.getValueByQName('name')
+            elt_name = attrs.getValueByQName("name")
             return NamedCollector(elt_name, {collector_any: typespec})
 
-        return DictCollector({'element': element})
+        return DictCollector({"element": element})
 
-    return collector_parse(input, {'schema': schema})
+    return collector_parse(input, {"schema": schema})
 
 
 def parse_codelists(input):
@@ -159,21 +159,21 @@ def parse_codelists(input):
                         def documentation(name, attrs):
                             return TextCollector()
 
-                        return ListCollector({'documentation': documentation})
+                        return ListCollector({"documentation": documentation})
 
                     return NamedCollector(
-                        attrs.getValueByQName(u'value'), {'annotation': annotation}
+                        attrs.getValueByQName("value"), {"annotation": annotation}
                     )
 
-                return DictCollector({'enumeration': enumeration})
+                return DictCollector({"enumeration": enumeration})
 
             return NamedCollector(
-                attrs.getValueByQName(u'name'), {'restriction': restriction}
+                attrs.getValueByQName("name"), {"restriction": restriction}
             )
 
-        return DictCollector({'simpleType': simpleType})
+        return DictCollector({"simpleType": simpleType})
 
-    return collector_parse(input, {'schema': schema})
+    return collector_parse(input, {"schema": schema})
 
 
 init()
