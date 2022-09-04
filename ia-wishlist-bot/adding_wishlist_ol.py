@@ -1,38 +1,64 @@
-import sys
-from olclient.openlibrary import OpenLibrary
-import olclient.common as common
-
-import csv
 import ast
-import requests
+import csv
 import json
+import sys
 import unittest
 
+import olclient.common as common
+import requests
+from olclient.openlibrary import OpenLibrary
+
 ol = OpenLibrary()
-FILE = 'ia-data/new_wishlist_salman_1000.csv'
+FILE = "ia-data/new_wishlist_salman_1000.csv"
 
 
 class TestWishlistAddBook(unittest.TestCase):
     def test_parse_wishlist_csv_row_to_dict(self):
-        csv = ["Larks in a paradise: New Zealand portraits", "['McNeish, James', 'Friedlander, Marti']",
-               "eng", "1974", "16289249", "0002114976", "9780002114974"]
-        expected = {"title": "Larks in a paradise: New Zealand portraits", "authors": [
-            'McNeish, James', 'Friedlander, Marti'], "language": "eng", "date": "1974", "oclc": "16289249", "isbn10": "0002114976", "isbn13": "9780002114974"}
+        csv = [
+            "Larks in a paradise: New Zealand portraits",
+            "['McNeish, James', 'Friedlander, Marti']",
+            "eng",
+            "1974",
+            "16289249",
+            "0002114976",
+            "9780002114974",
+        ]
+        expected = {
+            "title": "Larks in a paradise: New Zealand portraits",
+            "authors": ["McNeish, James", "Friedlander, Marti"],
+            "language": "eng",
+            "date": "1974",
+            "oclc": "16289249",
+            "isbn10": "0002114976",
+            "isbn13": "9780002114974",
+        }
 
         self.assertTrue(parse_wishlist_csv_row_to_dict(csv) == expected)
 
     def test_get_author_object(self):
-        author = {'author_name': 'JK Rowling'}
-        expected = common.Author(name='JK Rowling')
-        author_obj = get_author_object(author.get('author_name'), author.get(
-            'author_birth_date'), author.get('author_death_date'))
+        author = {"author_name": "JK Rowling"}
+        expected = common.Author(name="JK Rowling")
+        author_obj = get_author_object(
+            author.get("author_name"),
+            author.get("author_birth_date"),
+            author.get("author_death_date"),
+        )
 
         self.assertTrue(
-            expected.name == author_obj.name and expected.identifiers == author_obj.identifiers)
+            expected.name == author_obj.name
+            and expected.identifiers == author_obj.identifiers
+        )
 
     def test_get_bookcover(self):
-        csv = ["Mom Goes to War(Light)", "[' Irene Aparici Martin']",
-               "eng", "1974", "16289249", "8415503202", "9788415503200"]
+        csv = [
+            "Mom Goes to War(Light)",
+            "[' Irene Aparici Martin']",
+            "eng",
+            "1974",
+            "16289249",
+            "8415503202",
+            "9788415503200",
+        ]
 
         book = parse_wishlist_csv_row_to_dict(csv)
         expected_url = "https://images.betterworldbooks.com/841/9788415503200.jpg"
@@ -40,8 +66,15 @@ class TestWishlistAddBook(unittest.TestCase):
         self.assertTrue(expected_url == get_bookcover(book))
 
     def test_empty_bookcover(self):
-        csv = ["Alicia a trave s del espejo La caza del snark", "['Lewis Carroll']",
-               "Spanish", "2002", "893562252", "9706664998", "9789706664990"]
+        csv = [
+            "Alicia a trave s del espejo La caza del snark",
+            "['Lewis Carroll']",
+            "Spanish",
+            "2002",
+            "893562252",
+            "9706664998",
+            "9789706664990",
+        ]
         book = parse_wishlist_csv_row_to_dict(csv)
         expected_url = None
 
@@ -55,7 +88,7 @@ def process_csv(filename):
         >>> parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
         { "author": "foo", "title": "bar", ...}
     """
-    with open(filename, mode='r') as infile:
+    with open(filename, mode="r") as infile:
         reader = csv.reader(infile)
 
         book_data = [row for row in reader]
@@ -70,8 +103,15 @@ def parse_wishlist_csv_row_to_dict(csv):
         >>> parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
         { "author": "foo", "title": "bar", ...}
     """
-    book = {"title": csv[0], "authors": ast.literal_eval(
-        csv[1]), "language": csv[2], "date": csv[3], "oclc": csv[4], "isbn10": csv[5], "isbn13": csv[6]}
+    book = {
+        "title": csv[0],
+        "authors": ast.literal_eval(csv[1]),
+        "language": csv[2],
+        "date": csv[3],
+        "oclc": csv[4],
+        "isbn10": csv[5],
+        "isbn13": csv[6],
+    }
     return book
 
 
@@ -85,11 +125,11 @@ def get_author_object(author_name, author_birth_date=None, author_death_date=Non
         >>> get_author_object('Dan Brown')
     """
     if "," in author_name:
-        author_name = author_name.split(',')
-        author_name = author_name[1] + ' ' + author_name[0]
+        author_name = author_name.split(",")
+        author_name = author_name[1] + " " + author_name[0]
 
     while True:
-        author_name_new = re.sub(r'\([^\(]*?\)', r'', author_name)
+        author_name_new = re.sub(r"\([^\(]*?\)", r"", author_name)
         if author_name_new == author_name:
             break
         author_name = author_name_new
@@ -102,8 +142,13 @@ def get_author_object(author_name, author_birth_date=None, author_death_date=Non
 
 
 def get_bookcover(book):
-    url = "https://images.betterworldbooks.com/" + \
-        book.get('isbn10')[0:3] + "/" + book.get('isbn13') + ".jpg"
+    url = (
+        "https://images.betterworldbooks.com/"
+        + book.get("isbn10")[0:3]
+        + "/"
+        + book.get("isbn13")
+        + ".jpg"
+    )
 
     r = requests.get(url)
 
@@ -116,13 +161,17 @@ def add_book_via_olclient(book, author_list, bookcover=None):
 
     if len(author_list) != 0:
         # Define a Book Object
-        new_book = common.Book(title=book.get("title"), authors=author_list,
-                               publish_date=book.get("date"), language=book.get("language"))
+        new_book = common.Book(
+            title=book.get("title"),
+            authors=author_list,
+            publish_date=book.get("date"),
+            language=book.get("language"),
+        )
 
         # Add metadata like ISBN 10 and ISBN 13
-        new_book.add_id(u'isbn_10', book.get("isbn10"))
-        new_book.add_id(u'isbn_13', book.get('isbn13'))
-        new_book.add_id(u'oclc', book.get('oclc'))
+        new_book.add_id("isbn_10", book.get("isbn10"))
+        new_book.add_id("isbn_13", book.get("isbn13"))
+        new_book.add_id("oclc", book.get("oclc"))
 
         print(new_book)
         try:
@@ -133,14 +182,13 @@ def add_book_via_olclient(book, author_list, bookcover=None):
             print("Book already exists!")
 
     else:
-        print("No authors added. Work " +
-              book.get("title") + " has been skipped.")
+        print("No authors added. Work " + book.get("title") + " has been skipped.")
 
 
 def process_book(book):
     # make sure we've normalized the author name (e.g. first last?)
     author_list = []
-    for author_name in book.get('authors'):
+    for author_name in book.get("authors"):
         author_list.append(get_author_object(author_name))
 
     # Bookcover search, etc
