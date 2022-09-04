@@ -1,4 +1,5 @@
 from isbnlib import notisbn
+
 from isbnbot.normalize_isbns import NormalizeISBNJob
 
 

@@ -1,12 +1,14 @@
 class Error(Exception):
     pass
 
+
 class TweepyAuthenticationError(Error):
     def __init__(self, error=None):
         self.error = error
 
     def __str__(self):
         return f"{type(self).__name__}: Failed to Authenticate with Twitter through Tweepy >> {self.error}"
+
 
 class FileIOError(Error):
     def __init__(self, filename=None, data=None, error="Error not provided"):
@@ -19,7 +21,7 @@ class FileIOError(Error):
             return f"{type(self).__name__}: Failed to write '{self.data}' to file '{self.filename}' >> {self.error}"
         return f"{type(self).__name__}: Failed to read from file '{self.filename}' >> {self.error}"
 
-    
+
 class LastSeenIDError(Error):
     def __init__(self, filename=None, last_seen_id=None):
         self.filename = filename
@@ -50,11 +52,13 @@ class TooManyMentionsError(Error):
 
 class GoodreadsError(Error):
     def __init__(self, url=None, error=None):
-        self.url=url
-        self.error=error
+        self.url = url
+        self.error = error
 
     def __str__(self):
-        return f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
+        return (
+            f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
+        )
 
 
 class AmazonError(Error):
@@ -63,7 +67,9 @@ class AmazonError(Error):
         self.error = error
 
     def __str__(self):
-        return f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
+        return (
+            f"{type(self).__name__}: Failed to scrape url '{self.url}' >> {self.error}"
+        )
 
 
 class FindISBNError(Error):
@@ -108,7 +114,9 @@ class FindAvailableWorkError(Error):
         self.error = error
 
     def __str__(self):
-        return f"{type(self).__name__}: Failed to get book '{self.book}' >> {self.error}"
+        return (
+            f"{type(self).__name__}: Failed to get book '{self.book}' >> {self.error}"
+        )
 
 
 class SendTweetError(Error):
@@ -120,4 +128,4 @@ class SendTweetError(Error):
     def __str__(self):
         if not self.mention.user.screen_name or not self.mention.id:
             return f"{type(self).__name__}: {self.error}"
-        return f"{type(self).__name__}: Failed to send tweet '{self.message}' with mention id '{self.mention.id}' >> {self.error}"  
+        return f"{type(self).__name__}: Failed to send tweet '{self.message}' with mention id '{self.mention.id}' >> {self.error}"

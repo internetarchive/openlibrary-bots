@@ -1,8 +1,10 @@
-import isbnlib
-import re
-import requests
 import datetime
+import re
+
+import isbnlib
+import requests
 import twitterbotErrors
+
 
 class ISBNFinder:
 
@@ -11,9 +13,8 @@ class ISBNFinder:
     @staticmethod
     def amazon(url):
         try:
-            return (
-                re.findall("/dp/([0-9X]{10})/?", url) or
-                re.findall("/product/([0-9X]{10})/?", url)
+            return re.findall("/dp/([0-9X]{10})/?", url) or re.findall(
+                "/product/([0-9X]{10})/?", url
             )
         except Exception as e:
             raise twitterbotErrors.AmazonError(url, e)
@@ -27,7 +28,6 @@ class ISBNFinder:
         except Exception as e:
             raise twitterbotErrors.GoodreadsError(url, e)
 
-
     @classmethod
     def find_isbns(cls, text):
         try:
@@ -40,8 +40,11 @@ class ISBNFinder:
                         isbns.extend(_isbns)
                 else:
                     isbns.extend(isbnlib.get_isbnlike(token, level="normal"))
-            return [isbnlib.canonical(isbn) for isbn in isbns
-                    if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)]
+            return [
+                isbnlib.canonical(isbn)
+                for isbn in isbns
+                if isbnlib.is_isbn10(isbn) or isbnlib.is_isbn13(isbn)
+            ]
         except Exception as e:
             raise twitterbotErrors.FindISBNError(text=text, error=e)
 
@@ -57,7 +60,9 @@ class InternetArchive:
     def get_edition(cls, isbn):
         try:
             ed = requests.get("%s/isbn/%s.json" % (cls.OL_URL, isbn)).json()
-            ed["availability"] = ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
+            ed["availability"] = (
+                ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
+            )
             ed["isbn"] = ed and isbn
             return ed
         except twitterbotErrors.GetAvailabilityError as e:
@@ -69,8 +74,13 @@ class InternetArchive:
     def get_availability(cls, identifier):
         try:
             url = "%s/services/loans/loan/" % cls.IA_URL
-            status = requests.get("%s?&action=availability&identifier=%s" % (
-                url, identifier)).json().get("lending_status")
+            status = (
+                requests.get(
+                    "%s?&action=availability&identifier=%s" % (url, identifier)
+                )
+                .json()
+                .get("lending_status")
+            )
             for mode in cls.MODES:
                 if status.get(mode):
                     return mode
@@ -83,11 +93,11 @@ class InternetArchive:
             url = "%s/advancedsearch.php" % cls.IA_URL
             work_id = book["works"][0]["key"].split("/")[-1]
             query = (
-                "openlibrary_work:%s AND" % work_id +
-                "(lending___is_lendable:true OR" +
-                " lending___is_readable:true OR" +
-                " lending___is_printdisabled:true" +
-                ")"
+                "openlibrary_work:%s AND" % work_id
+                + "(lending___is_lendable:true OR"
+                + " lending___is_readable:true OR"
+                + " lending___is_printdisabled:true"
+                + ")"
             )
             params = [
                 ("q", query),
@@ -98,7 +108,7 @@ class InternetArchive:
                 ("fl[]", "lending___is_printdisabled"),
                 ("rows", "50"),
                 ("page", "1"),
-                ("output", "json")
+                ("output", "json"),
             ]
             matches = requests.get(url, params=params).json()
             if matches and matches["response"]["docs"]:
