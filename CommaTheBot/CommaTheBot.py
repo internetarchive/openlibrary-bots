@@ -45,7 +45,7 @@ class CommaTheBotJob(AbstractBotJob):
                 isEdition = json_data['type']['key'] == '/type/edition'
                 book = self.ol.Edition.get(olid) if isEdition else self.ol.Work.get(olid)
 
-                if not ( book.type['key'] == '/type/edition' or book.type['key'] == '/type/work' ):
+                if not book.type['key'] in ('/type/edition', '/type/work' ):
                     continue # skip deleted books
                 if not self.needs_fixing(book.title):
                     continue
