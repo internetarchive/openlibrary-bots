@@ -1,7 +1,7 @@
 certifi==2022.9.24
 chardet==5.0.0
 idna==3.3
-isbnlib==3.10.10
+isbnlib==3.10.12
 oauthlib==3.2.2
 PySocks==1.7.1
 python-dotenv==0.21.0
