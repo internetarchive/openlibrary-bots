@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
-      - run: pip install --upgrade pip
+      - run: pip install --upgrade pip setuptools
       - run: pip install black codespell flake8 isort pytest
       - run: black --check .
       - run: codespell --ignore-words-list="didnt" --skip="*.tsv,*.xsd" --quiet-level=2
