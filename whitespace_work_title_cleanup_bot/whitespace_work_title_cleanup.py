@@ -8,7 +8,9 @@ from olclient.bots import AbstractBotJob
 
 class TrimTitleJob(AbstractBotJob):
     @staticmethod
-    def needs_trim(work_title: str,) -> bool:  
+    def needs_trim(
+        work_title: str,
+    ) -> bool:
         """Returns True if Edition title needs to have whitespace removed. Return false otherwise"""
         return work_title.strip() != work_title
 
@@ -23,7 +25,7 @@ class TrimTitleJob(AbstractBotJob):
                 row, json_data = self.process_row(row)
                 if json_data["type"]["key"] != "/type/work":
                     continue  # this handles full dump (instead for work dump)
-                if not self.needs_trim(json_data.get("title","")):
+                if not self.needs_trim(json_data.get("title", "")):
                     continue
 
                 # the database may have changed since the dump was created, so call the
@@ -38,7 +40,9 @@ class TrimTitleJob(AbstractBotJob):
                 # this edition needs editing, so fix it
                 old_title = copy.deepcopy(work.title)
                 work.title = work.title.strip()
-                self.logger.info("|".join((olid, old_title, work.title)))  # log the modifications
+                self.logger.info(
+                    "|".join((olid, old_title, work.title))
+                )  # log the modifications
                 self.save(lambda: work.save(comment=comment))
 
 
