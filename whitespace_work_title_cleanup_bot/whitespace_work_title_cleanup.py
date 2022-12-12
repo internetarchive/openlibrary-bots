@@ -8,9 +8,7 @@ from olclient.bots import AbstractBotJob
 
 class TrimTitleJob(AbstractBotJob):
     @staticmethod
-    def needs_trim(
-        work_title: str,
-    ) -> bool:
+    def needs_trim(work_title: str) -> bool:
         """Returns True if Edition title needs to have whitespace removed. Return false otherwise"""
         return work_title.strip() != work_title
 
@@ -40,9 +38,8 @@ class TrimTitleJob(AbstractBotJob):
                 # this edition needs editing, so fix it
                 old_title = copy.deepcopy(work.title)
                 work.title = work.title.strip()
-                self.logger.info(
-                    "|".join((olid, old_title, work.title))
-                )  # log the modifications
+                # log the modifications
+                self.logger.info("|".join((olid, old_title, work.title)))
                 self.save(lambda: work.save(comment=comment))
 
 
