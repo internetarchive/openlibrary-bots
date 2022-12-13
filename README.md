@@ -1,4 +1,7 @@
+[![example workflow](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml/badge.svg)](https://github.com/internetarchive/openlibrary-bots/actions/workflows/lint_python.yml)
+
 # openlibrary-bots
+
 [Open Library](https://openlibrary.org) is an open, editable library catalog, building towards a web page for every book ever published. This repository contains cleanup bots implementing the `openlibrary-client` which allow developers to add/edit/remove different works/editions on Open Library.
 
 ## Table of Contents
@@ -37,7 +40,7 @@ For instructions on administrating your Open Library instance and build instruct
 
 You can also find more information regarding Developer Documentation for Open Library in the Open Library [Wiki](https://github.com/internetarchive/openlibrary/wiki/)
 
-Typically every folder signifies a different bot. The folder must contain code with respect to the bot, a `README.md` file which tells the user how to run the bot and any dependecies or `requirements.txt` file which can make it easier for a user to run the bot.
+Typically every folder signifies a different bot. The folder must contain code with respect to the bot, a `README.md` file which tells the user how to run the bot and any dependencies or `requirements.txt` file which can make it easier for a user to run the bot.
 
 ## Contributing
 

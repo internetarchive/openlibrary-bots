@@ -50,10 +50,6 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-local_settings.py
-
 # Flask stuff:
 instance/
 .webassets-cache
@@ -81,6 +77,11 @@ celerybeat-schedule
 
 # dotenv
 .env
+twitter-borrowbot/.env
+
+# Last seen id of the tweet
+twitter-borrowbot/last_seen_id.txt
+
 
 # virtualenv
 .venv
