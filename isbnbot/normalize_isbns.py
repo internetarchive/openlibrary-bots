@@ -29,15 +29,8 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
             return normalized_isbn and normalized_isbn != isbn
 
     def run(self) -> None:
-        """
-        Performs ISBN normalization (removes hyphens and capitalizes letters)
-
-        dump_filepath -- path to *.txt.gz dump containing editions that need to be operated on
-        """
-        if self.dry_run:
-            self.logger.info(
-                "dry_run set to TRUE. Script will run, but no data will be modified."
-            )
+        """Performs ISBN normalization (removes hyphens and capitalizes letters)"""
+        self.write_changes_declaration()
         header = {'type': 0,
                   'key': 1,
                   'revision': 2,
