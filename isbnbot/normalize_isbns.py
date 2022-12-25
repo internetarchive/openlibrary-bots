@@ -5,7 +5,6 @@ NOTE: This script assumes the Open Library Dump passed only contains editions wi
 import isbnlib
 import gzip
 import json
-import re
 
 import olclient
 
@@ -91,10 +90,7 @@ def dedupe(input_list: list) -> list:
     return output
 
 
-RE_ISBN13 = re.compile('97[89]-?[0-9][-0-9]{7,9}[0-9]-?[0-9]')
-
-
-def parse_isbns(string):
+def parse_isbns(string: str) -> list:
     """Find isbns in a string on the assumption that if you strip all non-isbn
     characters and all that is left is valid isbns then it's unlikely to be random chance
     if that doesn't work it will use a reasonably strict regex to look for an isbn13
@@ -107,7 +103,7 @@ def parse_isbns(string):
 
     isbnchars = ''.join(isbnchars).upper()
     # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
-    if not isbnchars.find('X') in [-1,10,20,23,30,36]:
+    if not isbnchars.find('X') in [-1, 10, 20, 23]:
         isbnchars.replace("X", "")
 
     if len(isbnchars) % 10 == 0:
@@ -121,11 +117,9 @@ def parse_isbns(string):
     elif len(isbnchars) == 23 and isbnlib.is_isbn10(isbnchars[:10]) and isbnlib.is_isbn13(isbnchars[10:]):
         return [isbnchars[:10], isbnchars[10:]]
 
-    # if we get this far then  we have 10+ isbn character but it's not a ISBN 10, 13 or a basic combination of the above
-    # just with extra padding characters. Most probably, there are some extra numbers in the string somewhere,
-    # so extract any ISBNs with a fairly strict regex
-    matches = re.findall(RE_ISBN13, string)
-    return list(isbnlib.canonical(isbn) for isbn in matches)
+    # if we get this far then  we have 10+ string, but it's not a ISBN 10, 13 or a basic combination of the two. This is
+    # beyond the scope of this bot job
+    return []
 
 
 def split(string, length):
