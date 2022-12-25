@@ -103,8 +103,9 @@ def parse_isbns(string: str) -> list:
 
     isbnchars = ''.join(isbnchars).upper()
     # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
-    if not isbnchars.find('X') in [-1, 10, 20, 23]:
-        isbnchars.replace("X", "")
+    x_idx = isbnchars.find("X")
+    if (x_idx + 1) % 10 != 0 and x_idx + 1 != 23:
+        isbnchars = isbnchars.replace("X", "")
 
     if len(isbnchars) % 10 == 0:
         if all(isbnlib.is_isbn10(isbn) for isbn in split(isbnchars, 10)):
