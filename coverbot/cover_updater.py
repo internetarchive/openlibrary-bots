@@ -5,24 +5,38 @@ NOTE: This script assumes the Open Library Dump passed only contains coverless e
 
 import gzip
 import json
-import sys
 
-from olclient.openlibrary import OpenLibrary
+from olclient import AbstractBotJob
 
-if __name__ == "__main__":
-    ol = OpenLibrary()
-    filtered_ol_dump = sys.argv[1]
-    output_filepath = sys.argv[2]
-    with gzip.open(filtered_ol_dump, "rb") as fin:
-        header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
-        with gzip.open(output_filepath, "a") as fout:
+
+class AddInternetArchiveCoverJob(AbstractBotJob):
+
+    def run(self) -> None:
+        """Add the Internet Archive scan to applicable coverless edition."""
+        self.write_changes_declaration()
+        with gzip.open(self.args.file, "rb") as fin:
+            header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
             for row in fin:
                 row = row.decode().split("\t")
                 _json = json.loads(row[header["JSON"]])
                 olid = _json["key"].split("/")[-1]
-                edition_obj = ol.Edition.get(olid)
-                if not len(getattr(edition_obj, "covers", [])):
-                    fout.write(f"{edition_obj.olid}\n".encode())
-                    edition_obj.add_bookcover(
-                        "https://archive.org/download/%s/page/cover" % _json["ocaid"]
-                    )
+                edition_obj = self.ol.Edition.get(olid)
+                covers = getattr(edition_obj, "covers", [])
+                if not self.valid_covers(covers):
+                    cover_url = f"https://archive.org/download/{_json['ocaid']}/page/cover"
+                    self.logger.info(f"{edition_obj.olid} {covers} {cover_url}")
+                    self.save(lambda: edition_obj.add_bookcover(cover_url=cover_url))
+
+    @staticmethod
+    def valid_covers(covers: list) -> bool:
+        return covers not in ([], [-1], [None], [-1, None], [None, -1])
+
+
+if __name__ == "__main__":
+    job = AddInternetArchiveCoverJob()
+
+    try:
+        job.run()
+    except Exception as e:
+        job.logger.exception(e)
+        raise e
