@@ -24,24 +24,20 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
     def run(self) -> None:
         """Looks for any ISBNs with extra non-numeric characters"""
         self.write_changes_declaration()
-        header = {'type': 0,
-                  'key': 1,
-                  'revision': 2,
-                  'last_modified': 3,
-                  'JSON': 4}
-        comment = 'normalize ISBN'
-        with gzip.open(self.args.file, 'rb') as fin:
+        header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
+        comment = "normalize ISBN"
+        with gzip.open(self.args.file, "rb") as fin:
             for row_num, row in enumerate(fin):
-                row = row.decode().split('\t')
-                _json = json.loads(row[header['JSON']])
-                if _json['type']['key'] != '/type/edition':
+                row = row.decode().split("\t")
+                _json = json.loads(row[header["JSON"]])
+                if _json["type"]["key"] != "/type/edition":
                     continue
 
                 isbns_by_type = dict()
-                if 'isbn_10' in _json:
-                    isbns_by_type['isbn_10'] = _json.get('isbn_10', None)
-                if 'isbn_13' in _json:
-                    isbns_by_type['isbn_13'] = _json.get('isbn_13', None)
+                if "isbn_10" in _json:
+                    isbns_by_type["isbn_10"] = _json.get("isbn_10", None)
+                if "isbn_13" in _json:
+                    isbns_by_type["isbn_13"] = _json.get("isbn_13", None)
 
                 if not isbns_by_type:
                     continue
@@ -58,7 +54,7 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
 
                 olid = _json["key"].split("/")[-1]
                 edition = self.ol.Edition.get(olid)
-                if edition.type['key'] != '/type/edition':
+                if edition.type["key"] != "/type/edition":
                     continue
 
                 for isbn_type, isbns in isbns_by_type.items():
@@ -97,11 +93,11 @@ def parse_isbns(string: str) -> list:
     formatted string within the full text, which should help when other numbers are present"""
 
     # pass one: strip all non isbn characters, and see if what remains looks like an ISBN
-    isbnchars = [c for c in string if c in '0123456789Xx']
+    isbnchars = [c for c in string if c in "0123456789Xx"]
     if len(isbnchars) < 10:
         return []
 
-    isbnchars = ''.join(isbnchars).upper()
+    isbnchars = "".join(isbnchars).upper()
     # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
     x_idx = isbnchars.find("X")
     if (x_idx + 1) % 10 != 0 and x_idx + 1 != 23:
@@ -113,9 +109,17 @@ def parse_isbns(string: str) -> list:
     elif len(isbnchars) % 13 == 0:
         if all(isbnlib.is_isbn13(isbn) for isbn in split(isbnchars, 13)):
             return split(isbnchars, 13)
-    elif len(isbnchars) == 23 and isbnlib.is_isbn13(isbnchars[:13]) and isbnlib.is_isbn10(isbnchars[13:]):
+    elif (
+        len(isbnchars) == 23
+        and isbnlib.is_isbn13(isbnchars[:13])
+        and isbnlib.is_isbn10(isbnchars[13:])
+    ):
         return [isbnchars[:13], isbnchars[13:]]
-    elif len(isbnchars) == 23 and isbnlib.is_isbn10(isbnchars[:10]) and isbnlib.is_isbn13(isbnchars[10:]):
+    elif (
+        len(isbnchars) == 23
+        and isbnlib.is_isbn10(isbnchars[:10])
+        and isbnlib.is_isbn13(isbnchars[10:])
+    ):
         return [isbnchars[:10], isbnchars[10:]]
 
     # if we get this far then  we have 10+ string, but it's not a ISBN 10, 13 or a basic combination of the two. This is
@@ -124,10 +128,10 @@ def parse_isbns(string: str) -> list:
 
 
 def split(string, length):
-    return list(string[i:i+length] for i in range(0, len(string), length))
+    return list(string[i : i + length] for i in range(0, len(string), length))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     job = NormalizeISBNJob()
 
     try:
