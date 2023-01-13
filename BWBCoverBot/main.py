@@ -9,6 +9,7 @@ from zipfile import ZipFile, ZipInfo
 from olclient import OpenLibrary, config
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s:%(message)s",
@@ -59,6 +60,7 @@ def is_cover_already_stored(isbn_13: str) -> bool:
 
 def verify_and_update_cover(isbn_13: str, archive_contents: ZipFile) -> None:
     if is_cover_already_stored(isbn_13):
+        logging.info(f"cover exists in dump for {isbn_13}")
         return
 
     ol_edition = ol.Edition.get(isbn=isbn_13)
@@ -66,8 +68,8 @@ def verify_and_update_cover(isbn_13: str, archive_contents: ZipFile) -> None:
         return
     edition_olid = ol_edition.olid
     # TODO: double check this
-    cover_exists = getattr(ol_edition, "covers", None) not in (None, [-1])
-    if cover_exists is True:
+    cover_exists = getattr(ol_edition, "covers", None)
+    if cover_exists:
         db_session.bulk_save_objects(
             [EditionCoverData(isbn_13=isbn_13, cover_exists=True)]
         )
