@@ -86,7 +86,11 @@ def dedupe(input_list: list) -> list:
     return output
 
 
-def parse_isbns(string: str) -> list:
+def chop(string: str, length: int) -> tuple[str]:
+    return tuple(string[i : i + length] for i in range(0, len(string), length))
+
+
+def parse_isbns(string: str) -> tuple:
     """Find isbns in a string on the assumption that if you strip all non-isbn
     characters and all that is left is valid isbns then it's unlikely to be random chance
     if that doesn't work it will use a reasonably strict regex to look for an isbn13
@@ -95,7 +99,7 @@ def parse_isbns(string: str) -> list:
     # pass one: strip all non isbn characters, and see if what remains looks like an ISBN
     isbnchars = [c for c in string if c in "0123456789Xx"]
     if len(isbnchars) < 10:
-        return []
+        return ()
 
     isbnchars = "".join(isbnchars).upper()
     # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
@@ -104,31 +108,27 @@ def parse_isbns(string: str) -> list:
         isbnchars = isbnchars.replace("X", "")
 
     if len(isbnchars) % 10 == 0:
-        if all(isbnlib.is_isbn10(isbn) for isbn in split(isbnchars, 10)):
-            return split(isbnchars, 10)
+        if all(isbnlib.is_isbn10(isbn) for isbn in chop(isbnchars, 10)):
+            return chop(isbnchars, 10)
     elif len(isbnchars) % 13 == 0:
-        if all(isbnlib.is_isbn13(isbn) for isbn in split(isbnchars, 13)):
-            return split(isbnchars, 13)
+        if all(isbnlib.is_isbn13(isbn) for isbn in chop(isbnchars, 13)):
+            return chop(isbnchars, 13)
     elif (
         len(isbnchars) == 23
         and isbnlib.is_isbn13(isbnchars[:13])
         and isbnlib.is_isbn10(isbnchars[13:])
     ):
-        return [isbnchars[:13], isbnchars[13:]]
+        return isbnchars[:13], isbnchars[13:]
     elif (
         len(isbnchars) == 23
         and isbnlib.is_isbn10(isbnchars[:10])
         and isbnlib.is_isbn13(isbnchars[10:])
     ):
-        return [isbnchars[:10], isbnchars[10:]]
+        return isbnchars[:10], isbnchars[10:]
 
     # if we get this far then  we have 10+ string, but it's not a ISBN 10, 13 or a basic combination of the two. This is
     # beyond the scope of this bot job
-    return []
-
-
-def split(string, length):
-    return list(string[i : i + length] for i in range(0, len(string), length))
+    return ()
 
 
 if __name__ == "__main__":
