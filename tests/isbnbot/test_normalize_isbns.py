@@ -105,32 +105,32 @@ class NormalizeISBNJobTestCase(unittest.TestCase):
 
     def test_single_inputs(self):
         for input_str, expectedoutput in iter(self.single.items()):
-            with self.subTest("single input:" + input_str):
+            with self.subTest(f"single input:{input_str}"):
                 self.assertEqual(normalize_isbns.parse_isbns(input_str), expectedoutput)
 
     def test_double_inputs(self):
         for input_str, expectedoutput in iter(self.double.items()):
-            with self.subTest("double input:" + input_str):
+            with self.subTest(f"double input:{input_str}"):
                 self.assertEqual(normalize_isbns.parse_isbns(input_str), expectedoutput)
 
     def test_multi_inputs(self):
         for input_str, expectedoutput in iter(self.multi.items()):
-            with self.subTest("multi input:" + input_str):
+            with self.subTest(f"multi input:{input_str}"):
                 self.assertEqual(normalize_isbns.parse_isbns(input_str), expectedoutput)
 
     def test_tricky_inputs(self):
         for input_str, expectedoutput in iter(self.tricky.items()):
-            with self.subTest("tricky input:" + input_str):
+            with self.subTest(f"tricky input:{input_str}"):
                 self.assertEqual(normalize_isbns.parse_isbns(input_str), expectedoutput)
 
     def test_invalid_inputs(self):
         for input_str in self.invalid:
-            with self.subTest("Invalid input:" + input_str):
+            with self.subTest(f"Invalid input:{input_str}"):
                 self.assertFalse(normalize_isbns.parse_isbns(input_str))
 
     def test_ignored_inputs(self):
         for input_str in self.ignored:
-            with self.subTest("Should ignore:" + input_str):
+            with self.subTest(f"Should ignore:{input_str}"):
                 self.assertFalse(normalize_isbns.parse_isbns(input_str))
 
 
