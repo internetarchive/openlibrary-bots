@@ -1,31 +1,33 @@
+import logging
+import pathlib
 from dataclasses import dataclass
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
+import main
 import pytest
+from main import EditionCoverData, update_cover_for_edition, verify_and_update_cover
 from olclient import OpenLibrary
 from requests_mock.mocker import Mocker as RequestsMock
 from sqlmodel import Session, select
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import ValueTarget
 
-import main
-from main import (EditionCoverData, update_cover_for_edition,
-                  verify_and_update_cover)
+test_path = pathlib.Path(__file__).parent.resolve()
+test_isbns_zip = test_path / "test_isbns.zip"
 
 
 def test_update_cover_for_edition_completes_successfully(
-        requests_mock: RequestsMock, get_ol: OpenLibrary
+    requests_mock: RequestsMock, get_ol: OpenLibrary
 ) -> bool | None:
     """Check that correct data is POSTed to the backend."""
     m = requests_mock
     olid = "OL1234M"
     mime_type = "image/jpeg"
     file_name = "1234567890123.jpg"
-    cover_fp = open(f"./tests/{file_name}", "rb")
-    cover_data = cover_fp.read()
-    cover_fp.close()
+    cover_data = Path(f"{test_path}/{file_name}").read_bytes()
     ol = get_ol
 
     m.post(f"https://openlibrary.org/books/{olid}/-/add-cover", text="Totally Saved!")
@@ -62,7 +64,7 @@ def test_update_cover_for_edition_completes_successfully(
 
 
 def test_update_cover_for_edition_reports_failure(
-        requests_mock: RequestsMock, get_ol: OpenLibrary
+    requests_mock: RequestsMock, get_ol: OpenLibrary
 ) -> bool | None:
     """Fail because the response doesn't have the success text."""
     m = requests_mock
@@ -87,6 +89,9 @@ class ISBN:
     id: str
     exp: list[tuple[EditionCoverData]]
     saved_text: str
+    cover_exists_in_ol: bool
+    is_success: bool
+    warning: str
     err: Any
 
 
@@ -94,23 +99,42 @@ class ISBN:
 test_cases = [
     ISBN(
         text="ISBN already seeded into DB. No check of saved_text. Ensure no duplication.",
-        id="123",
-        exp=[(EditionCoverData(isbn_13="123", cover_exists=True),)],
+        id="111",
+        exp=[(EditionCoverData(isbn_13="111", cover_exists=True),)],
         saved_text="",
+        cover_exists_in_ol=False,
+        is_success=False,
+        warning="cover exists in dump for 111",
         err=None,
     ),
     ISBN(
         text="Failed save message from the BACK END.",
-        id="456",
-        exp=[(EditionCoverData(isbn_13="456", cover_exists=False),)],
+        id="222",
+        exp=[(EditionCoverData(isbn_13="222", cover_exists=False),)],
         saved_text="Fail",
+        cover_exists_in_ol=False,
+        is_success=False,
+        warning="",
         err=None,
     ),
     ISBN(
-        text="Successful add.",
-        id="789",
-        exp=[(EditionCoverData(isbn_13="789", cover_exists=True),)],
+        text="Successfully added cover.",
+        id="333",
+        exp=[(EditionCoverData(isbn_13="333", cover_exists=True),)],
         saved_text="Saved!",
+        cover_exists_in_ol=False,
+        is_success=True,
+        warning="",
+        err=None,
+    ),
+    ISBN(
+        text="Cover already in OL.",
+        id="444",
+        exp=[(EditionCoverData(isbn_13="444", cover_exists=True),)],
+        saved_text="",
+        cover_exists_in_ol=True,
+        is_success=False,
+        warning="cover exists in OL for 444",
         err=None,
     ),
 ]
@@ -118,18 +142,19 @@ test_cases = [
 
 @pytest.mark.parametrize("tc,exp", [(tc, tc.exp) for tc in test_cases])
 def test_verify_and_update_cover(
-    requests_mock: RequestsMock, get_db: Session, get_ol: OpenLibrary, tc, exp
+    requests_mock: RequestsMock, get_db: Session, get_ol: OpenLibrary, tc, exp, caplog
 ) -> None:
-    """See comments to test_cases for each test case."""
+    """See the "text" field in test_cases for an explanation of each test case."""
 
+    caplog.set_level(logging.INFO)
     m = requests_mock
-    archive_contents = ZipFile("./tests/test_isbns.zip", "r")
+    archive_contents = ZipFile(test_isbns_zip, "r")
 
     # Override scope rather than refactoring.
     ol = get_ol
     main.db_session = get_db
 
-    db_session = get_db  # For consistency/clarity.
+    db_session = main.db_session  # For consistency/clarity.
 
     bibkey = {
         f"ISBN:{tc.id}": {
@@ -137,15 +162,22 @@ def test_verify_and_update_cover(
             "info_url": f"https://openlibrary.org/books/OL{tc.id}M/Test_Book",
         }
     }
-    edition_response = {"olid": f"OL{tc.id}M"}
+    edition_response = {"olid": f"OL{tc.id}M", "covers": tc.cover_exists_in_ol}
     m.get(f"https://openlibrary.org/api/books.json?bibkeys=ISBN:{tc.id}", json=bibkey)
     m.get(f"https://openlibrary.org/books/OL{tc.id}M.json", json=edition_response)
     m.post(
         f"https://openlibrary.org/books/OL{tc.id}M/-/add-cover", text=f"{tc.saved_text}"
     )
 
-    verify_and_update_cover(isbn_13=tc.id, archive_contents=archive_contents, ol=ol)
+    is_success = verify_and_update_cover(
+        isbn_13=tc.id, archive_contents=archive_contents, ol=ol
+    )
 
+    # Check command output and logged statements.
+    assert is_success == tc.is_success
+    assert f"{tc.warning}" in caplog.text
+
+    # Finally, ensure the database looks as expected for each test case.
     statement = select(EditionCoverData).where(EditionCoverData.isbn_13 == tc.id)
     res = db_session.execute(statement).fetchall()
     assert res == exp
