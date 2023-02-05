@@ -107,7 +107,6 @@ class OnixParser(object):
         count = 0
 
         for record in self.onix_records:
-
             try:
                 work_isbn10 = ol.Edition.get(isbn=record[4])
             except (IndexError, ValueError):
@@ -190,7 +189,6 @@ class OnixParser(object):
 
 
 if __name__ == "__main__":
-
     onix = OnixParser(FILE)
     onix.get_attributes()
     print(onix.onix_records)

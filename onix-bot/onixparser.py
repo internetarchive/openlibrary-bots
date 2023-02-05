@@ -33,7 +33,6 @@ ol = OpenLibrary()
 
 
 class TestOnixParser(unittest.TestCase):
-
     # TEST_ONIX_FEED_URL = 'https://storage.googleapis.com/support-kms-prod/SNP_EFDA74818D56F47DE13B6FF3520E468126FD_3285388_en_v2'
     TEST_ONIX_FEED_URL = (
         "https://ia801503.us.archive.org/2/items/onix-bot/SampleONIX.xml"
@@ -395,7 +394,6 @@ class OnixProductBot(object):
 
     @property
     def check_identifiers(self):
-
         try:
             work_isbn10 = ol.Edition.get(
                 isbn=self.data.get("identifiers").get("isbn10")

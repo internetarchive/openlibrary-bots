@@ -158,7 +158,6 @@ def get_bookcover(book):
 
 
 def add_book_via_olclient(book, author_list, bookcover=None):
-
     if len(author_list) != 0:
         # Define a Book Object
         new_book = common.Book(

@@ -60,7 +60,6 @@ with open(FILE) as f:
 
 # Iterates over the size of the data
 for new_book in data:
-
     isbn10 = new_book.get("isbn10", "")
     isbn13 = new_book.get("isbn13", "")
     oclc = new_book.get("oclc", "")
