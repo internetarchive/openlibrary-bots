@@ -7,7 +7,6 @@ import twitterbotErrors
 
 
 class ISBNFinder:
-
     SERVICES = ("amazon", "goodreads")
 
     @staticmethod
@@ -50,7 +49,6 @@ class ISBNFinder:
 
 
 class InternetArchive:
-
     IA_URL = "https://archive.org"
     OL_URL = "https://openlibrary.org"
     OL_DEV = "https://dev.openlibrary.org"

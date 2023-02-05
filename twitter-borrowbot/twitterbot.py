@@ -252,7 +252,6 @@ def reply_to_tweets():
 
 
 if __name__ == "__main__":
-
     # Configure logging
     logging.basicConfig(
         filename=LOG_FILE,

@@ -243,7 +243,7 @@ def massage_value(v):
 
 def massage_dict(d):
     dd = {}
-    for (k, v) in d.iteritems():
+    for k, v in d.iteritems():
         dd[k] = massage_value(v)
     return dd
 

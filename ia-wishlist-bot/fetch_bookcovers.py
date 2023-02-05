@@ -32,6 +32,7 @@ desktop_agents = [
     "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0",
 ]
 
+
 # Random Headers to add to the application
 def random_headers():
     return {
