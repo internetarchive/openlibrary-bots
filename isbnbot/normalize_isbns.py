@@ -2,81 +2,31 @@
 normalize ISBNs
 NOTE: This script assumes the Open Library Dump passed only contains editions with an isbn_10 or isbn_13
 """
-import argparse
-import datetime
+import isbnlib
 import gzip
 import json
-import logging
-import sys
-from os import makedirs
 
-import isbnlib
-from olclient.openlibrary import OpenLibrary
-
-ALLOWED_ISBN_CHARS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "X", "x", "-"}
+import olclient
 
 
-class NormalizeISBNJob(object):
-    def __init__(self, ol=None, dry_run=True, limit=1):
-        """Create logger and class variables"""
-        if ol is None:
-            self.ol = OpenLibrary()
-        else:
-            self.ol = ol
-
-        self.changed = 0
-        self.dry_run = dry_run
-        self.limit = limit
-
-        job_name = sys.argv[0].replace(".py", "")
-        self.logger = logging.getLogger("jobs.%s" % job_name)
-        self.logger.setLevel(logging.DEBUG)
-        log_formatter = logging.Formatter(
-            "%(name)s;%(levelname)-8s;%(asctime)s %(message)s"
-        )
-        self.console_handler = logging.StreamHandler()
-        self.console_handler.setLevel(logging.WARN)
-        self.console_handler.setFormatter(log_formatter)
-        self.logger.addHandler(self.console_handler)
-        log_dir = "logs/jobs/%s" % job_name
-        makedirs(log_dir, exist_ok=True)
-        log_file_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir + "/%s_%s.log" % (job_name, log_file_datetime)
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(log_formatter)
-        self.logger.addHandler(file_handler)
-
+class NormalizeISBNJob(olclient.AbstractBotJob):
     @staticmethod
     def isbn_needs_normalization(isbn: str) -> bool:
         """
-        Returns True if the given ISBN is valid and needs to be normalized (hyphens removed, letters capitalized, etc.)
+        Returns True if the given string contains one or two unformatted isbns
         Returns False otherwise
         """
-        if not set(isbn.strip()).issubset(ALLOWED_ISBN_CHARS):
-            return False
-        elif isbnlib.notisbn(isbn):
-            return False
+        if len(isbn) > 10 and parse_isbns(isbn):
+            return True
         else:
-            normalized_isbn = isbnlib.get_canonical_isbn(
-                isbn
-            )  # get_canonical_isbn returns None if ISBN is invalid
-            return normalized_isbn and normalized_isbn != isbn
+            return False
 
-    def run(self, dump_filepath: str) -> None:
-        """
-        Performs ISBN normalization (removes hyphens and capitalizes letters)
-
-        dump_filepath -- path to *.txt.gz dump containing editions that need to be operated on
-        """
-        if self.dry_run:
-            self.logger.info(
-                "dry_run set to TRUE. Script will run, but no data will be modified."
-            )
-
+    def run(self) -> None:
+        """Looks for any ISBNs with extra non-numeric characters"""
+        self.write_changes_declaration()
         header = {"type": 0, "key": 1, "revision": 2, "last_modified": 3, "JSON": 4}
         comment = "normalize ISBN"
-        with gzip.open(dump_filepath, "rb") as fin:
+        with gzip.open(self.args.file, "rb") as fin:
             for row_num, row in enumerate(fin):
                 row = row.decode().split("\t")
                 _json = json.loads(row[header["JSON"]])
@@ -88,6 +38,7 @@ class NormalizeISBNJob(object):
                     isbns_by_type["isbn_10"] = _json.get("isbn_10", None)
                 if "isbn_13" in _json:
                     isbns_by_type["isbn_13"] = _json.get("isbn_13", None)
+
                 if not isbns_by_type:
                     continue
 
@@ -106,20 +57,17 @@ class NormalizeISBNJob(object):
                 if edition.type["key"] != "/type/edition":
                     continue
 
-                for (
-                    isbn_type,
-                    isbns,
-                ) in (
-                    isbns_by_type.items()
-                ):  # if an ISBN is in the wrong field this script will not move it to the appropriate one
+                for isbn_type, isbns in isbns_by_type.items():
+                    # if an ISBN is in the wrong field this script will not move it to the appropriate one
                     normalized_isbns = list()
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
-                        if self.isbn_needs_normalization(isbn):
-                            normalized_isbn = isbnlib.get_canonical_isbn(isbn)
-                            normalized_isbns.append(normalized_isbn)
+                        parsed = parse_isbns(isbn)
+                        if parsed:
+                            normalized_isbns.extend(parsed)
                         else:
                             normalized_isbns.append(isbn)
+
                     normalized_isbns = dedupe(normalized_isbns)  # remove duplicates
                     if normalized_isbns != isbns and normalized_isbns != []:
                         setattr(edition, isbn_type, normalized_isbns)
@@ -128,66 +76,66 @@ class NormalizeISBNJob(object):
                         )
                         self.save(lambda: edition.save(comment=comment))
 
-    def save(self, save_fn):
-        """Modify default save behavior based on 'limit' and 'dry_run' parameters"""
-        if not self.dry_run:
-            save_fn()
-        else:
-            self.logger.info("Modification not made because dry_run is True")
-        self.changed += 1
-        if self.limit and self.changed >= self.limit:
-            self.logger.info("Modification limit reached. Exiting script.")
-            sys.exit()
 
-
-def str2bool(value):
-    if isinstance(value, bool):
-        return value
-    if value.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    elif value.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    else:
-        raise argparse.ArgumentTypeError("Boolean value expected.")
-
-
-def dedupe(input: list) -> list:
+def dedupe(input_list: list) -> list:
     """Remove duplicate elements in a list and return the new list"""
     output = list()
-    for i in input:
+    for i in input_list:
         if i not in output:
             output.append(i)
     return output
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--dump_path",
-        type=str,
-        default=None,
-        help="Path to *.txt.gz containing OpenLibrary editions data",
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=1,
-        help="Limit number of edits performed on OpenLibrary data. Set to zero to allow unlimited edits",
-    )
-    parser.add_argument(
-        "--dry-run",
-        type=str2bool,
-        default=True,
-        help="Don't actually perform edits on Open Library",
-    )
-    _args = parser.parse_args()
+def chop(string: str, length: int) -> tuple[str]:
+    return tuple(string[i : i + length] for i in range(0, len(string), length))
 
-    _ol = OpenLibrary()
-    bot = NormalizeISBNJob(ol=_ol, dry_run=_args.dry_run, limit=_args.limit)
-    bot.console_handler.setLevel(logging.INFO)
+
+def parse_isbns(string: str) -> tuple:
+    """Find isbns in a string on the assumption that if you strip all non-isbn
+    characters and all that is left is valid isbns then it's unlikely to be random chance
+    if that doesn't work it will use a reasonably strict regex to look for an isbn13
+    formatted string within the full text, which should help when other numbers are present"""
+
+    # pass one: strip all non isbn characters, and see if what remains looks like an ISBN
+    isbnchars = [c for c in string if c in "0123456789Xx"]
+    if len(isbnchars) < 10:
+        return ()
+
+    isbnchars = "".join(isbnchars).upper()
+    # X is tricky, but can only appear at the end of an isbn10 so remove if not where expected
+    x_idx = isbnchars.find("X")
+    if (x_idx + 1) % 10 != 0 and (x_idx + 1) % 23 != 0:
+        isbnchars = isbnchars.replace("X", "")
+
+    if len(isbnchars) % 10 == 0:
+        if all(isbnlib.is_isbn10(isbn) for isbn in chop(isbnchars, 10)):
+            return chop(isbnchars, 10)
+    elif len(isbnchars) % 13 == 0:
+        if all(isbnlib.is_isbn13(isbn) for isbn in chop(isbnchars, 13)):
+            return chop(isbnchars, 13)
+    elif (
+        len(isbnchars) == 23
+        and isbnlib.is_isbn13(isbnchars[:13])
+        and isbnlib.is_isbn10(isbnchars[13:])
+    ):
+        return isbnchars[:13], isbnchars[13:]
+    elif (
+        len(isbnchars) == 23
+        and isbnlib.is_isbn10(isbnchars[:10])
+        and isbnlib.is_isbn13(isbnchars[10:])
+    ):
+        return isbnchars[:10], isbnchars[10:]
+
+    # if we get this far then  we have 10+ string, but it's not a ISBN 10, 13 or a basic combination of the two. This is
+    # beyond the scope of this bot job
+    return ()
+
+
+if __name__ == "__main__":
+    job = NormalizeISBNJob()
 
     try:
-        bot.run(_args.dump_path)
+        job.run()
     except Exception as e:
-        bot.logger.exception("")
+        job.logger.exception(e)
         raise e
