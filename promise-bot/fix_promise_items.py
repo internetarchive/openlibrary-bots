@@ -65,7 +65,8 @@ class FixPromiseItems:
                     pass
 
         num_processed = self.modified + self.errors + self.matched
-        self.write_state(self.state_file, self.start_line + num_processed)
+        if not self.dry_run:
+            self.write_state(self.state_file, self.start_line + num_processed)
 
         return {
           'processed': num_processed,
@@ -73,6 +74,7 @@ class FixPromiseItems:
           'matched': self.matched,
           'errors': self.errors,
         }
+
     def extract_olid(self, line):
         fields = line.split("\t")
         return fields[1].split("/")[-1]
@@ -195,7 +197,7 @@ def configure_and_start(args):
     args.infile = config_args.get("in_file", IN_FILE)
     args.state_file = config_args.get("state_file", STATE_FILE)
     args.error_file = config_args.get("error_file", ERR_FILE)
-    args.dry_run = config_args.get("dry_run", False)
+    args.dry_run = bool(config_args.get("dry_run", False))
     args.batch_size = config_args.getint("batch_size", DEFAULT_BATCH_SIZE)
 
     # Attempt to read starting line number from state file:
@@ -217,35 +219,36 @@ def configure_and_start(args):
 
 
 def start_job(args):
-    if not args.dry_run:
-        infile_path = Path(args.infile)
-        if not infile_path.exists():
-            print(f"{infile_path} does not exist.")
-            sys.exit(errno.ENOENT)
+    infile_path = Path(args.infile)
+    if not infile_path.exists():
+        print(f"{infile_path} does not exist.")
+        sys.exit(errno.ENOENT)
 
-        ol = None
-        try:
-            ol_config = Config(config_file=args.config)
-            ol = OpenLibrary(credentials=ol_config.get_config().get("s3", None))
-        except Exception as err:
-            print("Failed to initialize Open Library client.")
-            print(f"Error: {err}")
-            sys.exit(errno.ECONNREFUSED)
+    ol = None
+    try:
+        ol_config = Config(config_file=args.config)
+        ol = OpenLibrary(credentials=ol_config.get_config().get("s3", None))
+    except Exception as err:
+        print("Failed to initialize Open Library client.")
+        print(f"Error: {err}")
+        sys.exit(errno.ECONNREFUSED)
 
-        # Initialize job and run
-        results = FixPromiseItems(
-            args.infile,
-            args.state_file,
-            args.error_file,
-            ol=ol,
-            batch_size=args.batch_size,
-            start_line=args.start_line,
-            dry_run=args.dry_run,
-        ).run()
-        print(f"Total records processed: {results.num_processed}")
-        print(f'Total modified: {results.modified}')
-        print(f'Total matched: {results.matched}')
-        print(f'Total errors: {results.errors}')
+    # Initialize job and run
+    results = FixPromiseItems(
+        args.infile,
+        args.state_file,
+        args.error_file,
+        ol=ol,
+        batch_size=args.batch_size,
+        start_line=args.start_line,
+        dry_run=args.dry_run,
+    ).run()
+    print("Results:")
+    print(f"Start line: {args.start_line}")
+    print(f"Total records processed: {results.get('processed')}")
+    print(f"Total modified: {results.get('modified')}")
+    print(f"Total matched: {results.get('matched')}")
+    print(f"Total errors: {results.get('errors')}")
 
     print("Program terminated...")
 
