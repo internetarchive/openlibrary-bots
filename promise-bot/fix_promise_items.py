@@ -256,15 +256,20 @@ def start_job(args):
         start_line=args.start_line,
         dry_run=args.dry_run,
     ).run()
+
+    print_summary(results, args.dry_run)
+
+    print("Program terminated...")
+
+def print_summary(results, dry_run):
+    if dry_run:
+        print("Running in dry-run mode.")
     print("Results:")
     print(f"Start line: {args.start_line}")
     print(f"Total records processed: {results.get('processed')}")
     print(f"Total modified: {results.get('modified')}")
     print(f"Total matched: {results.get('matched')}")
     print(f"Total errors: {results.get('errors')}")
-
-    print("Program terminated...")
-
 
 if __name__ == "__main__":
     print("Starting...")
