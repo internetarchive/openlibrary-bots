@@ -77,7 +77,7 @@ def _upload_ol_book(ol_book):
         )
 
     edition = OL.Work.create(ol_book)
-    print("Upload of {} successful!".format(edition.olid))
+    print(f"Upload of {edition.olid} successful!")
 
 
 def main():

@@ -30,7 +30,7 @@ if not os.path.exists("data/wish_list_march_2018.ndjson"):
     )
 
 # Fetches all ISBNs which are currently not added to Open Library
-with open("data/ol_works.csv", "r") as csvfile:
+with open("data/ol_works.csv") as csvfile:
     csvreader = csv.reader(csvfile)
     for row in csvreader:
         isbn_data.append(row[0])
@@ -49,7 +49,7 @@ start_time = time.time()
 for data in dataset:
     # Checking if ISBN-13 for a particular data is Nonetype or not
     if data["isbn13"] is not None:
-        y = set([data["isbn13"]])
+        y = {data["isbn13"]}
         # Intersection of set of dataset ISBN-13 and wishlist ISBN-13 is taken
         if isbn_set.intersection(y):
             new_data.append(data)

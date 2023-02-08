@@ -27,26 +27,26 @@
 
 TERMS AND CONDITIONS OF USE OF THE ONIX PRODUCT INFORMATION MESSAGE XML SCHEMA
 
-All ONIX standards and documentation are copyright materials, made available 
-free of charge for general use.  If you use the ONIX Product Information 
+All ONIX standards and documentation are copyright materials, made available
+free of charge for general use.  If you use the ONIX Product Information
 Message XML Schema, you will be deemed to have accepted these terms and conditions:
 
-1.  You agree that you will not add to, delete from or amend the ONIX Product 
-Information Message Schema, any part of the Schema except for strictly internal 
+1.  You agree that you will not add to, delete from or amend the ONIX Product
+Information Message Schema, any part of the Schema except for strictly internal
 use in your own organisation.
 
-2.  You agree that if you wish to add to, amend, or make extracts of the 
-Schema for any purpose that is not strictly internal to your own organisation, 
-you will in the first instance notify EDItEUR and allow EDItEUR to review 
-and comment on your proposed use, in the interest of securing an orderly 
+2.  You agree that if you wish to add to, amend, or make extracts of the
+Schema for any purpose that is not strictly internal to your own organisation,
+you will in the first instance notify EDItEUR and allow EDItEUR to review
+and comment on your proposed use, in the interest of securing an orderly
 development of the Schema for the benefit of other users.
 
-If you do not accept these terms, you must not use the ONIX Product Information 
+If you do not accept these terms, you must not use the ONIX Product Information
 Message Schema.
 
-Full copies of the latest release of this Schema and all associated documentation 
-are available from the EDItEUR web site, where may also be found details of 
-how to contact EDItEUR for advice on the use of this Schema. The URL for the 
+Full copies of the latest release of this Schema and all associated documentation
+are available from the EDItEUR web site, where may also be found details of
+how to contact EDItEUR for advice on the use of this Schema. The URL for the
 EDItEUR web site is:
 
 http://www.editeur.org/
@@ -65,20 +65,20 @@ SCHEMA REVISION HISTORY (IN REVERSE CHRONOLOGICAL ORDER)
          2. Element Title removed following TitleOfSet.
          3. Optional repetitions of element SalesRights removed.
 
-     NOTE - The removal of two instances of the element Title has not been 
-            matched by a corresponding change in the DTD. In this respect 
-            only the functionality of DTD and Schema currently differ. This 
+     NOTE - The removal of two instances of the element Title has not been
+            matched by a corresponding change in the DTD. In this respect
+            only the functionality of DTD and Schema currently differ. This
             difference is to be resolved at the next major Release.
 
-2004-11-10: Schema for public release based upon the ONIX for Books DTD 
+2004-11-10: Schema for public release based upon the ONIX for Books DTD
             Release 2.1 Revision 02
 
 2004-08-10: Second Draft Schema based upon the ONIX for Books DTD
             Release 2.1 Revision 02
 
-2004-02-20: First Draft Schema based upon the ONIX for Books 
+2004-02-20: First Draft Schema based upon the ONIX for Books
             DTD Release 2.1 Revision 01
-            
+
             For earlier revision history, see the DTD.
 
 -->

@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 import logging
 import os
 import time
@@ -48,7 +47,7 @@ class Tweet:
                 mention=mention,
                 error="Given mention is missing either a screen name or a status ID",
             )
-        msg = "Hi 👋 @%s %s" % (mention.user.screen_name, message)
+        msg = f"Hi 👋 @{mention.user.screen_name} {message}"
         if not debug:
             try:
                 API.update_status(
@@ -72,7 +71,7 @@ class Tweet:
             "you're in luck. "
             + "This book appears to be %sable " % action
             + "on @openlibrary: "
-            + "%s/isbn/%s" % (InternetArchive.OL_URL, edition.get("isbn")),
+            + "{}/isbn/{}".format(InternetArchive.OL_URL, edition.get("isbn")),
         )
 
     @classmethod
@@ -92,7 +91,7 @@ class Tweet:
             "this book doesn't appear to have a readable option yet, "
             + "however you can still add it to your "
             + "Want To Read list here: "
-            + "%s/isbn/%s" % (InternetArchive.OL_URL, edition.get("isbn")),
+            + "{}/isbn/{}".format(InternetArchive.OL_URL, edition.get("isbn")),
         )
 
     @classmethod
@@ -117,7 +116,7 @@ class Tweet:
 
 def get_last_seen_id():
     try:
-        with open(STATE_FILE, "r") as fin:
+        with open(STATE_FILE) as fin:
             last_seen_id = fin.read().strip()
     except Exception as e:
         raise twitterbotErrors.FileIOError(filename=STATE_FILE, error=e)

@@ -4,7 +4,7 @@ Python Script to add books to Open Library using the Open Library Client
 Input: 'wish_list_march_2018.ndjson'
 * Parameters for the wishlist include "isbn10", "language", "author", "isbn13", "title" , "oclc", "date"
 
-Output: Adding new works to Open Library 
+Output: Adding new works to Open Library
 """
 
 # Import os to check for file exist and

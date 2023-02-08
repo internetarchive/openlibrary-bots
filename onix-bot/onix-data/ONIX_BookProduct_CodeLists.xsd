@@ -25,26 +25,26 @@ N.B. PRIMARILY DESIGNED FOR USE WITH ONIX SCHEMAS
 
 TERMS AND CONDITIONS OF USE OF THE ONIX PRODUCT INFORMATION MESSAGE XML SCHEMA
 
-All ONIX standards and documentation are copyright materials, made available 
-free of charge for general use.  If you use the ONIX International Code Lists, 
+All ONIX standards and documentation are copyright materials, made available
+free of charge for general use.  If you use the ONIX International Code Lists,
 you will be deemed to have accepted these terms and conditions:
 
-1.  You agree that you will not add to, delete from or amend the ONIX International 
-Code Lists, any part of the Code Lists except for strictly internal 
+1.  You agree that you will not add to, delete from or amend the ONIX International
+Code Lists, any part of the Code Lists except for strictly internal
 use in your own organisation.
 
-2.  You agree that if you wish to add to, amend, or make extracts of the 
-Code Lists for any purpose that is not strictly internal to your own organisation, 
-you will in the first instance notify EDItEUR and allow EDItEUR to review 
-and comment on your proposed use, in the interest of securing an orderly 
+2.  You agree that if you wish to add to, amend, or make extracts of the
+Code Lists for any purpose that is not strictly internal to your own organisation,
+you will in the first instance notify EDItEUR and allow EDItEUR to review
+and comment on your proposed use, in the interest of securing an orderly
 development of the Code Lists for the benefit of other users.
 
-If you do not accept these terms, you must not use the ONIX International 
+If you do not accept these terms, you must not use the ONIX International
 Code Lists.
 
-The latest release of this Module and all documentation associated with the 
-ONIX International Code Lists are available from the EDItEUR web site, where may 
-also be found details of how to contact EDItEUR for advice on the use of this 
+The latest release of this Module and all documentation associated with the
+ONIX International Code Lists are available from the EDItEUR web site, where may
+also be found details of how to contact EDItEUR for advice on the use of this
 Module. The URL for the EDItEUR web site is:
 
 http://www.editeur.org/
@@ -62,13 +62,13 @@ MODULE REVISION HISTORY (IN REVERSE CHRONOLOGICAL ORDER)
 2005-02-10: Module for public release based upon the ONIX International
             Code Lists Issue 4 (February 2005)
 
-2004-11-10: Module for public release based upon the ONIX International 
+2004-11-10: Module for public release based upon the ONIX International
             Code Lists Issue 3 (August 2004)
 
-2004-08-10: Second Draft Module based upon the ONIX International 
+2004-08-10: Second Draft Module based upon the ONIX International
             Code Lists Issue 3 (August 2004)
 
-2003-12-30: First Draft Module based upon the ONIX International 
+2003-12-30: First Draft Module based upon the ONIX International
             Code Lists Issue 2 (December 2003)
 
 -->

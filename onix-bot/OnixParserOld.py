@@ -12,7 +12,7 @@ FILE = "data/SampleONIX.xml"
 ol = OpenLibrary()
 
 
-class OnixParser(object):
+class OnixParser:
     """
     ONIX Parser which parses through an ONIX File and returns valid attributes
     Attributes:
