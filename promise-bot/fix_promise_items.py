@@ -56,9 +56,12 @@ class FixPromiseItems:
                 try:
                     edition = self.ol.get(edition_olid)
                     modified_fields = self.update_edition(edition)
-                    if not self.dry_run:
-                        edition.save(f"Modified {', '.join(modified_fields)}")
-                    self.modified += 1
+                    if modified_fields:
+                        self.modified += 1
+                        if not self.dry_run:
+                            edition.save(f"Modified {', '.join(modified_fields)}")
+                    else:
+                        self.matched += 1
                 except Exception:
                     self.write_error(self.error_file, line[:-1])
                     self.errors += 1
@@ -95,8 +98,7 @@ class FixPromiseItems:
 
         # Check if record was previously modified:
         if id_count == len(updated_ids):
-            self.matched += 1
-            return
+            return None
 
         edition.local_id = updated_ids
 
@@ -113,6 +115,9 @@ class FixPromiseItems:
 
         # Fix source_records entry:
         sku = local_id.split(":")[-1]
+
+        if not sku:
+            raise Exception('Could not parse sku.')
         source_record = next(
             (r for r in edition.source_records if r.startswith("promise:")), ""
         )
