@@ -72,10 +72,10 @@ class FixPromiseItems:
             self.write_state(self.state_file, self.start_line + num_processed)
 
         return {
-          'processed': num_processed,
-          'modified': self.modified,
-          'matched': self.matched,
-          'errors': self.errors,
+            "processed": num_processed,
+            "modified": self.modified,
+            "matched": self.matched,
+            "errors": self.errors,
         }
 
     def extract_olid(self, line):
@@ -117,7 +117,7 @@ class FixPromiseItems:
         sku = local_id.split(":")[-1]
 
         if not sku:
-            raise Exception('Could not parse sku.')
+            raise Exception("Could not parse sku.")
         source_record = next(
             (r for r in edition.source_records if r.startswith("promise:")), ""
         )
@@ -266,6 +266,7 @@ def start_job(args):
 
     print("Program terminated...")
 
+
 def print_summary(results, dry_run):
     if dry_run:
         print("Running in dry-run mode.")
@@ -275,6 +276,7 @@ def print_summary(results, dry_run):
     print(f"Total modified: {results.get('modified')}")
     print(f"Total matched: {results.get('matched')}")
     print(f"Total errors: {results.get('errors')}")
+
 
 if __name__ == "__main__":
     print("Starting...")
