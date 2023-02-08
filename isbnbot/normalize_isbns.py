@@ -94,7 +94,8 @@ def parse_isbns(string: str) -> tuple:
     """Find isbns in a string on the assumption that if you strip all non-isbn
     characters and all that is left is valid isbns then it's unlikely to be random chance
     if that doesn't work it will use a reasonably strict regex to look for an isbn13
-    formatted string within the full text, which should help when other numbers are present"""
+    formatted string within the full text, which should help when other numbers are present
+    """
 
     # pass one: strip all non isbn characters, and see if what remains looks like an ISBN
     isbnchars = [c for c in string if c in "0123456789Xx"]
