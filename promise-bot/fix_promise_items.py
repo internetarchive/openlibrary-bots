@@ -55,9 +55,9 @@ class FixPromiseItems:
 
                 try:
                     edition = self.ol.get(edition_olid)
-                    self.update_edition(edition)
+                    modified_fields = self.update_edition(edition)
                     if not self.dry_run:
-                        edition.save("Fix bwbsku, bwb_id, amz_id, source_record")
+                        edition.save(f"Modified {', '.join(modified_fields)}")
                     self.modified += 1
                 except Exception:
                     self.write_error(self.error_file, line[:-1])
@@ -80,6 +80,8 @@ class FixPromiseItems:
         return fields[1].split("/")[-1]
 
     def update_edition(self, edition):
+        modified_fields = []
+
         id_count = len(edition.local_id)
 
         local_id = next(
@@ -98,9 +100,16 @@ class FixPromiseItems:
 
         edition.local_id = updated_ids
 
+        modified_fields.append("local IDs")
+
         # Fix identifiers:
-        edition.identifiers.pop("amazon", None)
-        edition.identifiers.pop("better_world_books", None)
+        amazon_ids = edition.identifiers.pop("amazon", None)
+        bwb_ids = edition.identifiers.pop("better_world_books", None)
+
+        if amazon_ids:
+            modified_fields.append("amazon IDs")
+        if bwb_ids:
+            modified_fields.append("bwb IDs")
 
         # Fix source_records entry:
         sku = local_id.split(":")[-1]
@@ -110,6 +119,10 @@ class FixPromiseItems:
         edition.source_records = [f"{source_record}:{sku}"] + [
             r for r in edition.source_records if not r.startswith("promise:")
         ]
+
+        modified_fields.append("source records")
+
+        return modified_fields
 
     def write_error(self, path, olid):
         err_path = Path(path)
