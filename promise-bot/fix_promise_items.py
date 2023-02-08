@@ -67,8 +67,12 @@ class FixPromiseItems:
         num_processed = self.modified + self.errors + self.matched
         self.write_state(self.state_file, self.start_line + num_processed)
 
-        return num_processed
-
+        return {
+          'processed': num_processed,
+          'modified': self.modified,
+          'matched': self.matched,
+          'errors': self.errors,
+        }
     def extract_olid(self, line):
         fields = line.split("\t")
         return fields[1].split("/")[-1]
@@ -229,7 +233,7 @@ def start_job(args):
             sys.exit(errno.ECONNREFUSED)
 
         # Initialize job and run
-        num_processed = FixPromiseItems(
+        results = FixPromiseItems(
             args.infile,
             args.state_file,
             args.error_file,
@@ -238,7 +242,10 @@ def start_job(args):
             start_line=args.start_line,
             dry_run=args.dry_run,
         ).run()
-        print(f"Total records processed: {num_processed}")
+        print(f"Total records processed: {results.num_processed}")
+        print(f'Total modified: {results.modified}')
+        print(f'Total matched: {results.matched}')
+        print(f'Total errors: {results.errors}')
 
     print("Program terminated...")
 
