@@ -76,7 +76,7 @@ class Biblio:
             "number_of_pages": self.pages,
             "languages": [self.language],
             "subjects": self.subjects,
-            "source_records": ["bwb:%s" % self.isbn],
+            "source_records": [f"bwb:{self.isbn}"],
         }
         return a
 

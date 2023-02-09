@@ -139,9 +139,9 @@ if __name__ == "__main__":
     else:
         ol = OpenLibrary()
 
-    print("Importing to %s" % ol.base_url)
-    print("ITEM: %s" % item)
-    print("FILENAME: %s" % fname)
+    print(f"Importing to {ol.base_url}")
+    print(f"ITEM: {item}")
+    print(f"FILENAME: {fname}")
 
     if args.info:
         if barcode is True:
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             print(LOCAL_ID.findall(r.json()["body"]["value"]))
         if item:
             # List MARC21 files, then quit.
-            print("Item %s has the following MARC files:" % item)
+            print(f"Item {item} has the following MARC files:")
             for f in get_marc21_files(item):
                 print(f)
         ol.session.close()
@@ -219,7 +219,7 @@ if __name__ == "__main__":
             else:  # 4xx errors should have json content, to be handled in default 200 flow
                 pass
         except ConnectionError as e:
-            print("CONNECTION ERROR: %s" % e.args[0])
+            print(f"CONNECTION ERROR: {e.args[0]}")
             sleep(SHORT_CONNECT_WAIT)
             continue
         # log results to stdout

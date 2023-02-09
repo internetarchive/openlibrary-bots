@@ -42,7 +42,7 @@ for i in range(len(data)):
         if flag:
             new_data.append(data[i]["editions"][0]["isbn"])
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print(f"--- {time.time() - start_time} seconds ---")
 
 with open("data/ol_works.csv", "w") as csvfile:
     csvwriter = csv.writer(csvfile)

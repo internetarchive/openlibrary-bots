@@ -12,13 +12,8 @@ from .sax_utils import *
 from .xmltramp import *
 
 repo_path = os.getenv("PHAROS_REPO")
-codelists_path = "{}/{}".format(
-    repo_path, "catalog/onix/ONIX_BookProduct_CodeLists.xsd"
-)
-ref_dtd_path = "{}/{}".format(
-    repo_path,
-    "catalog/onix/ONIX_BookProduct_Release2.1_reference.xsd",
-)
+codelists_path = f"{repo_path}/catalog/onix/ONIX_BookProduct_CodeLists.xsd"
+ref_dtd_path = f"{repo_path}/catalog/onix/ONIX_BookProduct_Release2.1_reference.xsd"
 
 # for testing, also set URL_CACHE_DIR; see bottom.
 
@@ -95,7 +90,7 @@ class OnixProduct:
         try:
             return onix_shortnames[reference_name]
         except KeyError:
-            raise Exception("unknown reference name: %s" % reference_name)
+            raise Exception(f"unknown reference name: {reference_name}")
 
 
 class OnixHandler(ContentHandler):
@@ -191,7 +186,7 @@ class TestErrorHandler:
         raise exn
 
     def warning(self, exn):
-        sys.stderr.write("warning: %s\n" % exn.getMessage)
+        sys.stderr.write(f"warning: {exn.getMessage}\n")
 
 
 def produce_items(input, produce):
@@ -202,7 +197,7 @@ def produce_items(input, produce):
     parser.setContentHandler(OnixHandler(parser, process_item))
     url_cache_dir = os.getenv("URL_CACHE_DIR")
     if url_cache_dir:
-        sys.stderr.write("using url cache in %s\n" % url_cache_dir)
+        sys.stderr.write(f"using url cache in {url_cache_dir}\n")
         parser.setEntityResolver(CachingEntityResolver(parser, url_cache_dir))
     else:
         sys.stderr.write(

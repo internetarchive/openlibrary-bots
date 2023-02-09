@@ -26,7 +26,7 @@ def setup():
     def getvar(name, required=True):
         val = os.getenv(name)
         if required and val is None:
-            raise Exception("found no environment variable %s" % name)
+            raise Exception(f"found no environment variable {name}")
         return val
 
     dbname = getvar("PHAROS_DBNAME")
@@ -40,7 +40,7 @@ def setup():
     logfile = getvar("PHAROS_LOGFILE", False)
     if logfile:
         tdb.logger.set_logfile(open(logfile, "a"))
-        sys.stderr.write("logging to %s\n" % logfile)
+        sys.stderr.write(f"logging to {logfile}\n")
 
     global source_name, source_path
     source_dir = getvar("PHAROS_SOURCE_DIR")
@@ -73,7 +73,7 @@ def setup_names():
     ):
         edition_records.add(int(r.value))
 
-    warn("noted %d items" % len(item_names))
+    warn(f"noted {len(item_names)} items")
     if len(edition_records) > 0:
         warn(
             "already have %d records from this source; they will be ignored"
@@ -138,7 +138,7 @@ def import_item(x):
             break
 
     if not name:
-        raise Exception("couldn't find a unique name for %s" % x)
+        raise Exception(f"couldn't find a unique name for {x}")
 
     e = Edition(name, d=massage_dict(x))
     global source_name

@@ -33,7 +33,7 @@ class URLCache:
             # with index locked, add an entry for this url and
             # open a locked, temporary file to load its data
             index.seek(0, 2)
-            index.write("%s\n" % url)
+            index.write(f"{url}\n")
             data_file = self.dir + "/" + str(next)
             tmp_data_file = data_file + "-fetching"
             tmp_data = open(tmp_data_file, "w")
@@ -42,7 +42,7 @@ class URLCache:
 
             # having released the lock on the index, suck data
             # into the temporary file
-            sys.stderr.write("URLCache: fetching %s\n" % url)
+            sys.stderr.write(f"URLCache: fetching {url}\n")
             net_data = urllib.urlopen(url)
             shutil.copyfileobj(net_data, tmp_data)
             tmp_data.flush()
@@ -61,7 +61,7 @@ class URLCache:
         else:
             # wait for fetch to finish
             tmp_data_file = data_file + "-fetching"
-            sys.stderr.write("URLCache: waiting for %s\n" % data_file)
+            sys.stderr.write(f"URLCache: waiting for {data_file}\n")
             try:
                 try:
                     tmp_data = open(tmp_data_file)
@@ -73,6 +73,5 @@ class URLCache:
             except Exception as exn:
                 # in case this happens, just blow away your cache
                 raise Exception(
-                    "URLCache: sorry, corrupted state for url '%s': %s"
-                    % (url, str(exn))
+                    f"URLCache: sorry, corrupted state for url '{url}': {str(exn)}"
                 )

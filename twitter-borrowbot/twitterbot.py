@@ -65,13 +65,13 @@ class Tweet:
     @classmethod
     def edition_available(cls, mention, edition):
         action = READ_OPTIONS[edition.get("availability")]
-        print("Replying: Edition %sable" % action)
+        print(f"Replying: Edition {action}able")
         cls._tweet(
             mention,
             "you're in luck. "
-            + "This book appears to be %sable " % action
+            + f"This book appears to be {action}able "
             + "on @openlibrary: "
-            + "{}/isbn/{}".format(InternetArchive.OL_URL, edition.get("isbn")),
+            + f"{InternetArchive.OL_URL}/isbn/{edition.get('isbn')}",
         )
 
     @classmethod
@@ -91,7 +91,7 @@ class Tweet:
             "this book doesn't appear to have a readable option yet, "
             + "however you can still add it to your "
             + "Want To Read list here: "
-            + "{}/isbn/{}".format(InternetArchive.OL_URL, edition.get("isbn")),
+            + f"{InternetArchive.OL_URL}/isbn/{edition.get('isbn')}",
         )
 
     @classmethod
