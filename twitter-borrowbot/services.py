@@ -71,7 +71,7 @@ class InternetArchive:
     @classmethod
     def get_availability(cls, identifier):
         try:
-            url = "%s/services/loans/loan/" % cls.IA_URL
+            url = f"{cls.IA_URL}/services/loans/loan/"
             status = (
                 requests.get(f"{url}?&action=availability&identifier={identifier}")
                 .json()
@@ -86,10 +86,10 @@ class InternetArchive:
     @classmethod
     def find_available_work(cls, book):
         try:
-            url = "%s/advancedsearch.php" % cls.IA_URL
+            url = f"{cls.IA_URL}/advancedsearch.php"
             work_id = book["works"][0]["key"].split("/")[-1]
             query = (
-                "openlibrary_work:%s AND" % work_id
+                f"openlibrary_work:{work_id} AND"
                 + "(lending___is_lendable:true OR"
                 + " lending___is_readable:true OR"
                 + " lending___is_printdisabled:true"

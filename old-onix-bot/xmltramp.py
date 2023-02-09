@@ -157,7 +157,7 @@ class Element:
         for x in self._dir:
             if isinstance(x, Element) and x._name == n:
                 return x
-        raise AttributeError("No child element named %s" % repr(n))
+        raise AttributeError(f"No child element named {repr(n)}")
 
     def __hasattr__(self, n):
         for x in self._dir:

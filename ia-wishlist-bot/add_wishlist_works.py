@@ -54,7 +54,7 @@ for data in dataset:
         if isbn_set.intersection(y):
             new_data.append(data)
 
-print("--- %s seconds to process all the works ---" % (time.time() - start_time))
+print(f"--- {time.time() - start_time} seconds to process all the works ---")
 
 # A new CSV file is chosen to write into the Wishlist
 with open("data/wishlist_works_may_2018.csv", "w") as csvfile:

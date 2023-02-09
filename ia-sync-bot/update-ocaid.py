@@ -43,10 +43,10 @@ with open(infile) as f:
         # check and add ocaid to OL edition
         print(f"Adding {ocaid} to {olid}")
         edition = ol.get(olid)
-        assert edition.title, "Missing title in %s!" % olid
+        assert edition.title, f"Missing title in {olid}!"
 
         if hasattr(edition, "ocaid"):
-            print("  OCAID already found: %s" % edition.ocaid)
+            print(f"  OCAID already found: {edition.ocaid}")
         else:
             edition.ocaid = ocaid
             edition.save("add ocaid")

@@ -24,5 +24,5 @@ if __name__ == "__main__":
                 if not len(getattr(edition_obj, "covers", [])):
                     fout.write(f"{edition_obj.olid}\n".encode())
                     edition_obj.add_bookcover(
-                        "https://archive.org/download/%s/page/cover" % _json["ocaid"]
+                        f"https://archive.org/download/{_json['ocaid']}/page/cover"
                     )
