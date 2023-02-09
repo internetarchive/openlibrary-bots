@@ -12,7 +12,7 @@ except NameError:
 
 
 def isstr(f):
-    return isinstance(f, (str, type("")))
+    return isinstance(f, (str, str))
 
 
 def islst(f):
@@ -172,11 +172,11 @@ class Element:
             self[n] = v
 
     def __getitem__(self, n):
-        if isinstance(n, type(0)):  # d[1] == d._dir[1]
+        if isinstance(n, int):  # d[1] == d._dir[1]
             return self._dir[n]
         elif isinstance(n, slice(0).__class__):
             # numerical slices
-            if isinstance(n.start, type(0)):
+            if isinstance(n.start, int):
                 return self._dir[n.start : n.stop]
 
             # d['foo':] == all <foo>s
@@ -197,7 +197,7 @@ class Element:
             raise KeyError
 
     def __setitem__(self, n, v):
-        if isinstance(n, type(0)):  # d[1]
+        if isinstance(n, int):  # d[1]
             self._dir[n] = v
         elif isinstance(n, slice(0).__class__):
             # d['foo':] adds a new foo
@@ -230,7 +230,7 @@ class Element:
                 del self[i]
 
     def __delitem__(self, n):
-        if isinstance(n, type(0)):
+        if isinstance(n, int):
             del self._dir[n]
         elif isinstance(n, slice(0).__class__):
             # delete all <foo>s

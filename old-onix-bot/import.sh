@@ -7,7 +7,7 @@ export PHAROS_SITE=site1
 export PHAROS_EDITION_PREFIX="b/"
 export PHAROS_AUTHOR_PREFIX="a/"
 
-export URL_CACHE_DIR=urlcache 
+export URL_CACHE_DIR=urlcache
 export PYTHONPATH=/home/dbg/lib/python
 
 exec python2.4 onix-import.py

@@ -57,7 +57,7 @@ class InternetArchive:
     @classmethod
     def get_edition(cls, isbn):
         try:
-            ed = requests.get("%s/isbn/%s.json" % (cls.OL_URL, isbn)).json()
+            ed = requests.get(f"{cls.OL_URL}/isbn/{isbn}.json").json()
             ed["availability"] = (
                 ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             )
@@ -73,9 +73,7 @@ class InternetArchive:
         try:
             url = "%s/services/loans/loan/" % cls.IA_URL
             status = (
-                requests.get(
-                    "%s?&action=availability&identifier=%s" % (url, identifier)
-                )
+                requests.get(f"{url}?&action=availability&identifier={identifier}")
                 .json()
                 .get("lending_status")
             )

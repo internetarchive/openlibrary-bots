@@ -88,7 +88,7 @@ def process_csv(filename):
         >>> parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
         { "author": "foo", "title": "bar", ...}
     """
-    with open(filename, mode="r") as infile:
+    with open(filename) as infile:
         reader = csv.reader(infile)
 
         book_data = [row for row in reader]

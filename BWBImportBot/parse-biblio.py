@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 import json
 import sys
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     seen_isbns = set()
 
     for fname in fnames:
-        with open(fname, "r") as f:
+        with open(fname) as f:
             for line in f:
                 data = line.strip().split("|")
                 b = Biblio(data)

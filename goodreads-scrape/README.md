@@ -1,4 +1,4 @@
- 
+
  Basically a barebones script to fetch book details from GoodReads (Name, Author and Book Image url) and push those into openlibrary database.
 
 #### Libraries used
@@ -20,4 +20,4 @@ Then simply run the script ```python3 script_add.py [isbn_id]```
 
 #### To Do
 1. The script is quite slow. This is because it is fetching data from GoodReads first then reading the xml response and then pushing the data back to the openlibrary databases. Need to think of ways to make it a bit faster.
-2. Integrate it with the openlibrary bots repository. 
+2. Integrate it with the openlibrary bots repository.

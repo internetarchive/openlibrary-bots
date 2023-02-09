@@ -16,7 +16,7 @@ source_path = None
 edition_prefix = None
 author_prefix = None
 
-edition_records = set([])
+edition_records = set()
 item_names = {}
 # edition_names = set ([])
 # author_names = {}
@@ -45,7 +45,7 @@ def setup():
     global source_name, source_path
     source_dir = getvar("PHAROS_SOURCE_DIR")
     source_name = sys.argv[1]
-    source_path = "%s/%s" % (source_dir, source_name)
+    source_path = f"{source_dir}/{source_name}"
 
     global edition_prefix, author_prefix
     edition_prefix = getvar("PHAROS_EDITION_PREFIX", False) or ""
@@ -251,5 +251,5 @@ def massage_dict(d):
 if __name__ == "__main__":
     setup()
     sys.stderr.write("--> setup finished\n")
-    import_file(open(source_path, "r"))
+    import_file(open(source_path))
     sys.stderr.write("--> import finished\n")

@@ -38,6 +38,6 @@ if __name__ == "__main__":
                         data["number_of_pages"] = data.pop("pagination", None)
                     r = ol.session.post(url, data=json.dumps(data))
                     if r.status_code == 200:
-                        print("%s: SUCCESS: %s" % (i, r.content))
+                        print(f"{i}: SUCCESS: {r.content}")
                     else:
-                        print("%s: ERROR: %s" % (i, r.content))
+                        print(f"{i}: ERROR: {r.content}")
