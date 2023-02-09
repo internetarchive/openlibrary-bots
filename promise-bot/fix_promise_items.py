@@ -43,7 +43,7 @@ class FixPromiseItems:
         self.dry_run = dry_run
 
     def run(self):
-        with open(self.in_file, "r") as f:
+        with open(self.in_file) as f:
             if self.start_line:
                 for _ in range(1, self.start_line):
                     f.readline()
