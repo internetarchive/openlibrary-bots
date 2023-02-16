@@ -10,7 +10,6 @@ from olclient import AbstractBotJob
 
 
 class AddInternetArchiveCoverJob(AbstractBotJob):
-
     def run(self) -> None:
         """Add the Internet Archive scan to applicable coverless edition."""
         self.write_changes_declaration()
@@ -23,7 +22,9 @@ class AddInternetArchiveCoverJob(AbstractBotJob):
                 edition_obj = self.ol.Edition.get(olid)
                 covers = getattr(edition_obj, "covers", [])
                 if not self.valid_covers(covers):
-                    cover_url = f"https://archive.org/download/{_json['ocaid']}/page/cover"
+                    cover_url = (
+                        f"https://archive.org/download/{_json['ocaid']}/page/cover"
+                    )
                     self.logger.info(f"{edition_obj.olid} {covers} {cover_url}")
                     self.save(lambda: edition_obj.add_bookcover(cover_url=cover_url))
 
