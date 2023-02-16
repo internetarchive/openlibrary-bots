@@ -12,7 +12,7 @@ class CachingEntityResolver(EntityResolver):
     def __init__(self, parser, dir):
         self.parser = parser
         if not os.path.isdir(dir):
-            raise Exception("CachingEntityResolver: no such directory: %s" % dir)
+            raise Exception(f"CachingEntityResolver: no such directory: {dir}")
         self.cache = URLCache(dir)
 
     def resolveEntity(self, pubid, sysid):
@@ -183,7 +183,7 @@ class DictCollector(NodeCollector):
     def collect(self, key_value):
         (key, value) = key_value
         if self.values.get(key):
-            raise Exception("dictionary key '%s' is already mapped" % key)
+            raise Exception(f"dictionary key '{key}' is already mapped")
         else:
             self.values[key] = value
 

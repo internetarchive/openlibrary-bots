@@ -88,7 +88,7 @@ def process_csv(filename):
         >>> parse_wishlist_csv_row_to_dict("foo,bar,baz,qux")
         { "author": "foo", "title": "bar", ...}
     """
-    with open(filename, mode="r") as infile:
+    with open(filename) as infile:
         reader = csv.reader(infile)
 
         book_data = [row for row in reader]
@@ -158,7 +158,6 @@ def get_bookcover(book):
 
 
 def add_book_via_olclient(book, author_list, bookcover=None):
-
     if len(author_list) != 0:
         # Define a Book Object
         new_book = common.Book(

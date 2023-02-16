@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 # Import simplejson for Python 2 else json for Python 3
 try:
     import urllib2
@@ -38,7 +36,7 @@ NYT_BEST_SELLERS_URL = "http://api.nytimes.com/svc/books/v2/lists"
 
 
 def LOG(level, msg):
-    print("%s: %s" % (level, msg.encode("utf-8")), file=sys.stderr)
+    print(f"{level}: {msg.encode('utf-8')}", file=sys.stderr)
 
 
 def ensureUtf(s):
@@ -64,7 +62,7 @@ def _request(request, parser=simplejson.loads):
         results = ensureUtf(results)
         results = parser(results)
     except Exception as e:
-        LOG("ERROR", "error loading %s: %s results: %s" % (request, e, results))
+        LOG("ERROR", f"error loading {request}: {e} results: {results}")
         raise
     finally:
         conn.close()
@@ -72,7 +70,7 @@ def _request(request, parser=simplejson.loads):
 
 
 def get_nyt_bestseller_list_names():
-    url = "%s/%s.json?%s" % (
+    url = "{}/{}.json?{}".format(
         NYT_BEST_SELLERS_URL,
         "names",
         urllib.urlencode({"api-key": NYT_API_KEY}),
@@ -84,7 +82,7 @@ def get_nyt_bestseller_list_names():
 
 
 def load_nyt_bestseller_list(list_name):
-    url = "%s/%s.json?%s" % (
+    url = "{}/{}.json?{}".format(
         NYT_BEST_SELLERS_URL,
         urllib.quote(list_name.replace(" ", "-")),
         urllib.urlencode({"api-key": NYT_API_KEY}),
@@ -124,7 +122,7 @@ def reconcile_book(book):
             result.update([x["key"] for x in edition["works"] or []])
 
     if result:
-        LOG("INFO", "RECONCILED BY ISBN10: %s" % str(result))
+        LOG("INFO", f"RECONCILED BY ISBN10: {str(result)}")
         return result
 
     for isbn13 in (x["isbn13"] for x in book["isbns"]):
@@ -133,7 +131,7 @@ def reconcile_book(book):
             result.update([x["key"] for x in edition["works"] or []])
 
     if result:
-        LOG("INFO", "RECONCILED BY ISBN13: %s" % str(result))
+        LOG("INFO", f"RECONCILED BY ISBN13: {str(result)}")
         return result
 
     authors = reconcile_authors(book["book_details"][0]["author"])
@@ -146,7 +144,7 @@ def reconcile_book(book):
             authors.update(reconcile_authors(a))
 
     if not authors:
-        LOG("INFO", "NO AUTHOR: %s" % pprint.pformat(book["book_details"]))
+        LOG("INFO", f"NO AUTHOR: {pprint.pformat(book['book_details'])}")
         return []
 
     for a in authors:
@@ -165,7 +163,7 @@ def reconcile_book(book):
         )
         if r:
             result.update([x["key"] for x in r])
-            LOG("INFO", "RECONCILED BY AUTHOR: %s" % str(result))
+            LOG("INFO", f"RECONCILED BY AUTHOR: {str(result)}")
             return result
     return result
 
@@ -223,11 +221,11 @@ def write_machine_tags(ln, books):
                 ),
             )
         else:
-            LOG("DEBUG", "Adding tags (%s) to %s" % (", ".join(tags), work["key"]))
-    LOG("INFO", "WRITING MACHINE TAGS FOR %s of %s works" % (len(write), len(books)))
+            LOG("DEBUG", f"Adding tags ({', '.join(tags)}) to {work['key']}")
+    LOG("INFO", f"WRITING MACHINE TAGS FOR {len(write)} of {len(books)} works")
     if write:
         OL.save_many(
-            write.values(), comment="Adding tags to New York Times %s bestsellers" % ln
+            write.values(), comment=f"Adding tags to New York Times {ln} bestsellers"
         )
 
 
@@ -267,11 +265,11 @@ if __name__ == "__main__":
     global NYT_API_KEY
     NYT_API_KEY = options.nyt_api_key
     global OL
-    OL = OpenLibrary("http://%s" % options.openlibrary_host)
+    OL = OpenLibrary(f"http://{options.openlibrary_host}")
     OL.login(options.username, options.password)
     results = collections.defaultdict(list)
     for ln in get_nyt_bestseller_list_names():
-        LOG("INFO", "processing list %s" % ln)
+        LOG("INFO", f"processing list {ln}")
         for i, book in enumerate(load_nyt_bestseller_list(ln)):
             ol_keys = reconcile_book(book)
             if not ol_keys:
@@ -315,4 +313,4 @@ if __name__ == "__main__":
             )
             write_machine_tags(ln, results[ln])
         else:
-            LOG("WARN", "No bestsellers for %s" % ln)
+            LOG("WARN", f"No bestsellers for {ln}")

@@ -7,7 +7,6 @@ import twitterbotErrors
 
 
 class ISBNFinder:
-
     SERVICES = ("amazon", "goodreads")
 
     @staticmethod
@@ -50,7 +49,6 @@ class ISBNFinder:
 
 
 class InternetArchive:
-
     IA_URL = "https://archive.org"
     OL_URL = "https://openlibrary.org"
     OL_DEV = "https://dev.openlibrary.org"
@@ -59,7 +57,7 @@ class InternetArchive:
     @classmethod
     def get_edition(cls, isbn):
         try:
-            ed = requests.get("%s/isbn/%s.json" % (cls.OL_URL, isbn)).json()
+            ed = requests.get(f"{cls.OL_URL}/isbn/{isbn}.json").json()
             ed["availability"] = (
                 ed and ed.get("ocaid") and cls.get_availability(ed["ocaid"])
             )
@@ -73,11 +71,9 @@ class InternetArchive:
     @classmethod
     def get_availability(cls, identifier):
         try:
-            url = "%s/services/loans/loan/" % cls.IA_URL
+            url = f"{cls.IA_URL}/services/loans/loan/"
             status = (
-                requests.get(
-                    "%s?&action=availability&identifier=%s" % (url, identifier)
-                )
+                requests.get(f"{url}?&action=availability&identifier={identifier}")
                 .json()
                 .get("lending_status")
             )
@@ -90,10 +86,10 @@ class InternetArchive:
     @classmethod
     def find_available_work(cls, book):
         try:
-            url = "%s/advancedsearch.php" % cls.IA_URL
+            url = f"{cls.IA_URL}/advancedsearch.php"
             work_id = book["works"][0]["key"].split("/")[-1]
             query = (
-                "openlibrary_work:%s AND" % work_id
+                f"openlibrary_work:{work_id} AND"
                 + "(lending___is_lendable:true OR"
                 + " lending___is_readable:true OR"
                 + " lending___is_printdisabled:true"

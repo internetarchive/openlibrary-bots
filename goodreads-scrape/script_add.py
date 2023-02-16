@@ -8,7 +8,7 @@ from olclient.openlibrary import OpenLibrary
 
 isbn_13 = str(sys.argv[1])
 API_KEY = ""
-r = requests.get("https://www.goodreads.com/search.xml?key=%sq=%s" % (API_KEY, isbn_13))
+r = requests.get(f"https://www.goodreads.com/search.xml?key={API_KEY}q={isbn_13}")
 
 root = ET.fromstring(r.content)  # Parsing XML response from Goodreads
 title = (root[1][6][0][8][1]).text  # Deeply attributed title of the book

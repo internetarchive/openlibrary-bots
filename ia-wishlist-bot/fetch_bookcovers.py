@@ -1,10 +1,10 @@
 """
-Python Script to fetch Bookcovers from 
+Python Script to fetch Bookcovers from
 1. Google Books API
 2. Amazon Scraping Bookcovers
 3. Betterworld Books Page
 
-Input: 
+Input:
 ISBNs for books to get bookcover
 
 Output:
@@ -31,6 +31,7 @@ desktop_agents = [
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0",
 ]
+
 
 # Random Headers to add to the application
 def random_headers():

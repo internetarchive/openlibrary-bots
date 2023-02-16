@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 """
@@ -33,7 +32,6 @@ ol = OpenLibrary()
 
 
 class TestOnixParser(unittest.TestCase):
-
     # TEST_ONIX_FEED_URL = 'https://storage.googleapis.com/support-kms-prod/SNP_EFDA74818D56F47DE13B6FF3520E468126FD_3285388_en_v2'
     TEST_ONIX_FEED_URL = (
         "https://ia801503.us.archive.org/2/items/onix-bot/SampleONIX.xml"
@@ -152,7 +150,7 @@ class TestOnixProductBot(unittest.TestCase):
         self.assertTrue(expected_status == self.opb.status)
 
 
-class OnixFeedParser(object):
+class OnixFeedParser:
     def __init__(self, filename, ns=""):
         parser = etree.XMLParser(ns_clean=True)
         self.onix = etree.parse(filename, parser).getroot()
@@ -162,7 +160,7 @@ class OnixFeedParser(object):
         ]
 
 
-class OnixProductParser(object):
+class OnixProductParser:
     def __init__(self, product, ns):
         self.ns = ns
         self.product = product
@@ -388,14 +386,13 @@ class OnixProductParser(object):
         return json.dumps(data)
 
 
-class OnixProductBot(object):
+class OnixProductBot:
     def __init__(self, data):
         self.status = 1
         self.data = json.loads(data)
 
     @property
     def check_identifiers(self):
-
         try:
             work_isbn10 = ol.Edition.get(
                 isbn=self.data.get("identifiers").get("isbn10")

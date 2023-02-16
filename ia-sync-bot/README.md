@@ -9,7 +9,7 @@ Takes an Open Library edition dump as input and outputs tsv of:
 `<ISBN13> <Edition-OLID> (<Work-OLID> | 'NONE')`
 
   OR
-  
+
 `'BAD-ISBN:' <bad isbn> <Edition-OLID> (<Work-OLID> | 'NONE')`
 
 if the isbn does not validate.

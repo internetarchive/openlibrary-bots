@@ -33,6 +33,6 @@ Look through our issues related to `contributing`: [Github Issues]( https://gith
 
 ## Documentation
 
-* Every Bot has documentation within the Bot folder as a `README.md` file. Also check out [Github Wiki](https://github.com/internetarchive/openlibrary-bots/wiki) and look for the Bot Documentation for more information regarding the Bot. 
+* Every Bot has documentation within the Bot folder as a `README.md` file. Also check out [Github Wiki](https://github.com/internetarchive/openlibrary-bots/wiki) and look for the Bot Documentation for more information regarding the Bot.
 
 * Every Bot has certain data files which are uploaded on `archive.org` and can be readily accessed. In case you are looking to add a new data file for a particular bot, contact the maintainer for that bot for more information on how to access the `archive.org` access.

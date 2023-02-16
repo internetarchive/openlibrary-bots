@@ -12,13 +12,13 @@ jobs:
         with:
           python-version: 3.x
       - run: pip install --upgrade pip setuptools
-      - run: pip install black codespell flake8 isort pytest
+      - run: pip install black codespell flake8 isort pytest tomli
       - run: black --check .
-      - run: codespell --ignore-words-list="didnt" --skip="*.tsv,*.xsd" --quiet-level=2
+      - run: codespell  # See pyproject.toml for config
       - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - run: isort --profile black .
-      - run: pip install -r requirements.txt -r twitter-borrowbot/requirements.txt
+      - run: pip install -r requirements.txt -r BWBCoverBot/requirements.txt -r twitter-borrowbot/requirements.txt
       - run: pip list --outdated
       - run: pip install --editable .  # https://docs.pytest.org/en/stable/goodpractices.html
-      - run: pytest  # --ignore="twitter-borrowbot/test_borrowbot.py"
+      - run: pytest
       # - run: pytest --doctest-modules . || true

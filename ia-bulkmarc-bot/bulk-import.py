@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" 
+"""
     Iterates over an archive.org bulk MARC item, such as OpenLibraries-Trent-MARCs,
     and imports all records in all of its MARC files to Open Library.
 
@@ -62,7 +62,7 @@ def next_record(identifier, ol):
         ol.base_url
         + "/show-records/"
         + re.search(r"^[^:]*", identifier).group(0)
-        + ":%s:%s" % (next_offset, next_length)
+        + f":{next_offset}:{next_length}"
     )
     next_length = re.search(r"[^:]*$", r.headers.get("Location", "5")).group(0)
     return int(next_offset), int(next_length)
@@ -139,9 +139,9 @@ if __name__ == "__main__":
     else:
         ol = OpenLibrary()
 
-    print("Importing to %s" % ol.base_url)
-    print("ITEM: %s" % item)
-    print("FILENAME: %s" % fname)
+    print(f"Importing to {ol.base_url}")
+    print(f"ITEM: {item}")
+    print(f"FILENAME: {fname}")
 
     if args.info:
         if barcode is True:
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             print(LOCAL_ID.findall(r.json()["body"]["value"]))
         if item:
             # List MARC21 files, then quit.
-            print("Item %s has the following MARC files:" % item)
+            print(f"Item {item} has the following MARC files:")
             for f in get_marc21_files(item):
                 print(f)
         ol.session.close()
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         if limit and count >= limit:
             # Stop if a limit has been set, and we are over it.
             break
-        identifier = "{}/{}:{}:{}".format(item, fname, offset, length)
+        identifier = f"{item}/{fname}:{offset}:{length}"
         data = {"identifier": identifier, "bulk_marc": "true"}
         if barcode and barcode is not True:
             # A local_id key has been passed to import a specific local_id barcode
@@ -214,12 +214,12 @@ if __name__ == "__main__":
                 else:
                     sleep(SERVER_ISSUES_WAIT)
                 length = 5
-                print("%s:%s" % (offset, length))
+                print(f"{offset}:{length}")
                 continue
             else:  # 4xx errors should have json content, to be handled in default 200 flow
                 pass
         except ConnectionError as e:
-            print("CONNECTION ERROR: %s" % e.args[0])
+            print(f"CONNECTION ERROR: {e.args[0]}")
             sleep(SHORT_CONNECT_WAIT)
             continue
         # log results to stdout
@@ -229,5 +229,5 @@ if __name__ == "__main__":
             length = result.get("next_record_length")
         except json.decoder.JSONDecodeError:
             result = r.content
-        print("{}: {} -- {}".format(identifier, r.status_code, result))
+        print(f"{identifier}: {r.status_code} -- {result}")
         count += 1
