@@ -16,8 +16,8 @@ if [[ -z $3 ]]
 fi
 
 OL_DUMP=$1
-FIXED_OL_DUMP=$2
+FILTERED_OL_DUMP=$2
 FIXED_EDITIONS_DUMP=$3
 
-bash find_coverless_editions_in_library.sh $OL_DUMP $FILTERED_OL_DUMP
-python cover_updater.py $FILTERED_OL_DUMP $FIXED_EDITIONS_DUMP
+bash find_coverless_editions_in_library.sh "$OL_DUMP" "$FILTERED_OL_DUMP"
+python cover_updater.py "$FILTERED_OL_DUMP" "$FIXED_EDITIONS_DUMP"
