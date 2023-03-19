@@ -4,3 +4,8 @@ internetarchive
 isbnlib
 ndjson
 requests
+# requests_mock has issues with sessions and cookies.
+# See https://github.com/jamielennox/requests-mock/pull/220
+requests_mock@git+https://github.com/jaraco/requests-mock@bugfix-17
+sqlmodel
+streaming-form-data==1.11.0  # https://github.com/siddhantgoel/streaming-form-data
