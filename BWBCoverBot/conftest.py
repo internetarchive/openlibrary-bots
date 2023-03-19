@@ -30,5 +30,7 @@ def get_ol(requests_mock: RequestsMock) -> Iterator[OpenLibrary]:
         },
     )
     yield olclient.OpenLibrary(
-        credentials=olclient.config.Credentials(access="access_key", secret="secret_key")
+        credentials=olclient.config.Credentials(
+            access="access_key", secret="secret_key"
+        )
     )
