@@ -22,7 +22,7 @@ def get_db() -> Iterator[Session]:
 
 
 @pytest.fixture()
-def get_ol(requests_mock: RequestsMock) -> Iterator[OpenLibrary]:
+def get_ol(requests_mock: RequestsMock) -> Iterator[olclient.OpenLibrary]:
     requests_mock.post(
         "https://openlibrary.org/account/login",
         cookies={
