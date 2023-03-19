@@ -1,8 +1,9 @@
 from collections.abc import Iterator
 
 import pytest
+
+import olclient
 from main import EditionCoverData
-from olclient import OpenLibrary, config
 from requests_mock.mocker import Mocker as RequestsMock
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -28,6 +29,6 @@ def get_ol(requests_mock: RequestsMock) -> Iterator[OpenLibrary]:
             "session": "/people/testbot%2C2023-01-20T02%3A26%3A33%2C4819b%246atest;Path=/"
         },
     )
-    yield OpenLibrary(
-        credentials=config.Credentials(access="access_key", secret="secret_key")
+    yield olclient.OpenLibrary(
+        credentials=olclient.config.Credentials(access="access_key", secret="secret_key")
     )
