@@ -3,6 +3,7 @@ from collections.abc import Iterator
 import pytest
 from main import EditionCoverData
 from olclient import OpenLibrary, config
+
 # from requests_mock.mocker import Mocker as RequestsMock
 from sqlmodel import Session, SQLModel, create_engine
 
