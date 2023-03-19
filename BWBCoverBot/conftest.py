@@ -1,11 +1,12 @@
 from collections.abc import Iterator
 
 import pytest
-
-import olclient
-from main import EditionCoverData
 from requests_mock.mocker import Mocker as RequestsMock
 from sqlmodel import Session, SQLModel, create_engine
+
+import olclient
+
+from main import EditionCoverData
 
 
 @pytest.fixture(scope="session")
