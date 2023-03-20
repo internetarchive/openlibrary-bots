@@ -1,5 +1,3 @@
-* What bot account does one use with bwbcoverbot?
-=======
 # BWBCoverBot
 A script to update covers on Open Library using a zip of covers from BWB.
 
