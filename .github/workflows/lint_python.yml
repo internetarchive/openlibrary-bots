@@ -25,6 +25,6 @@ jobs:
       - run: pip install -r requirements.txt -r BWBCoverBot/requirements.txt -r twitter-borrowbot/requirements.txt
       - run: pip install --editable .  # https://docs.pytest.org/en/stable/goodpractices.html
       - run: pip list --outdated
-      - run: mypy --exclude "old-onix-bot" --exclude "twitter-borrowbot" --install-types . || true
+      - run: mypy --exclude "old-onix-bot" --exclude "twitter-borrowbot" --install-types --non-interactive . || true
       - run: pytest
       # - run: pytest --doctest-modules . || true
