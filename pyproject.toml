@@ -1,3 +1,50 @@
 [tool.codespell]
 ignore-words-list = 'didnt'
-skip = '*.xsd'
+skip = './.*,*.xsd'
+
+[tool.ruff]
+select = [
+  "C4",      # flake8-comprehensions
+  "C90",     # mccabe
+  "E",       # pycodestyle
+  "F",       # Pyflakes
+  "I",       # isort
+  "ICN",     # flake8-import-conventions
+  "PGH",     # pygrep-hooks
+  "PIE",     # flake8-pie
+  "PLC",     # Pylint conventions
+  "PLE",     # Pylint errors
+  "PLR091",  # Pylint refactor just for max-args, max-branches, etc.
+  "PYI",     # flake8-pyi
+  "RSE",     # flake8-raise
+  "RUF",     # Ruff-specific rules
+  "T10",     # flake8-debugger
+  "TCH",     # flake8-type-checking
+  "TID",     # flake8-tidy-imports
+  "UP",      # pyupgrade
+  "W",       # pycodestyle
+  "YTT",     # flake8-2020
+]
+ignore = [
+  "E402",
+  "E722",
+  "F401",
+  "F403",
+  "F405",
+  "F841",
+  "PLC1901",
+  "RUF001",
+]
+line-length = 616
+target-version = "py37"
+
+[tool.ruff.mccabe]
+max-complexity = 21
+
+[tool.ruff.pylint]
+max-args = 8
+max-branches = 18
+max-statements = 73
+
+[tool.ruff.per-file-ignores]
+"test/*" = ["S101"]

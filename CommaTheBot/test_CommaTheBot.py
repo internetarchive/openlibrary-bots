@@ -1,4 +1,5 @@
 import unittest
+
 from CommaTheBot import CommaTheBotJob
 
 commaTheBot = CommaTheBotJob()

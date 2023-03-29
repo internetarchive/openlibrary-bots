@@ -1,5 +1,6 @@
 import unittest
 from random import randint
+
 from coverbot.cover_updater import AddInternetArchiveCoverJob as job
 
 

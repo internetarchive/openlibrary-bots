@@ -91,7 +91,7 @@ def process_csv(filename):
     with open(filename) as infile:
         reader = csv.reader(infile)
 
-        book_data = [row for row in reader]
+        book_data = list(reader)
 
         return book_data
 

@@ -32,7 +32,12 @@ def setup():
     dbname = getvar("PHAROS_DBNAME")
     dbuser = getvar("PHAROS_DBUSER")
     dbpass = getvar("PHAROS_DBPASS")
-    web.config.db_parameters = dict(dbn="postgres", db=dbname, user=dbuser, pw=dbpass)
+    web.config.db_parameters = {
+        "dbn": "postgres",
+        "db": dbname,
+        "user": dbuser,
+        "pw": dbpass,
+    }
     web.db._hasPooling = False
     web.config.db_printing = False
     web.load()

@@ -4,11 +4,10 @@ Fix promise items
 import argparse
 import errno
 import sys
-
 from configparser import ConfigParser
 from pathlib import Path
 
-from olclient.openlibrary import OpenLibrary, Config
+from olclient.openlibrary import Config, OpenLibrary
 
 DEFAULT_BATCH_SIZE = 1000
 DEFAULT_START_LINE = 1
