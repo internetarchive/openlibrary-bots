@@ -4,21 +4,27 @@ on:
   push:
     branches: [master]
 jobs:
-  lint_python:
+  codespell_ruff_and_black:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: pip install --user black "codespell[toml]" ruff
+    - run: codespell
+    - run: ruff --format=github .
+    - run: black --check .
+
+  mypy_and_pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
-      - run: pip install --upgrade pip setuptools
-      - run: pip install black codespell flake8 isort pytest tomli
-      - run: black --check .
-      - run: codespell  # See pyproject.toml for config
-      - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - run: isort --profile black .
+      - run: pip install --upgrade pip setuptools wheel
+      - run: pip install mypy pytest
       - run: pip install -r requirements.txt -r BWBCoverBot/requirements.txt -r twitter-borrowbot/requirements.txt
-      - run: pip list --outdated
       - run: pip install --editable .  # https://docs.pytest.org/en/stable/goodpractices.html
+      - run: pip list --outdated
+      - run: mypy --exclude "old-onix-bot" --exclude "twitter-borrowbot" --install-types --non-interactive . || true
       - run: pytest
       # - run: pytest --doctest-modules . || true

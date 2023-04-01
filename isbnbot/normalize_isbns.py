@@ -2,10 +2,10 @@
 normalize ISBNs
 NOTE: This script assumes the Open Library Dump passed only contains editions with an isbn_10 or isbn_13
 """
-import isbnlib
 import gzip
 import json
 
+import isbnlib
 import olclient
 
 
@@ -33,7 +33,7 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
                 if _json["type"]["key"] != "/type/edition":
                     continue
 
-                isbns_by_type = dict()
+                isbns_by_type = {}
                 if "isbn_10" in _json:
                     isbns_by_type["isbn_10"] = _json.get("isbn_10", None)
                 if "isbn_13" in _json:
@@ -43,11 +43,9 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
                     continue
 
                 needs_normalization = any(
-                    [
-                        self.isbn_needs_normalization(isbn)
-                        for isbns in isbns_by_type.values()
-                        for isbn in isbns
-                    ]
+                    self.isbn_needs_normalization(isbn)
+                    for isbns in isbns_by_type.values()
+                    for isbn in isbns
                 )
                 if not needs_normalization:
                     continue
@@ -59,7 +57,7 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
 
                 for isbn_type, isbns in isbns_by_type.items():
                     # if an ISBN is in the wrong field this script will not move it to the appropriate one
-                    normalized_isbns = list()
+                    normalized_isbns = []
                     isbns = getattr(edition, isbn_type, [])
                     for isbn in isbns:
                         parsed = parse_isbns(isbn)
@@ -79,7 +77,7 @@ class NormalizeISBNJob(olclient.AbstractBotJob):
 
 def dedupe(input_list: list) -> list:
     """Remove duplicate elements in a list and return the new list"""
-    output = list()
+    output = []
     for i in input_list:
         if i not in output:
             output.append(i)

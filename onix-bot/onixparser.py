@@ -329,8 +329,7 @@ class OnixProductParser:
             >>> p = op.products[0]
             >>> p.publication_country
         """
-        publication_country = self.product.xpath("//CountryOfPublication")
-        if publication_country:
+        if publication_country := self.product.xpath("//CountryOfPublication"):
             return publication_country[0].text
         else:
             return ""
@@ -351,8 +350,7 @@ class OnixProductParser:
             >>> p = op.products[0]
             >>> p.publication_city
         """
-        publication_city = self.product.xpath("//CityOfPublication")
-        if publication_city:
+        if publication_city := self.product.xpath("//CityOfPublication"):
             return publication_city[0].text
         else:
             return ""

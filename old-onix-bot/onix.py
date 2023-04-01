@@ -195,8 +195,7 @@ def produce_items(input, produce):
     parser = xml.sax.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, 1)
     parser.setContentHandler(OnixHandler(parser, process_item))
-    url_cache_dir = os.getenv("URL_CACHE_DIR")
-    if url_cache_dir:
+    if url_cache_dir := os.getenv("URL_CACHE_DIR"):
         sys.stderr.write(f"using url cache in {url_cache_dir}\n")
         parser.setEntityResolver(CachingEntityResolver(parser, url_cache_dir))
     else:

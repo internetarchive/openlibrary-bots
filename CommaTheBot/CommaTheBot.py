@@ -1,10 +1,11 @@
 # example invocation
 # python CommaTheBot.py --file filtered_ol_dump_2022-06-06.txt.gz --limit 1
 
-from olclient.bots import AbstractBotJob
 import copy
 import gzip
 import re
+
+from olclient.bots import AbstractBotJob
 
 
 class CommaTheBotJob(AbstractBotJob):
@@ -53,7 +54,7 @@ class CommaTheBotJob(AbstractBotJob):
                     self.ol.Edition.get(olid) if isEdition else self.ol.Work.get(olid)
                 )
 
-                if not book.type["key"] in ("/type/edition", "/type/work"):
+                if book.type["key"] not in ("/type/edition", "/type/work"):
                     continue  # skip deleted books
                 if not self.needs_fixing(book.title):
                     continue

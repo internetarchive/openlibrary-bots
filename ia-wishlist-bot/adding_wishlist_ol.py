@@ -91,7 +91,7 @@ def process_csv(filename):
     with open(filename) as infile:
         reader = csv.reader(infile)
 
-        book_data = [row for row in reader]
+        book_data = list(reader)
 
         return book_data
 
@@ -134,8 +134,7 @@ def get_author_object(author_name, author_birth_date=None, author_death_date=Non
             break
         author_name = author_name_new
 
-    author_olid = ol.Author.get_olid_by_name(author_name)
-    if author_olid:
+    if author_olid := ol.Author.get_olid_by_name(author_name):
         return ol.get(author_olid)
     else:
         return common.Author(name=author_name)

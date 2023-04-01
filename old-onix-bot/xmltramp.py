@@ -47,12 +47,12 @@ def quote(x, elt=True):
 
 class Element:
     def __init__(self, name, attrs=None, children=None, prefixes=None, line=None):
-        if islst(name) and name[0] == None:
+        if islst(name) and name[0] is None:
             name = name[1]
         if attrs:
             na = {}
             for k in attrs.keys():
-                if islst(k) and k[0] == None:
+                if islst(k) and k[0] is None:
                     na[k[1]] = attrs[k]
                 else:
                     na[k] = attrs[k]
@@ -86,7 +86,7 @@ class Element:
             out = ""
 
             for p in self._prefixes.keys():
-                if not p in inprefixes.keys():
+                if p not in inprefixes.keys():
                     if addns:
                         out += " xmlns"
                     if addns and self._prefixes[p]:
@@ -391,7 +391,7 @@ def unittest():
     except AttributeError:
         pass
 
-    assert hasattr(d, "bar") == True
+    assert hasattr(d, "bar") is True
 
     assert d("foo") == "bar"
     d(silly="yes")

@@ -238,7 +238,7 @@ def reply_to_tweets():
 
             # Reply to me
             if not isbns and parent_mention.user.id == API.me().id:
-                logging.info(f"IS REPLY TO ME")
+                logging.info("IS REPLY TO ME")
                 continue
         if isbns:
             for isbn in isbns:

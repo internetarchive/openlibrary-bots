@@ -32,13 +32,17 @@ def setup():
     dbname = getvar("PHAROS_DBNAME")
     dbuser = getvar("PHAROS_DBUSER")
     dbpass = getvar("PHAROS_DBPASS")
-    web.config.db_parameters = dict(dbn="postgres", db=dbname, user=dbuser, pw=dbpass)
+    web.config.db_parameters = {
+        "dbn": "postgres",
+        "db": dbname,
+        "user": dbuser,
+        "pw": dbpass,
+    }
     web.db._hasPooling = False
     web.config.db_printing = False
     web.load()
     tdb.setup()
-    logfile = getvar("PHAROS_LOGFILE", False)
-    if logfile:
+    if logfile := getvar("PHAROS_LOGFILE", False):
         tdb.logger.set_logfile(open(logfile, "a"))
         sys.stderr.write(f"logging to {logfile}\n")
 
@@ -100,8 +104,7 @@ def import_author(x):
     a = None
 
     global item_names
-    aid = item_names.get(name, None)
-    if aid:
+    if aid := item_names.get(name, None):
         a = LazyThing(aid)
         # warn ("---------------------------> already author %s" % name)
     else:
@@ -183,23 +186,19 @@ def edition_name_choices(x):
     name = name[0:30]
     yield name
 
-    ed_number = x.get("edition_number")
-    if ed_number:
+    if ed_number := x.get("edition_number"):
         name = tsep.join([name, name_string(ed_number)])
         yield name
 
-    ed_type = x.get("edition_type")
-    if ed_type:
+    if ed_type := x.get("edition_type"):
         name = tsep.join([name, name_string(ed_type)])
         yield name
 
-    ed = x.get("edition")
-    if ed:
+    if ed := x.get("edition"):
         name = tsep.join([name, name_string(ed)])
         yield name
 
-    format = x.get("physical_format")
-    if format:
+    if format := x.get("physical_format"):
         name = tsep.join([name, name_string(format)])
         yield name
 
