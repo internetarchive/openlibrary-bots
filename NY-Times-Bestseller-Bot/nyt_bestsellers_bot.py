@@ -94,8 +94,9 @@ def load_nyt_bestseller_list(list_name):
     if len(results["results"]) != results["num_results"]:
         LOG(
             "ERROR",
-            "expected %s result for %s, got %s"
-            % (results["num_results"], len(results["results"]), list_name),
+            "expected {} result for {}, got {}".format(
+                results["num_results"], len(results["results"]), list_name
+            ),
         )
 
     return results["results"]
@@ -189,8 +190,7 @@ def write_machine_tags(ln, books):
         nyt = key_to_nyt[work["key"]]
         tags = (
             "New York Times bestseller",
-            "nyt:%s=%s"
-            % (
+            "nyt:{}={}".format(
                 "_".join([s.lower() for s in ln.split()]),
                 _get_first_bestseller_date(nyt),
             ),
@@ -213,8 +213,7 @@ def write_machine_tags(ln, books):
         if work["key"] not in write:
             LOG(
                 "INFO",
-                "all tags already present, skipping %s: '%s' by %s"
-                % (
+                "all tags already present, skipping {}: '{}' by {}".format(
                     work["key"],
                     nyt["book_details"][0]["title"],
                     nyt["book_details"][0]["author"],
@@ -275,8 +274,7 @@ if __name__ == "__main__":
             if not ol_keys:
                 LOG(
                     "WARN",
-                    "unable to reconcile '%s' by %s - no OL book found"
-                    % (
+                    "unable to reconcile '{}' by {} - no OL book found".format(
                         book["book_details"][0]["title"],
                         book["book_details"][0]["author"],
                     ),
@@ -284,8 +282,7 @@ if __name__ == "__main__":
             if not (key for key in ol_keys if key.startswith("/works/")):
                 LOG(
                     "WARN",
-                    "only editions for '%s' by %s: %s"
-                    % (
+                    "only editions for '{}' by {}: {}".format(
                         book["book_details"][0]["title"],
                         book["book_details"][0]["author"],
                         ol_keys,
@@ -301,8 +298,7 @@ if __name__ == "__main__":
         if results[ln]:
             LOG(
                 "INFO",
-                "RECONCILED %s%% of %s"
-                % (
+                "RECONCILED {}% of {}".format(
                     int(
                         len([r for r in results[ln] if r["ol:works"]])
                         / float(len(results[ln]))
