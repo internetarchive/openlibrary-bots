@@ -132,8 +132,7 @@ class NodeCollector(Collector):
             else:
                 if self.strict:
                     raise Exception(
-                        "no handler for element '%s'; handlers: %s"
-                        % (localname, self.collector_table.keys())
+                        f"no handler for element '{localname}'; handlers: {self.collector_table.keys()}"
                     )
                 else:
                     self.ignoring += 1

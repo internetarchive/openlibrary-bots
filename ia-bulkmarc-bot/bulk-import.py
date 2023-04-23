@@ -198,8 +198,7 @@ if __name__ == "__main__":
                 # Write error log
                 error_log = log_error(r)
                 print(
-                    "UNEXPECTED ERROR %s; [%s] WRITTEN TO: %s"
-                    % (r.status_code, error_summary, error_log)
+                    f"UNEXPECTED ERROR {r.status_code}; [{error_summary}] WRITTEN TO: {error_log}"
                 )
 
                 if length == 5:
