@@ -1,4 +1,4 @@
-requests==2.28.2
+requests==2.29.0
 elementpath==4.1.1
 openlibrary-client==0.0.30
 openlibrary==0.0.1
