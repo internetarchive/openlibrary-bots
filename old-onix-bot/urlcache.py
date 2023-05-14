@@ -73,5 +73,5 @@ class URLCache:
             except Exception as exn:
                 # in case this happens, just blow away your cache
                 raise Exception(
-                    f"URLCache: sorry, corrupted state for url '{url}': {str(exn)}"
+                    f"URLCache: sorry, corrupted state for url '{url}': {exn!s}"
                 )

@@ -123,7 +123,7 @@ def reconcile_book(book):
             result.update([x["key"] for x in edition["works"] or []])
 
     if result:
-        LOG("INFO", f"RECONCILED BY ISBN10: {str(result)}")
+        LOG("INFO", f"RECONCILED BY ISBN10: {result!s}")
         return result
 
     for isbn13 in (x["isbn13"] for x in book["isbns"]):
@@ -132,7 +132,7 @@ def reconcile_book(book):
             result.update([x["key"] for x in edition["works"] or []])
 
     if result:
-        LOG("INFO", f"RECONCILED BY ISBN13: {str(result)}")
+        LOG("INFO", f"RECONCILED BY ISBN13: {result!s}")
         return result
 
     authors = reconcile_authors(book["book_details"][0]["author"])
@@ -164,7 +164,7 @@ def reconcile_book(book):
         )
         if r:
             result.update([x["key"] for x in r])
-            LOG("INFO", f"RECONCILED BY AUTHOR: {str(result)}")
+            LOG("INFO", f"RECONCILED BY AUTHOR: {result!s}")
             return result
     return result
 
