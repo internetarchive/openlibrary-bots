@@ -1,7 +1,3 @@
-[tool.codespell]
-ignore-words-list = 'didnt'
-skip = './.*,*.xsd'
-
 [tool.ruff]
 select = [
   "C4",      # flake8-comprehensions
@@ -48,3 +44,7 @@ max-statements = 73
 
 [tool.ruff.per-file-ignores]
 "test/*" = ["S101"]
+
+[tool.codespell]
+ignore-words-list = 'didnt'
+skip = './.*,*.xsd'
