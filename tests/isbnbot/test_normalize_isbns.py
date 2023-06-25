@@ -5,7 +5,7 @@ from isbnbot import normalize_isbns
 
 
 class NormalizeISBNJobTestCase(unittest.TestCase):
-    single: ClassVar = {
+    single: ClassVar[dict[str, tuple]] = {
         "0-19-852663-6": ("0198526636",),
         "0-9752298-0-X": ("097522980X",),
         "3-444-101-11-2": ("3444101112",),
@@ -24,7 +24,7 @@ class NormalizeISBNJobTestCase(unittest.TestCase):
         "2.902.639.57.0": ("2902639570",),
         "ISBN-978-958-660-120-7": ("9789586601207",),
     }
-    double: ClassVar = {
+    double: ClassVar[dict[str, tuple]] = {
         "0-9752298-0-X 0-19-852663-6": ("097522980X", "0198526636"),
         "9789585596689-9789585596672": ("9789585596689", "9789585596672"),
         "9789585596689 - 0-9752298-0-X": ("9789585596689", "097522980X"),
@@ -41,7 +41,7 @@ class NormalizeISBNJobTestCase(unittest.TestCase):
         ),
         "ISBN 2-7535-0291-9ISBN 978-2-296-09310-2  ": ("2753502919", "9782296093102"),
     }
-    multi: ClassVar = {
+    multi: ClassVar[dict[str, tuple]] = {
         "978-84-96785-10-6. 978-84-96785-44-19789585596689": (
             "9788496785106",
             "9788496785441",
@@ -71,7 +71,7 @@ class NormalizeISBNJobTestCase(unittest.TestCase):
             "888191235X",
         ),
     }
-    tricky: ClassVar = {
+    tricky: ClassVar[dict[str, tuple]] = {
         # same number twice, note dedupe is done after
         "97815420429639781542042963": ("9781542042963", "9781542042963"),
         # tab character
