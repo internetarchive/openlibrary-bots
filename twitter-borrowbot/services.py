@@ -52,7 +52,7 @@ class InternetArchive:
     IA_URL = "https://archive.org"
     OL_URL = "https://openlibrary.org"
     OL_DEV = "https://dev.openlibrary.org"
-    MODES = ["is_readable", "is_lendable", "is_printdisabled"]
+    MODES = ("is_readable", "is_lendable", "is_printdisabled")
 
     @classmethod
     def get_edition(cls, isbn):
