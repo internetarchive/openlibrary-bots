@@ -116,16 +116,13 @@ def main():
 
     # Else, let the user choose from a list
     print(
-        "Google Books found {} results for this query. Here are the first {}:".format(
-            number_of_google_books, number_of_considered_books
-        )
+        f"Google Books found {number_of_google_books} results for this query. "
+        f"Here are the first {number_of_considered_books}:".format
     )
     for i, ol_book in enumerate(ol_books):
         isbn_10 = ol_book.identifiers["isbn_10"][0]
         print(
-            "\t{}: '{}' by {} - ISBN {}".format(
-                i, ol_book.title, ol_book.primary_author.name, isbn_10
-            )
+            f"\t{i}: '{ol_book.title}' by {ol_book.primary_author.name} - ISBN {isbn_10}"
         )
 
     chosen_index = int(input("Which of these would you like to upload? "))
