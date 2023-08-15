@@ -27,9 +27,8 @@ BULK_API = "/api/import/ia"
 LOCAL_ID = re.compile(r"\/local_ids\/(\w+)")
 MARC_EXT = re.compile(r".*\.(mrc|utf8)$")
 
-SERVER_ISSUES_WAIT = (
-    50 * 60
-)  # seconds to wait if server is giving unexpected 5XXs likely to be resolved in time
+# seconds to wait if server is giving unexpected 5XXs likely to be resolved in time
+SERVER_ISSUES_WAIT = 50 * 60
 SHORT_CONNECT_WAIT = 5 * 60  # seconds
 
 
@@ -128,7 +127,9 @@ if __name__ == "__main__":
     barcode = args.barcode
 
     if local_testing:
-        Credentials = namedtuple("Credentials", ["username", "password"])
+        Credentials = namedtuple(  # noqa: PYI024
+            "Credentials", ["username", "password"]
+        )
         local_dev = "http://localhost:8080"
         c = Credentials("openlibrary@example.com", "admin123")
         ol = OpenLibrary(base_url=local_dev, credentials=c)
@@ -157,12 +158,13 @@ if __name__ == "__main__":
         ol.session.close()
         exit()
 
-    limit = (
-        args.number
-    )  # if non-zero, a limit to only process this many records from each file
+    # if non-zero, a limit to only process this many records from each file
+    limit = args.number
     count = 0
     offset = args.offset
-    length = 5  # we only need to get the length of the first record (first 5 bytes), the API will seek to the end.
+    # we only need to get the length of the first record (first 5 bytes),
+    # the API will seek to the end.
+    length = 5
 
     ol.session.mount("https://", HTTPAdapter(max_retries=10))
 
@@ -205,11 +207,10 @@ if __name__ == "__main__":
                     # Two 500 errors in a row: skip to next record
                     offset, length = next_record(identifier, ol)
                     continue
-                if (
-                    m
-                ):  # a handled, debugged, and logged error, unlikely to be resolved by retrying later:
-                    # Skip this record and move to the next
-                    offset = offset + length
+                # a handled, debugged, and logged error, unlikely to be resolved by
+                # retrying later:
+                if m:  # Skip this record and move to the next
+                    offset += length
                 else:
                     sleep(SERVER_ISSUES_WAIT)
                 length = 5
