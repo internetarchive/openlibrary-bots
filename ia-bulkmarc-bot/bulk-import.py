@@ -127,9 +127,9 @@ if __name__ == "__main__":
     barcode = args.barcode
 
     if local_testing:
-        Credentials = namedtuple(
+        Credentials = namedtuple(  # noqa: PYI024
             "Credentials", ["username", "password"]
-        )  # noqa: PYI024
+        )
         local_dev = "http://localhost:8080"
         c = Credentials("openlibrary@example.com", "admin123")
         ol = OpenLibrary(base_url=local_dev, credentials=c)
