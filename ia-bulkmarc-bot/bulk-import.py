@@ -159,7 +159,7 @@ if __name__ == "__main__":
         exit()
 
     # if non-zero, a limit to only process this many records from each file
-    limit = args.number  
+    limit = args.number
     count = 0
     offset = args.offset
     # we only need to get the length of the first record (first 5 bytes),
