@@ -27,9 +27,8 @@ BULK_API = "/api/import/ia"
 LOCAL_ID = re.compile(r"\/local_ids\/(\w+)")
 MARC_EXT = re.compile(r".*\.(mrc|utf8)$")
 
-SERVER_ISSUES_WAIT = (
-    50 * 60
-)  # seconds to wait if server is giving unexpected 5XXs likely to be resolved in time
+# seconds to wait if server is giving unexpected 5XXs likely to be resolved in time
+SERVER_ISSUES_WAIT = 50 * 60
 SHORT_CONNECT_WAIT = 5 * 60  # seconds
 
 
@@ -128,9 +127,9 @@ if __name__ == "__main__":
     barcode = args.barcode
 
     if local_testing:
-        Credentials = namedtuple(
+        Credentials = namedtuple(  # noqa: PYI024
             "Credentials", ["username", "password"]
-        )  # noqa: PYI024
+        )
         local_dev = "http://localhost:8080"
         c = Credentials("openlibrary@example.com", "admin123")
         ol = OpenLibrary(base_url=local_dev, credentials=c)
