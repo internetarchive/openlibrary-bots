@@ -64,7 +64,6 @@ class FixPromiseItems:
                 except Exception:
                     self.write_error(self.error_file, line[:-1])
                     self.errors += 1
-                    pass
 
         num_processed = self.modified + self.errors + self.matched
         if not self.dry_run:
