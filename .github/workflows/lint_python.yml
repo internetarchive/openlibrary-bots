@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v3
     - run: pip install --user black "codespell[toml]" ruff
     - run: codespell
-    - run: ruff --format=github .
+    - run: ruff --output-format=github .
     - run: black --check .
 
   mypy_and_pytest:
