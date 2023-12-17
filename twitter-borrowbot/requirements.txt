@@ -1,4 +1,4 @@
-certifi==2023.7.22
+certifi==2023.11.17
 chardet==5.2.0
 idna==3.4
 isbnlib==3.10.14
