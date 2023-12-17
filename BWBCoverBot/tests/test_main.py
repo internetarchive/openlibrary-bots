@@ -3,7 +3,7 @@ import pathlib
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 from zipfile import ZipFile
 
 import main
@@ -11,12 +11,22 @@ import pytest
 from main import EditionCoverData, update_cover_for_edition, verify_and_update_cover
 from olclient import OpenLibrary
 from requests_mock.mocker import Mocker as RequestsMock
-from sqlmodel import Session, select
+from sqlmodel import Session, SQLModel, select
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import ValueTarget
 
 test_path = pathlib.Path(__file__).parent.resolve()
 test_isbns_zip = test_path / "test_isbns.zip"
+
+
+def get_dict_of_session_response(
+    sql_session_response: Sequence[SQLModel],
+) -> list[dict]:
+    """
+    Convert the db session response to a list[dict] so the order of
+    the SQLModel's attributes won't matter when evaluating test output.
+    """
+    return [sqlmodel.model_dump() for sqlmodel in sql_session_response]
 
 
 def test_update_cover_for_edition_completes_successfully(
@@ -100,7 +110,7 @@ test_cases = [
     ISBN(
         text="ISBN already seeded into DB. No check of saved_text. Ensure no duplication.",
         id="111",
-        exp=[(EditionCoverData(isbn_13="111", cover_exists=True),)],
+        exp=[EditionCoverData(isbn_13="111", cover_exists=True)],
         saved_text="",
         cover_exists_in_ol=False,
         is_success=False,
@@ -110,7 +120,7 @@ test_cases = [
     ISBN(
         text="Failed save message from the BACK END.",
         id="222",
-        exp=[(EditionCoverData(isbn_13="222", cover_exists=False),)],
+        exp=[EditionCoverData(isbn_13="222", cover_exists=False)],
         saved_text="Fail",
         cover_exists_in_ol=False,
         is_success=False,
@@ -120,7 +130,7 @@ test_cases = [
     ISBN(
         text="Successfully added cover.",
         id="333",
-        exp=[(EditionCoverData(isbn_13="333", cover_exists=True),)],
+        exp=[EditionCoverData(isbn_13="333", cover_exists=True)],
         saved_text="Saved!",
         cover_exists_in_ol=False,
         is_success=True,
@@ -130,7 +140,7 @@ test_cases = [
     ISBN(
         text="Cover already in OL.",
         id="444",
-        exp=[(EditionCoverData(isbn_13="444", cover_exists=True),)],
+        exp=[EditionCoverData(isbn_13="444", cover_exists=True)],
         saved_text="",
         cover_exists_in_ol=True,
         is_success=False,
@@ -179,5 +189,5 @@ def test_verify_and_update_cover(
 
     # Finally, ensure the database looks as expected for each test case.
     statement = select(EditionCoverData).where(EditionCoverData.isbn_13 == tc.id)
-    res = db_session.execute(statement).fetchall()
-    assert res == exp
+    res = db_session.exec(statement).fetchall()
+    assert get_dict_of_session_response(res) == get_dict_of_session_response(exp)
