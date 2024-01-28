@@ -2,6 +2,7 @@
 normalize ISBNs
 NOTE: This script assumes the Open Library Dump passed only contains editions with an isbn_10 or isbn_13
 """
+
 import gzip
 import json
 
