@@ -283,9 +283,9 @@ class OnixProductParser:
             found_identifiers = {}
             for identifier in identifiers:
                 if IDENTIFIER_TYPES.get(identifier[0].text):
-                    found_identifiers[
-                        IDENTIFIER_TYPES.get(identifier[0].text)
-                    ] = identifier[1].text
+                    found_identifiers[IDENTIFIER_TYPES.get(identifier[0].text)] = (
+                        identifier[1].text
+                    )
 
         return found_identifiers if identifiers else ""
 
