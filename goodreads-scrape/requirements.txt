@@ -1,5 +1,5 @@
-requests==2.31.0
-elementpath==4.3.0
+requests==2.32.3
+elementpath==4.4.0
 openlibrary-client==0.0.30
 openlibrary==0.0.1
 openlibrary-api==0.1.0

@@ -1,2 +1,2 @@
-requests==2.31.0
+requests==2.32.3
 olclient==0.0.20
