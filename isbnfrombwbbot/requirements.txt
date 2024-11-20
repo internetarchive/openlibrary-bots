@@ -1,0 +1,2 @@
+openlibrary-client==0.0.30
+isbnlib==3.10.14
