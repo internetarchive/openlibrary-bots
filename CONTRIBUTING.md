@@ -4,7 +4,7 @@
 Look through our issues related to `contributing`: [Github Issues]( https://github.com/internetarchive/openlibrary-bots/issues)
 
 ## Want to Participate in the Community?
-- Ask here to join our Open Library slack: https://github.com/internetarchive/openlibrary/issues/686
+- Ask here to join our Open Library slack: https://openlibrary.org/volunteer
 - Join us for our Open Library Community Call every Tuesday @ 11:30am PT. We usually discuss weekly goals via our Tuesday Community Call and using Slack.
 
 ## Submitting Issues
