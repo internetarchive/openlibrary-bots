@@ -49,8 +49,7 @@ class PublisherParser(Protocol):
     name: str
     base_url: str
 
-    def page_url(self, item_id: int) -> str:
-        ...
+    def page_url(self, item_id: int) -> str: ...
 
     def parse(self, html: str, item_id: int) -> ParsedBook | None:
         ...

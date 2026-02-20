@@ -30,7 +30,9 @@ def parse_args() -> argparse.Namespace:
         help="Publisher parser to use (example: artanuji)",
     )
     parser.add_argument("--start-id", type=int, default=1, help="Start book id")
-    parser.add_argument("--end-id", type=int, default=5000, help="End book id (inclusive)")
+    parser.add_argument(
+        "--end-id", type=int, default=5000, help="End book id (inclusive)"
+    )
     parser.add_argument(
         "--sleep-seconds",
         type=float,
@@ -123,7 +125,9 @@ def parsed_book_to_ol_book(book: ParsedBook, ol_common: Any) -> Any:
     )
 
 
-def run_ol_create(ol: Any, ol_common: Any, book: ParsedBook, dry_run: bool) -> tuple[bool, str]:
+def run_ol_create(
+    ol: Any, ol_common: Any, book: ParsedBook, dry_run: bool
+) -> tuple[bool, str]:
     payload_json = json.dumps(book.to_openlibrary_create_payload(), ensure_ascii=False)
     if dry_run:
         return True, f"DRY RUN: {payload_json}"
@@ -172,8 +176,7 @@ def process_book(
 
 def main() -> int:
     args = parse_args()
-    arg_error = validate_args(args)
-    if arg_error:
+    if arg_error := validate_args(args):
         print(arg_error, file=sys.stderr)
         return 2
 
