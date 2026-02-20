@@ -5,4 +5,3 @@ from publishers.artanuji import ArtanujiParser
 PARSERS = {
     "artanuji": ArtanujiParser(),
 }
-
