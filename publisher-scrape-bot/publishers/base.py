@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Protocol
 
 
 @dataclass
@@ -13,12 +13,12 @@ class ParsedBook:
     author: str
     publisher: str
     publish_date: str
-    isbn_13: Optional[str] = None
-    isbn_10: Optional[str] = None
-    number_of_pages: Optional[int] = None
-    description: Optional[str] = None
-    subject: Optional[str] = None
-    cover_url: Optional[str] = None
+    isbn_13: str | None = None
+    isbn_10: str | None = None
+    number_of_pages: int | None = None
+    description: str | None = None
+    subject: str | None = None
+    cover_url: str | None = None
 
     def to_openlibrary_create_payload(self) -> dict:
         identifiers = {}
@@ -52,5 +52,5 @@ class PublisherParser(Protocol):
     def page_url(self, item_id: int) -> str:
         ...
 
-    def parse(self, html: str, item_id: int) -> Optional[ParsedBook]:
+    def parse(self, html: str, item_id: int) -> ParsedBook | None:
         ...

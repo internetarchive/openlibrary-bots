@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import html as ihtml
 import re
-from typing import Optional
 from urllib.parse import urljoin
 
 from publishers.base import ParsedBook
@@ -26,7 +25,7 @@ class ArtanujiParser:
     def page_url(self, item_id: int) -> str:
         return self.base_url.format(id=item_id)
 
-    def parse(self, html: str, item_id: int) -> Optional[ParsedBook]:
+    def parse(self, html: str, item_id: int) -> ParsedBook | None:
         if "book_ge.php" not in html or "ISBN" not in html:
             return None
 
@@ -70,27 +69,27 @@ class ArtanujiParser:
             cover_url=cover_url,
         )
 
-    def _extract_title(self, html: str) -> Optional[str]:
+    def _extract_title(self, html: str) -> str | None:
         match = re.search(r"<h1[^>]*>(.*?)</h1>", html, flags=re.IGNORECASE | re.DOTALL)
         if not match:
             return None
         return self._clean_text(match.group(1))
 
-    def _extract_author(self, html: str) -> Optional[str]:
+    def _extract_author(self, html: str) -> str | None:
         # Most pages place author name in <h4> under the title block.
         match = re.search(r"<h4[^>]*>(.*?)</h4>", html, flags=re.IGNORECASE | re.DOTALL)
         if not match:
             return None
         return self._clean_text(match.group(1))
 
-    def _extract_field(self, html: str, label: str) -> Optional[str]:
+    def _extract_field(self, html: str, label: str) -> str | None:
         prefix = f"{label}:"
         for line in self._to_text_lines(html):
             if line.startswith(prefix):
                 return self._clean_text(line[len(prefix) :])
         return None
 
-    def _extract_description(self, html: str) -> Optional[str]:
+    def _extract_description(self, html: str) -> str | None:
         text = self._to_text_lines(html)
         if not text:
             return None
@@ -113,7 +112,7 @@ class ArtanujiParser:
             return None
         return " ".join(out).strip()
 
-    def _extract_cover_url(self, html: str, item_id: int) -> Optional[str]:
+    def _extract_cover_url(self, html: str, item_id: int) -> str | None:
         og = re.search(
             r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']',
             html,
@@ -133,7 +132,7 @@ class ArtanujiParser:
         return None
 
     @staticmethod
-    def _classify_isbn(raw: str) -> tuple[Optional[str], Optional[str]]:
+    def _classify_isbn(raw: str) -> tuple[str | None, str | None]:
         digits = re.sub(r"[^0-9Xx]", "", raw).upper()
         if len(digits) == 13:
             return None, digits

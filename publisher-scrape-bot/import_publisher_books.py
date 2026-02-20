@@ -6,7 +6,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -15,7 +15,9 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from publishers import PARSERS
-from publishers.base import ParsedBook
+
+if TYPE_CHECKING:
+    from publishers.base import ParsedBook
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,7 +62,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_args(args: argparse.Namespace) -> Optional[str]:
+def validate_args(args: argparse.Namespace) -> str | None:
     if args.start_id < 1:
         return "--start-id must be >= 1"
     if args.end_id < args.start_id:
@@ -74,7 +76,7 @@ def validate_args(args: argparse.Namespace) -> Optional[str]:
     return None
 
 
-def fetch_html(url: str, timeout: float) -> Optional[str]:
+def fetch_html(url: str, timeout: float) -> str | None:
     req = Request(
         url,
         headers={

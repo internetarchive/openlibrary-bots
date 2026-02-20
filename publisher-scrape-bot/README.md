@@ -93,7 +93,7 @@ python3 import_publisher_books.py \
 
 `publishers/<name>.py` should implement the `PublisherParser` protocol:
    - `page_url(item_id: int) -> str`
-   - `parse(html: str, item_id: int) -> Optional[ParsedBook]`
+   - `parse(html: str, item_id: int) -> ParsedBook | None`
 
 ## PR Checklist
 
