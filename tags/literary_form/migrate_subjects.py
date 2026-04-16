@@ -35,6 +35,7 @@ OL_WORK_URL = "https://openlibrary.org/works/{work_id}.json"
 # Load mappings
 # ---------------------------------------------------------------------------
 
+
 def load_mapping(name: str) -> dict[str, str]:
     """Load a JSON mapping file from scripts/mappings/."""
     path = MAPPINGS_DIR / f"{name}.json"
@@ -84,6 +85,7 @@ def is_classification_code(s: str) -> bool:
 # ---------------------------------------------------------------------------
 # Core classifier
 # ---------------------------------------------------------------------------
+
 
 class SubjectClassifier:
     def __init__(self):
@@ -204,10 +206,18 @@ class SubjectClassifier:
 
         # Resolve literary_form conflicts
         # Fiction wins unless strong Nonfiction-specific signals are present
-        if "Fiction" in result["literary_form"] and "Nonfiction" in result["literary_form"]:
+        if (
+            "Fiction" in result["literary_form"]
+            and "Nonfiction" in result["literary_form"]
+        ):
             strong_nonfiction = {
-                'biography', 'biographies', 'autobiography', 'autobiographies',
-                'memoir', 'memoirs', 'juvenile nonfiction'
+                "biography",
+                "biographies",
+                "autobiography",
+                "autobiographies",
+                "memoir",
+                "memoirs",
+                "juvenile nonfiction",
             }
             subjects_lower = {s.lower().strip() for s in work.get("subjects", [])}
             if subjects_lower & strong_nonfiction:
@@ -242,6 +252,7 @@ class SubjectClassifier:
 # Fetching
 # ---------------------------------------------------------------------------
 
+
 def fetch_work(work_id: str) -> dict:
     """Fetch a work JSON from Open Library."""
     work_id = work_id.replace("/works/", "").strip()
@@ -262,6 +273,7 @@ def load_work_file(path: str) -> dict:
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
+
 
 def print_result(work_id: str, result: dict):
     print(f"\n=== {work_id} ===")
@@ -284,6 +296,7 @@ def write_result(work_id: str, result: dict, output_dir: str):
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Migrate OL legacy subjects to canonical typed tags."
@@ -293,8 +306,12 @@ def main():
     group.add_argument("--file", help="Path to a local work JSON file")
     group.add_argument("--batch", help="Path to newline-delimited OL Work IDs file")
 
-    parser.add_argument("--output", default="output", help="Output directory for batch mode")
-    parser.add_argument("--dry-run", action="store_true", help="Print results, don't write files")
+    parser.add_argument(
+        "--output", default="output", help="Output directory for batch mode"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print results, don't write files"
+    )
 
     args = parser.parse_args()
     classifier = SubjectClassifier()
