@@ -27,6 +27,7 @@ from migrate_subjects import SubjectClassifier
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_work(subjects):
     return {"subjects": subjects}
 
@@ -47,6 +48,7 @@ def literary_form_for(classifier, subjects):
 
 import pytest
 
+
 @pytest.fixture(scope="module")
 def clf():
     return SubjectClassifier()
@@ -55,6 +57,7 @@ def clf():
 # ---------------------------------------------------------------------------
 # 1. Original mappings still work
 # ---------------------------------------------------------------------------
+
 
 class TestOriginalMappings:
 
@@ -98,6 +101,7 @@ class TestOriginalMappings:
 # 2. New mappings added in this PR
 # ---------------------------------------------------------------------------
 
+
 class TestNewMappings:
 
     def test_general_fiction(self, clf):
@@ -135,39 +139,39 @@ class TestNewMappings:
 # 3. texts conflict resolution
 # ---------------------------------------------------------------------------
 
+
 class TestTextsConflict:
 
     def test_texts_not_classified_as_nonfiction(self, clf):
         """texts was removed from literary_form.json - should not map to Nonfiction."""
         tag_type, value = classify_single(clf, "texts")
-        assert value != "Nonfiction", (
-            "'texts' should not map to Nonfiction after removal from literary_form.json"
-        )
+        assert (
+            value != "Nonfiction"
+        ), "'texts' should not map to Nonfiction after removal from literary_form.json"
 
     def test_texts_not_in_literary_form(self, clf):
         """texts should not produce a literary_form tag at all."""
         tag_type, value = classify_single(clf, "texts")
-        assert tag_type != "literary_form", (
-            "'texts' was removed from literary_form.json but still classifying as literary_form"
-        )
+        assert (
+            tag_type != "literary_form"
+        ), "'texts' was removed from literary_form.json but still classifying as literary_form"
 
     def test_texts_is_dropped(self, clf):
         """texts is in droppable.json so it should be dropped."""
         tag_type, value = classify_single(clf, "texts")
-        assert tag_type == "drop", (
-            "'texts' should be dropped via droppable.json"
-        )
+        assert tag_type == "drop", "'texts' should be dropped via droppable.json"
 
     def test_work_with_only_texts_has_no_literary_form(self, clf):
         result = clf.classify_work(make_work(["texts"]))
-        assert result["literary_form"] == [], (
-            "A work with only 'texts' should produce no literary_form tag"
-        )
+        assert (
+            result["literary_form"] == []
+        ), "A work with only 'texts' should produce no literary_form tag"
 
 
 # ---------------------------------------------------------------------------
 # 4. droppable entries are dropped
 # ---------------------------------------------------------------------------
+
 
 class TestDroppable:
 
@@ -195,6 +199,7 @@ class TestDroppable:
 # ---------------------------------------------------------------------------
 # 5. Conflict resolution
 # ---------------------------------------------------------------------------
+
 
 class TestConflictResolution:
 
@@ -232,6 +237,7 @@ class TestConflictResolution:
 # 6. Case insensitivity
 # ---------------------------------------------------------------------------
 
+
 class TestCaseInsensitivity:
 
     def test_fiction_uppercase(self, clf):
@@ -253,6 +259,7 @@ class TestCaseInsensitivity:
 # ---------------------------------------------------------------------------
 # 7. Unmapped subjects pass through correctly
 # ---------------------------------------------------------------------------
+
 
 class TestUnmapped:
 
