@@ -150,6 +150,10 @@ class SubjectClassifier:
         # Mapping lookups (in priority order)
         if key in self.literary_form_map:
             return ("literary_form", self.literary_form_map[key])
+        if "--" in key:
+            suffix = key.split("--")[-1].strip()
+            if suffix in self.literary_form_map:
+                return ("literary_form", self.literary_form_map[suffix])
         if key in self.genres_map:
             return ("genres", self.genres_map[key])
         if key in self.subgenres_map:
