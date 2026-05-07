@@ -23,7 +23,7 @@ from typing import List, Optional
 from olclient.imports import DataProviderRecord, OLAuthor, OLImportRecord
 
 # OL import schema pattern for isbn_13
-_ISBN13_RE = re.compile(r'^([0-9][- ]*){13}$')
+_ISBN13_RE = re.compile(r"^([0-9][- ]*){13}$")
 
 
 class ITANRecord(DataProviderRecord):
@@ -56,30 +56,22 @@ class ITANRecord(DataProviderRecord):
             return None
 
         authors = [
-            OLAuthor(name=a["name"])
-            for a in self.authors
-            if a.get("name", "").strip()
+            OLAuthor(name=a["name"]) for a in self.authors if a.get("name", "").strip()
         ]
         if not authors:
             return None
 
         subjects = (
-            [s.strip() for s in self.subjects if s.strip()]
-            if self.subjects
-            else None
+            [s.strip() for s in self.subjects if s.strip()] if self.subjects else None
         )
 
         # Filter malformed ISBNs — ITAN uses "0" and "978" as placeholders
         isbn_13 = (
-            [v for v in self.isbn_13 if _ISBN13_RE.match(v)]
-            if self.isbn_13
-            else None
+            [v for v in self.isbn_13 if _ISBN13_RE.match(v)] if self.isbn_13 else None
         ) or None
 
         isbn_10 = (
-            [v for v in self.isbn_10 if v and v != "0"]
-            if self.isbn_10
-            else None
+            [v for v in self.isbn_10 if v and v != "0"] if self.isbn_10 else None
         ) or None
 
         return OLImportRecord(

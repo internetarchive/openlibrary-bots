@@ -29,23 +29,29 @@ from sources.itan.record import ITANRecord
 _SCHEMA_PATH = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
-        '..', '..', '..', 'openlibrary-client-imports',  # local worktree
-        'olclient', 'schemata', 'import.schema.json',
+        "..",
+        "..",
+        "..",
+        "openlibrary-client-imports",  # local worktree
+        "olclient",
+        "schemata",
+        "import.schema.json",
     )
 )
 
 # Fall back to installed package location if worktree path doesn't exist
 if not os.path.exists(_SCHEMA_PATH):
     import olclient
+
     _SCHEMA_PATH = os.path.join(
-        os.path.dirname(olclient.__file__), 'schemata', 'import.schema.json'
+        os.path.dirname(olclient.__file__), "schemata", "import.schema.json"
     )
 
 with open(_SCHEMA_PATH) as _f:
     _SCHEMA = json.load(_f)
 
 _RESOLVER = jsonschema.RefResolver(
-    'file:' + pathname2url(os.path.abspath(_SCHEMA_PATH)), _SCHEMA
+    "file:" + pathname2url(os.path.abspath(_SCHEMA_PATH)), _SCHEMA
 )
 _VALIDATOR = jsonschema.Draft4Validator(_SCHEMA, resolver=_RESOLVER)
 
@@ -69,11 +75,11 @@ FULL_RAW = {
     "subjects": ["African Literature & Fiction", " Contemporary Fiction", "romance"],
     "source_records": ["itan_technologies:BOO1109"],
     "identifiers": {"itan_technologies": ["BOO1109"]},
-    "ebook_access": "borrowable",          # NOT in OL schema — must be dropped
+    "ebook_access": "borrowable",  # NOT in OL schema — must be dropped
     "subtitle": "A Pan-African Romance Suspense Novel",
     "number_of_pages": 189,
     "notes": "A gripping Pan-African romantic thriller.",
-    "isbn_13": ["0"],                      # placeholder — must be filtered
+    "isbn_13": ["0"],  # placeholder — must be filtered
     "contributions": ["Editor: Jane Doe"],
 }
 
@@ -89,6 +95,7 @@ MINIMAL_RAW = {
 # ---------------------------------------------------------------------------
 # ITANRecord unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestITANRecord:
     def test_parses_full_record(self):
@@ -178,6 +185,7 @@ class TestITANRecord:
 # ITANProvider — live end-to-end over real data
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def live_records():
     """Fetch all ITAN records once for the module; skip if network unavailable."""
@@ -209,7 +217,9 @@ class TestITANProviderLive:
         for r in live_records:
             if r.subjects:
                 for s in r.subjects:
-                    assert s == s.strip(), f"Unstripped subject {s!r} in {r.source_records}"
+                    assert (
+                        s == s.strip()
+                    ), f"Unstripped subject {s!r} in {r.source_records}"
 
     def test_all_records_have_source_records_prefix(self, live_records):
         for r in live_records:
@@ -223,4 +233,6 @@ class TestITANProviderLive:
             errors = list(_VALIDATOR.iter_errors(r.model_dump(exclude_none=True)))
             if errors:
                 failures.append((r.source_records, errors))
-        assert not failures, f"{len(failures)} records failed schema validation: {failures[:3]}"
+        assert (
+            not failures
+        ), f"{len(failures)} records failed schema validation: {failures[:3]}"
