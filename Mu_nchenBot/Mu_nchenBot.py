@@ -19,10 +19,7 @@ login_data = {
     "password": PASSWORD,
 }
 
-login_response = session.post(
-    "https://openlibrary.org/account/login",
-    data=login_data
-)
+login_response = session.post("https://openlibrary.org/account/login", data=login_data)
 
 if "Invalid username or password" in login_response.text:
     raise Exception("Login failed")
@@ -105,10 +102,7 @@ while True:
 
                 edition["publish_places"] = new_publish_places
 
-                save_response = session.put(
-                    edition_url,
-                    json=edition
-                )
+                save_response = session.put(edition_url, json=edition)
 
                 if save_response.status_code in (200, 201):
                     print(f"Updated {olid}")
