@@ -1,6 +1,5 @@
-import requests
 import time
-
+import requests
 
 # CONFIG
 
@@ -36,13 +35,7 @@ offset = 0
 limit = 100
 
 while True:
-    search_url = (
-        "https://openlibrary.org/search.json"
-        f"?q=publish_place:{SEARCH_TERM}"
-        f"&fields=edition_key"
-        f"&limit={limit}"
-        f"&offset={offset}"
-    )
+    search_url = f"https://openlibrary.org/search.json?q=publish_place:{SEARCH_TERM}&fields=edition_key&limit={limit}&offset={offset}"
 
     response = session.get(search_url)
     data = response.json()
