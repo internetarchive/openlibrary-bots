@@ -1,3 +1,4 @@
+import logging
 import time
 import requests
 from secrets import secrets
@@ -10,6 +11,12 @@ EDIT_DELAY = 2
 
 offset = 0
 limit = 100
+
+ERRLOG="error.log"
+
+# Logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename=ERRLOG, level=logging.ERROR)
 
 # LOGIN
 
@@ -87,7 +94,6 @@ while True:
                     continue
 
                 edition["publish_places"] = new_publish_places
-
                 edition["_comment"] = (
                     'Fix encoding in publish_places: "'
                     + SEARCH_TERM
@@ -103,6 +109,7 @@ while True:
                 else:
                     print(f"Failed {olid}: {save_response.status_code}")
                     print(save_response.text)
+                    logger.error(f"Failed {olid}: {save_response.status_code}")
 
                 time.sleep(EDIT_DELAY)
 
