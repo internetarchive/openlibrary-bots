@@ -4,8 +4,8 @@ from secrets import secrets
 
 # CONFIG
 
-SEARCH_TERM = 'Mu nchen'
-SUBST_TERM = 'München'
+SEARCH_TERM = "Mu nchen"
+SUBST_TERM = "München"
 EDIT_DELAY = 2
 
 offset = 0
@@ -88,7 +88,13 @@ while True:
 
                 edition["publish_places"] = new_publish_places
 
-                edition["_comment"] = 'Fix encoding in publish_places: "' + SEARCH_TERM + '" → "' + SUBST_TERM + '"'
+                edition["_comment"] = (
+                    'Fix encoding in publish_places: "'
+                    + SEARCH_TERM
+                    + '" → "'
+                    + SUBST_TERM
+                    + '"'
+                )
 
                 save_response = session.put(edition_url, json=edition)
 
