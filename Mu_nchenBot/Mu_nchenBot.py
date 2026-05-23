@@ -1,24 +1,21 @@
 import time
 import requests
+from secrets import secrets
 
 # CONFIG
 
-USERNAME = "USERNAME"
-PASSWORD = "PASSWORD"
-
-SEARCH_TERM = "Mu nchen"
+SEARCH_TERM = 'Mu nchen'
+SUBST_TERM = 'München'
 EDIT_DELAY = 2
+
+offset = 0
+limit = 100
 
 # LOGIN
 
 session = requests.Session()
 
-login_data = {
-    "username": USERNAME,
-    "password": PASSWORD,
-}
-
-login_response = session.post("https://openlibrary.org/account/login", data=login_data)
+login_response = session.post("https://openlibrary.org/account/login", data=secrets)
 
 if "Invalid username or password" in login_response.text:
     raise Exception("Login failed")
@@ -28,11 +25,7 @@ if "account/logout" not in login_response.text:
 
 print("Logged in.")
 
-
 # SEARCH EDITIONS
-
-offset = 0
-limit = 100
 
 while True:
     search_url = f"https://openlibrary.org/search.json?q=publish_place:{SEARCH_TERM}&fields=edition_key&limit={limit}&offset={offset}"
@@ -69,7 +62,7 @@ while True:
                 for place in publish_places:
                     # Handle both string entries and dict entries
                     if isinstance(place, str):
-                        new_place = place.replace("Mu nchen", "München")
+                        new_place = place.replace(SEARCH_TERM, SUBST_TERM)
 
                         if new_place != place:
                             changed = True
@@ -78,7 +71,7 @@ while True:
 
                     elif isinstance(place, dict):
                         name = place.get("name", "")
-                        new_name = name.replace("Mu nchen", "München")
+                        new_name = name.replace(SEARCH_TERM, SUBST_TERM)
 
                         if new_name != name:
                             changed = True
@@ -94,6 +87,8 @@ while True:
                     continue
 
                 edition["publish_places"] = new_publish_places
+
+                edition["_comment"] = 'Fix encoding in publish_places: "' + SEARCH_TERM + '" → "' + SUBST_TERM + '"'
 
                 save_response = session.put(edition_url, json=edition)
 
