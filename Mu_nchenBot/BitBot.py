@@ -12,7 +12,7 @@ EDIT_DELAY = 2
 offset = 0
 limit = 100
 
-ERRLOG="error.log"
+ERRLOG = "error.log"
 
 # Logging
 logger = logging.getLogger(__name__)
