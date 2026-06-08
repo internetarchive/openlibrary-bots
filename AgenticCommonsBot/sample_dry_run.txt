@@ -1,0 +1,22 @@
+========================================================================
+OL alternate-name bot — DRY-RUN
+Proposal: sample_proposal.json (item 0)
+OL key:   /authors/OL2630047A
+URL:      https://openlibrary.org/authors/OL2630047A
+User:     AgenticCommonsBot (login via S3 access key xxxxxx…)
+Adding:   '苏童'
+========================================================================
+
+[1] POST /account/login (S3 auth) …
+  HTTP 200, landed at https://openlibrary.org/
+  cookies set: [('session', '/people/ag…'), ('pd', '…'), ('sfw', '…')]
+
+[2] GET /authors/OL2630047A.json (current author data) …
+  current alternate_names (0): []
+
+[3] Prepared PUT payload:
+    alternate_names: ['苏童']
+    _comment (first 120 chars): "Adding native-script form per Wikidata Q778276 (zh label '苏童') and Chinese Wikipedia article title '苏童'."
+
+[DRY-RUN] Would PUT to https://openlibrary.org/authors/OL2630047A.json
+[DRY-RUN] Re-run with --live to actually submit.

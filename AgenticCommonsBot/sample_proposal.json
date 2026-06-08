@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "ol_key": "/authors/OL2630047A",
+      "task_type": "add_alternate_name",
+      "author_name_primary": "Su Tong",
+      "current_alternate_names": [],
+      "proposed_addition": "苏童",
+      "comment": "Adding native-script form per Wikidata Q778276 (zh label '苏童') and Chinese Wikipedia article title '苏童'.",
+      "evidence": [
+        {
+          "source": "Wikidata Q778276",
+          "url": "https://www.wikidata.org/wiki/Q778276",
+          "value": "苏童"
+        },
+        {
+          "source": "Wikipedia (zh)",
+          "url": "https://zh.wikipedia.org/wiki/%E8%8B%8F%E7%AB%A5",
+          "value": "苏童"
+        }
+      ],
+      "rationale": "Su Tong is a major contemporary Chinese novelist (Wives and Concubines / Raise the Red Lantern). Readers searching in Chinese cannot find him by his romanized name. Both Wikidata and the zh-wiki article confirm the simplified-Chinese form 苏童 as the canonical native-script name."
+    }
+  ]
+}
