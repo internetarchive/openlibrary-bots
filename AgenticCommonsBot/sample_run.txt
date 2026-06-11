@@ -1,0 +1,76 @@
+[1] POST /account/login (S3 auth)
+  HTTP 200
+
+[2] GET /authors/OL713582A.json (current OL state)
+  name: Su Tong
+  current alternate_names: ['苏童', '蘇童', 'Sū Tóng', 'Tong Zhonggui', '童忠贵', 'Tong Su']
+  wikidata Q-id: Q778276
+
+[3] GET Wikidata Q778276 labels
+  total labels: 41
+
+[4] Diff — missing non-Latin labels: 7
+    he          סו טונג
+    ru          Су Тун
+    th          ซูถง
+    ar          سو تونغ
+    ko          쑤퉁
+    arz         سو تونج
+    as          চু টং
+
+[DRY-RUN] Would PUT /authors/OL713582A.json
+  edit comment: Added 7 non-Latin label(s) from Wikidata Q778276: 'סו טונג', 'Су Тун', 'ซูถง', 'سو تونغ', '쑤퉁', 'سو تونج', 'চু টং'
+  new alternate_names (13): ['Sū Tóng', 'Tong Su', 'Tong Zhonggui', 'Су Тун', 'סו טונג', 'سو تونج', 'سو تونغ', 'চু টং', 'ซูถง', '童忠贵', '苏童', '蘇童', '쑤퉁']
+
+  Re-run with --live to actually submit.
+{
+  "status": "dry_run",
+  "ol_key": "/authors/OL713582A",
+  "qid": "Q778276",
+  "to_add": [
+    [
+      "he",
+      "סו טונג"
+    ],
+    [
+      "ru",
+      "Су Тун"
+    ],
+    [
+      "th",
+      "ซูถง"
+    ],
+    [
+      "ar",
+      "سو تونغ"
+    ],
+    [
+      "ko",
+      "쑤퉁"
+    ],
+    [
+      "arz",
+      "سو تونج"
+    ],
+    [
+      "as",
+      "চু টং"
+    ]
+  ],
+  "new_alternate_names": [
+    "Sū Tóng",
+    "Tong Su",
+    "Tong Zhonggui",
+    "Су Тун",
+    "סו טונג",
+    "سو تونج",
+    "سو تونغ",
+    "চু টং",
+    "ซูถง",
+    "童忠贵",
+    "苏童",
+    "蘇童",
+    "쑤퉁"
+  ],
+  "edit_comment": "Added 7 non-Latin label(s) from Wikidata Q778276: 'סו טונג', 'Су Тун', 'ซูถง', 'سو تونغ', '쑤퉁', 'سو تونج', 'চু টং'"
+}
