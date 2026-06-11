@@ -1,82 +1,89 @@
 #!/usr/bin/env python3
 """
-OpenLibrary alternate-name submission bot.
+Wikidata-to-OL author alternate_names sync bot.
 
-Reads a proposal JSON (produced by an upstream research worker and validated
-by an independent QA gate) and adds one well-evidenced name variant to an
-author's ``alternate_names`` array on OpenLibrary.
+Deterministic (no LLM) sync. For OL authors that already have a cross-linked
+Wikidata Q-id but are missing one or more non-Latin labels Wikidata has, this
+bot fetches the Wikidata labels, diffs against OL's current alternate_names,
+and PUTs the missing non-Latin forms in a single edit.
 
-See README.md for the upstream pipeline, evidence requirements, and rate-limit
-posture.
+Two modes:
 
-Required env vars:
-  OL_BOT_ACCESS   — S3-style access key from https://archive.org/account/s3.php
-  OL_BOT_SECRET   — S3-style secret key from same page
-  OL_BOT_USERNAME — display username (only used in logs); defaults to
-                    "AgenticCommonsBot"
+  discover   Stream the OL monthly author dump and emit candidate OL keys to
+             stdout. Filters to authors that (a) have remote_ids.wikidata
+             populated and (b) have no non-Latin form in alternate_names.
 
-Why S3 keys (not email/password): OL grants two different session privilege
-levels — email+password sessions are anti-bot-restricted (PUT returns 403);
-access+secret sessions get full API write privileges. The S3 keys live on
-Internet Archive (https://archive.org/account/s3.php) because OL is an IA
-sub-project sharing accounts.
+  sync       For one OL author key, GET the current OL record + the Wikidata
+             entity, compute the diff, and PUT the missing non-Latin forms.
+             Defaults to dry-run; pass --live to actually submit.
+
+Pure stdlib. Auth via Internet Archive S3 keys (S3 access + secret from
+https://archive.org/account/s3.php — OL is an IA sub-project that shares
+the account system).
+
+Required env vars (sync mode only):
+  OL_BOT_ACCESS   S3-style access key
+  OL_BOT_SECRET   S3-style secret key
 
 Usage:
-  python3 wikidata_author_alias_bot.py --proposal sample_proposal.json          # dry-run
-  python3 wikidata_author_alias_bot.py --proposal sample_proposal.json --live   # submit
+  # find candidates from monthly dump:
+  python3 wikidata_author_alias_bot.py discover --limit 10
 
-Proposal JSON shape: see README.md and sample_proposal.json.
+  # dry-run a single author:
+  python3 wikidata_author_alias_bot.py sync /authors/OL713582A
 
-OL auth: POST /account/login with form-encoded access + secret;
-session cookie returned, then GET / PUT page .json with the cookie.
+  # submit for real:
+  python3 wikidata_author_alias_bot.py sync /authors/OL713582A --live
 """
+from __future__ import annotations
 
 import argparse
+import gzip
 import http.cookiejar
 import json
 import os
 import sys
+import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 
-BASE = "https://openlibrary.org"
+OL_BASE = "https://openlibrary.org"
+OL_DUMP_URL = "https://openlibrary.org/data/ol_dump_authors_latest.txt.gz"
+WD_BASE = "https://www.wikidata.org"
+UA_DEFAULT = "AgenticCommonsBot/0.1 (wiki-bot@agentic-commons.org)"
 
-REQUIRED_KEYS = ("ol_key", "task_type", "proposed_addition", "comment")
-
-USER_AGENT = "AgenticCommonsBot/0.1 (wiki-bot@agentic-commons.org)"
-
-
-def load_proposal(path, item_index):
-    with open(path) as f:
-        doc = json.load(f)
-    if isinstance(doc, dict) and "items" in doc:
-        items = doc["items"]
-        if not items:
-            raise ValueError(f"proposal {path}: 'items' is empty")
-        if item_index < 0 or item_index >= len(items):
-            raise ValueError(f"--item-index {item_index} out of range (have {len(items)})")
-        proposal = items[item_index]
-    elif isinstance(doc, dict) and "ol_key" in doc:
-        proposal = doc
-    else:
-        raise ValueError(f"proposal {path}: expected single proposal or {{items:[...]}}")
-    for k in REQUIRED_KEYS:
-        if k not in proposal:
-            raise ValueError(f"proposal missing required field: {k!r}")
-    if proposal["task_type"] != "add_alternate_name":
-        raise ValueError(
-            f"only task_type='add_alternate_name' is supported in this MVP "
-            f"(got {proposal['task_type']!r})"
-        )
-    if not proposal["ol_key"].startswith("/authors/"):
-        raise ValueError(
-            f"alternate_name task only supports /authors/* pages "
-            f"(got {proposal['ol_key']!r})"
-        )
-    return proposal
+# Unicode block markers used to classify a label as "non-Latin". A label is
+# non-Latin if any character's Unicode name contains one of these tokens.
+NON_LATIN_MARKERS = (
+    "CJK", "HIRAGANA", "KATAKANA", "HANGUL",
+    "ARABIC", "HEBREW", "CYRILLIC", "GREEK",
+    "DEVANAGARI", "BENGALI", "TAMIL", "THAI",
+    "TELUGU", "GUJARATI", "KANNADA", "MALAYALAM",
+    "MYANMAR", "GEORGIAN", "ARMENIAN", "ETHIOPIC",
+    "TIBETAN", "KHMER", "LAO", "SINHALA",
+)
 
 
-def make_opener(user_agent):
+def is_non_latin(s: str) -> bool:
+    for ch in s:
+        try:
+            name = unicodedata.name(ch)
+        except ValueError:
+            continue
+        if any(m in name for m in NON_LATIN_MARKERS):
+            return True
+    return False
+
+
+def nfc(s: str) -> str:
+    return unicodedata.normalize("NFC", s.strip())
+
+
+# ── HTTP helpers ─────────────────────────────────────────────────────
+
+
+def make_opener(user_agent: str):
     jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(
         urllib.request.HTTPCookieProcessor(jar),
@@ -89,45 +96,29 @@ def make_opener(user_agent):
     return opener, jar
 
 
-def login_s3(opener, access, secret):
-    """Form-POST to /account/login with S3 access+secret.
+def login_s3(opener, access: str, secret: str) -> int:
+    """POST /account/login with S3 keys → establishes a write-capable session.
 
-    This grants a full-privilege session (writes allowed). The alternative —
-    email+password — yields an anti-bot-restricted session (PUT -> 403).
-    Matches the auth pattern used by openlibrary-client (olclient).
-
-    On success: HTTP 303 redirect + session cookie set.
+    Minimal field set: adding remember/test fields triggers HTTP 500.
+    Matches the auth pattern used by olclient.
     """
-    # Minimal field set: adding 'remember'/'test' triggers HTTP 500 on OL.
-    body = urllib.parse.urlencode({
-        "access": access,
-        "secret": secret,
-    }).encode("utf-8")
-    req = urllib.request.Request(
-        f"{BASE}/account/login",
-        data=body, method="POST",
-    )
+    body = urllib.parse.urlencode({"access": access, "secret": secret}).encode()
+    req = urllib.request.Request(f"{OL_BASE}/account/login", data=body, method="POST")
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
     with opener.open(req, timeout=30) as r:
-        body_text = r.read().decode("utf-8", errors="replace")
-        return r.status, r.geturl(), body_text
+        return r.status
 
 
-def fetch_author(opener, ol_key):
-    """GET /authors/OL...A.json — returns parsed JSON dict."""
-    url = f"{BASE}{ol_key}.json"
+def fetch_ol_author(opener, ol_key: str) -> dict:
+    url = f"{OL_BASE}{ol_key}.json"
     req = urllib.request.Request(url)
     with opener.open(req, timeout=15) as r:
         return json.loads(r.read().decode("utf-8"))
 
 
-def put_author(opener, ol_key, author_data):
-    """PUT /authors/OL...A.json with full updated JSON.
-
-    Returns (status, final_url, body_text).
-    """
-    url = f"{BASE}{ol_key}.json"
-    body = json.dumps(author_data, ensure_ascii=False).encode("utf-8")
+def put_ol_author(opener, ol_key: str, data: dict):
+    url = f"{OL_BASE}{ol_key}.json"
+    body = json.dumps(data, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="PUT")
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json")
@@ -135,100 +126,231 @@ def put_author(opener, ol_key, author_data):
         return r.status, r.geturl(), r.read().decode("utf-8", errors="replace")
 
 
-def main():
-    ap = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
+def fetch_wikidata_labels(qid: str, user_agent: str) -> dict:
+    """Return {language_code: label} for the Wikidata entity."""
+    url = f"{WD_BASE}/wiki/Special:EntityData/{qid}.json"
+    req = urllib.request.Request(url, headers={"User-Agent": user_agent})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.loads(r.read().decode("utf-8"))
+    ent = data["entities"].get(qid, {})
+    labels = ent.get("labels", {})
+    return {code: l["value"] for code, l in labels.items()}
+
+
+# ── discover mode ────────────────────────────────────────────────────
+
+
+def discover_candidates(dump_url: str = OL_DUMP_URL,
+                        user_agent: str = UA_DEFAULT,
+                        limit: int | None = None):
+    """Stream the OL author dump, yield (ol_key, record) for candidates.
+
+    A candidate is an author that:
+    - has `remote_ids.wikidata` set (the cross-link anchor)
+    - has no non-Latin form in `alternate_names`
+    """
+    req = urllib.request.Request(dump_url, headers={"User-Agent": user_agent})
+    yielded = 0
+    scanned = 0
+    skipped_no_wikidata = 0
+    skipped_already_has_non_latin = 0
+
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        with gzip.GzipFile(fileobj=resp) as gz:
+            for raw in gz:
+                scanned += 1
+                if limit and yielded >= limit:
+                    break
+                parts = raw.decode("utf-8", errors="replace").rstrip("\n").split("\t")
+                if len(parts) != 5:
+                    continue
+                if parts[0] != "/type/author":
+                    continue
+                try:
+                    rec = json.loads(parts[4])
+                except json.JSONDecodeError:
+                    continue
+                qid = (rec.get("remote_ids") or {}).get("wikidata")
+                if not qid:
+                    skipped_no_wikidata += 1
+                    continue
+                alts = rec.get("alternate_names") or []
+                if any(is_non_latin(a) for a in alts):
+                    skipped_already_has_non_latin += 1
+                    continue
+                yielded += 1
+                yield rec["key"], rec
+
+    print(
+        f"# discover summary: scanned={scanned} yielded={yielded} "
+        f"skipped_no_wikidata={skipped_no_wikidata} "
+        f"skipped_already_has_non_latin={skipped_already_has_non_latin}",
+        file=sys.stderr,
     )
-    ap.add_argument("--proposal", required=True, help="Path to proposal JSON")
-    ap.add_argument("--item-index", type=int, default=0)
-    ap.add_argument("--live", action="store_true",
-                    help="Actually PUT. Default is DRY-RUN (does not write).")
-    args = ap.parse_args()
 
-    username = os.environ.get("OL_BOT_USERNAME", "AgenticCommonsBot")
-    access = os.environ.get("OL_BOT_ACCESS")
-    secret = os.environ.get("OL_BOT_SECRET")
-    if not access or not secret:
-        print("ERROR: OL_BOT_ACCESS and OL_BOT_SECRET env vars are required.", file=sys.stderr)
-        print("       Get them from https://archive.org/account/s3.php (Internet", file=sys.stderr)
-        print("       Archive shares OL's account system).", file=sys.stderr)
-        sys.exit(2)
 
-    proposal = load_proposal(args.proposal, args.item_index)
-    ol_key = proposal["ol_key"]
-    addition = proposal["proposed_addition"]
-    comment = proposal["comment"]
+# ── sync mode ────────────────────────────────────────────────────────
 
-    print("=" * 72, file=sys.stderr)
-    print(f"OL alternate-name bot — {'LIVE' if args.live else 'DRY-RUN'}", file=sys.stderr)
-    print(f"Proposal: {args.proposal} (item {args.item_index})", file=sys.stderr)
-    print(f"OL key:   {ol_key}", file=sys.stderr)
-    print(f"URL:      {BASE}{ol_key}", file=sys.stderr)
-    print(f"User:     {username} (login via S3 access key {access[:6]}…)", file=sys.stderr)
-    print(f"Adding:   {addition!r}", file=sys.stderr)
-    print("=" * 72, file=sys.stderr)
 
-    opener, jar = make_opener(USER_AGENT)
+def compute_additions(author_record: dict, wd_labels: dict) -> list:
+    """Return [(lang_code, label)] of non-Latin Wikidata labels NOT in OL.
 
-    print("\n[1] POST /account/login (S3 auth) …", file=sys.stderr)
+    Dedup is value-based (NFC normalized) — multiple Wikidata language codes
+    often share the same string (e.g. zh + zh-cn + zh-hans all = '苏童'),
+    so we only add the first unique form.
+    """
+    have = {nfc(author_record.get("name") or "")}
+    for a in (author_record.get("alternate_names") or []):
+        have.add(nfc(a))
+    have.discard("")
+
+    seen = set()
+    to_add = []
+    for code, val in wd_labels.items():
+        if not is_non_latin(val):
+            continue
+        n = nfc(val)
+        if n in have or n in seen:
+            continue
+        seen.add(n)
+        to_add.append((code, val))
+    return to_add
+
+
+def sync_author(ol_key: str, access: str, secret: str,
+                user_agent: str = UA_DEFAULT, live: bool = False) -> dict:
+    """Sync one OL author. Returns a result dict."""
+    opener, _jar = make_opener(user_agent)
+
+    print(f"[1] POST /account/login (S3 auth)", file=sys.stderr)
     try:
-        status, final_url, body = login_s3(opener, access, secret)
-        print(f"  HTTP {status}, landed at {final_url}", file=sys.stderr)
-        cookies = [(c.name, c.value[:10] + "…") for c in jar]
-        print(f"  cookies set: {cookies}", file=sys.stderr)
+        st = login_s3(opener, access, secret)
+        print(f"  HTTP {st}", file=sys.stderr)
     except Exception as e:
-        print(f"  login failed: {type(e).__name__}: {e}", file=sys.stderr)
-        sys.exit(3)
+        return {"status": "login_failed", "error": f"{type(e).__name__}: {e}"}
 
-    print(f"\n[2] GET {ol_key}.json (current author data) …", file=sys.stderr)
+    print(f"\n[2] GET {ol_key}.json (current OL state)", file=sys.stderr)
     try:
-        author = fetch_author(opener, ol_key)
-    except Exception as e:
-        print(f"  fetch failed: {type(e).__name__}: {e}", file=sys.stderr)
-        sys.exit(4)
+        author = fetch_ol_author(opener, ol_key)
+    except urllib.error.HTTPError as e:
+        return {"status": "fetch_failed", "ol_key": ol_key, "http_code": e.code}
 
-    current_names = author.get("alternate_names") or []
-    print(f"  current alternate_names ({len(current_names)}): {current_names}", file=sys.stderr)
+    qid = (author.get("remote_ids") or {}).get("wikidata")
+    print(f"  name: {author.get('name')}", file=sys.stderr)
+    print(f"  current alternate_names: {author.get('alternate_names') or []}", file=sys.stderr)
+    print(f"  wikidata Q-id: {qid or '(none)'}", file=sys.stderr)
 
-    if addition in current_names:
-        print(f"\n⚠️  {addition!r} already in alternate_names — skipping", file=sys.stderr)
-        return
+    if not qid:
+        return {"status": "skipped", "reason": "no_wikidata_link", "ol_key": ol_key}
 
-    # Construct the updated author payload (do not mutate other fields)
+    print(f"\n[3] GET Wikidata {qid} labels", file=sys.stderr)
+    labels = fetch_wikidata_labels(qid, user_agent)
+    print(f"  total labels: {len(labels)}", file=sys.stderr)
+
+    to_add = compute_additions(author, labels)
+    print(f"\n[4] Diff — missing non-Latin labels: {len(to_add)}", file=sys.stderr)
+    for code, val in to_add:
+        print(f"    {code:10}  {val}", file=sys.stderr)
+
+    if not to_add:
+        return {
+            "status": "skipped",
+            "reason": "no_missing_non_latin_labels",
+            "ol_key": ol_key,
+            "qid": qid,
+        }
+
+    additions_only = [val for _, val in to_add]
+    new_alt = sorted(set(author.get("alternate_names") or []) | set(additions_only))
     updated = dict(author)
-    updated["alternate_names"] = current_names + [addition]
-    updated["_comment"] = comment
+    updated["alternate_names"] = new_alt
+    updated["_comment"] = (
+        f"Added {len(to_add)} non-Latin label(s) from Wikidata {qid}: "
+        + ", ".join(f"'{v}'" for v in additions_only)
+    )
 
-    print(f"\n[3] Prepared PUT payload:", file=sys.stderr)
-    print(f"    alternate_names: {updated['alternate_names']}", file=sys.stderr)
-    print(f"    _comment (first 120 chars): {comment[:120]!r}", file=sys.stderr)
+    if not live:
+        print(f"\n[DRY-RUN] Would PUT {ol_key}.json", file=sys.stderr)
+        print(f"  edit comment: {updated['_comment']}", file=sys.stderr)
+        print(f"  new alternate_names ({len(new_alt)}): {new_alt}", file=sys.stderr)
+        print(f"\n  Re-run with --live to actually submit.", file=sys.stderr)
+        return {
+            "status": "dry_run",
+            "ol_key": ol_key,
+            "qid": qid,
+            "to_add": to_add,
+            "new_alternate_names": new_alt,
+            "edit_comment": updated["_comment"],
+        }
 
-    if not args.live:
-        print(f"\n[DRY-RUN] Would PUT to {BASE}{ol_key}.json", file=sys.stderr)
-        print("[DRY-RUN] Re-run with --live to actually submit.", file=sys.stderr)
-        return
-
-    print(f"\n[4] LIVE PUT → {BASE}{ol_key}.json", file=sys.stderr)
+    print(f"\n[5] LIVE PUT {ol_key}.json", file=sys.stderr)
     try:
-        status, result_url, body = put_author(opener, ol_key, updated)
-        print(f"  HTTP {status}", file=sys.stderr)
-        print(f"  result url: {result_url}", file=sys.stderr)
+        st, url, body = put_ol_author(opener, ol_key, updated)
+        print(f"  HTTP {st}", file=sys.stderr)
         print(f"  body[:300]: {body[:300]!r}", file=sys.stderr)
     except urllib.error.HTTPError as e:
+        body = e.read()[:500].decode("utf-8", errors="replace")
         print(f"  HTTP {e.code}: {e.reason}", file=sys.stderr)
-        print(f"  body[:500]: {e.read()[:500].decode('utf-8', errors='replace')!r}", file=sys.stderr)
-        sys.exit(5)
+        print(f"  body[:500]: {body!r}", file=sys.stderr)
+        return {
+            "status": "publish_failed",
+            "ol_key": ol_key,
+            "http_code": e.code,
+            "body": body,
+        }
 
-    print(f"\n[5] Verify via GET {ol_key}.json …", file=sys.stderr)
-    fresh = fetch_author(opener, ol_key)
-    final_names = fresh.get("alternate_names") or []
-    if addition in final_names:
-        print(f"\n✅ SUCCESS — {addition!r} now in alternate_names", file=sys.stderr)
-        print(f"   final list ({len(final_names)}): {final_names}", file=sys.stderr)
-        print(f"   see: {BASE}{ol_key}", file=sys.stderr)
-    else:
-        print(f"\n❌ NOT YET present in alternate_names — may need cache refresh", file=sys.stderr)
-        print(f"   observed list: {final_names}", file=sys.stderr)
+    print(f"\n[6] Verify GET {ol_key}.json", file=sys.stderr)
+    fresh = fetch_ol_author(opener, ol_key)
+    final = fresh.get("alternate_names") or []
+    landed = all(v in final for v in additions_only)
+    print(f"  final alternate_names ({len(final)}): {final}", file=sys.stderr)
+    print(f"  all additions landed: {landed}", file=sys.stderr)
+
+    return {
+        "status": "published" if landed else "published_unverified",
+        "ol_key": ol_key,
+        "qid": qid,
+        "added": to_add,
+        "final_alternate_names": final,
+        "verified": landed,
+    }
+
+
+# ── main ─────────────────────────────────────────────────────────────
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = ap.add_subparsers(dest="mode", required=True)
+
+    p_disc = sub.add_parser("discover", help="Stream OL dump → emit candidate OL keys to stdout")
+    p_disc.add_argument("--limit", type=int, default=None, help="Stop after N candidates")
+    p_disc.add_argument("--dump-url", default=OL_DUMP_URL)
+
+    p_sync = sub.add_parser("sync", help="Sync a single OL author")
+    p_sync.add_argument("ol_key", help="OL author key, e.g. /authors/OL713582A")
+    p_sync.add_argument("--live", action="store_true",
+                        help="Actually PUT. Default is DRY-RUN (does not write).")
+
+    args = ap.parse_args()
+
+    if args.mode == "discover":
+        for ol_key, _rec in discover_candidates(dump_url=args.dump_url, limit=args.limit):
+            print(ol_key)
+        return
+
+    if args.mode == "sync":
+        access = os.environ.get("OL_BOT_ACCESS")
+        secret = os.environ.get("OL_BOT_SECRET")
+        if not access or not secret:
+            print("ERROR: OL_BOT_ACCESS and OL_BOT_SECRET env vars are required.", file=sys.stderr)
+            print("  Get them from https://archive.org/account/s3.php", file=sys.stderr)
+            sys.exit(2)
+        result = sync_author(args.ol_key, access, secret, UA_DEFAULT, live=args.live)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

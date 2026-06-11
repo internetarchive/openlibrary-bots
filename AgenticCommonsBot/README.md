@@ -1,45 +1,72 @@
 # AgenticCommonsBot
 
-Adds one well-evidenced entry to an Open Library author's `alternate_names` array, citing Wikidata + a Wikipedia article in another language as independent sources.
+Deterministic Wikidata-to-OpenLibrary sync for author `alternate_names`.
 
-Closes #450.
+For OpenLibrary authors that already have a cross-linked Wikidata Q-id but
+lack one or more non-Latin labels Wikidata has, this bot fetches the
+Wikidata labels, diffs against OpenLibrary's current `alternate_names`,
+and PUTs the missing non-Latin forms in a single edit.
+
+Closes [internetarchive/openlibrary#12887](https://github.com/internetarchive/openlibrary/issues/12887).
 
 ## What this bot does
 
-For a single OL author at a time:
+Two modes, both pure stdlib:
 
-1. GET `/authors/OL...A.json`
-2. Verify `alternate_names` is still empty (skip if not — someone else already handled it)
-3. Append exactly one proposed addition to `alternate_names`
-4. PUT the updated author JSON with an edit comment citing the two evidence URLs
+### `discover` — find candidates
 
-That's it. One author, one addition, one PUT.
+Stream the monthly author dump (`ol_dump_authors_latest.txt.gz`), filter to
+authors that:
+- have `remote_ids.wikidata` populated (cross-linked Q-id, anchors identity)
+- have no non-Latin form in `alternate_names` (Unicode-block check)
+
+Emit OL author keys to stdout, one per line.
+
+### `sync` — actually edit one author
+
+For one OL author key:
+1. POST `/account/login` with S3 keys → write-capable session
+2. GET `/authors/<key>.json` → current `alternate_names`, current Q-id link
+3. GET Wikidata `Special:EntityData/<Q-id>.json` → all label translations
+4. Diff: non-Latin Wikidata labels MINUS OL's current alternate_names (NFC-normalized, value-level dedup across language codes)
+5. If diff is empty → skip; otherwise PUT updated record
+6. Verify via re-fetch GET
 
 ## What this bot does NOT do
 
-- Does not generate the alternate name itself. It reads a pre-built proposal JSON. The proposal upstream is produced by a research worker (which may use an LLM) and then validated by an independent QA gate that re-fetches the two evidence URLs and checks they actually contain the proposed value.
+- Does not use an LLM, fuzzy matching, or any model judgment. Identity match is anchored on the OL↔Wikidata cross-link; missing-form detection is set difference over Unicode-block-filtered labels.
+- Does not crawl OL. Candidate discovery uses the monthly bulk dump (one HTTP GET per month). Per-author work uses one GET + one PUT + one verify GET.
 - Does not edit works, editions, subjects, or any field other than `alternate_names`.
-- Does not remove, reorder, or replace existing `alternate_names` entries.
-- Does not bulk-process. Each invocation handles a single proposal item.
+- Does not remove, reorder, or replace existing `alternate_names` entries — it appends only.
+- Does not handle author record duplicates (a separate concern; out of scope here).
+- Does not invent or transliterate names. Only labels already present on Wikidata are propagated.
 
-## Evidence requirement
+## Why this design
 
-Every proposal must include **at least two independent reputable sources** in the `evidence` array. The default pair:
+Following review feedback on issue #12887:
 
-- **Wikidata** — capture the Q-id and the matching multilingual label
-- **Wikipedia (other-language article)** — capture the article title in the script being added
-
-Other acceptable corroborators: official publisher page, university faculty page, national library authority record (LoC, BnF, NDL, NLI, etc.).
-
-The bot is strict about the two-source minimum. If a proposal arrives with fewer than two evidence entries, the upstream gate rejects it before it reaches the bot.
+| Concern | Resolution |
+|---|---|
+| OL is hammered by crawler traffic | Use monthly bulk dump for candidate discovery, not OL search/list APIs |
+| Weak identity matching (matching by name alone) | Require OL record to have `remote_ids.wikidata` populated; identity comes from the existing cross-link, not from heuristics |
+| One-addition-per-edit is too conservative | Each edit adds **all** missing non-Latin forms from Wikidata at once |
+| Wikidata + Wikipedia aren't really independent sources | Wikidata is the sole authoritative source; the Q-id anchors the match |
 
 ## Frequency
 
-Targeting **≤ 8 edits per day** total. Each edit issues 1 GET + 1 PUT + 1 verify GET, paced at 1.5s between requests. Well below polite-bot thresholds.
+Per-day cap of 8 edits initially. Each edit makes 1 GET (Wikidata) + 1 GET
+(OL) + 1 PUT (OL) + 1 verify GET (OL) = 4 HTTP calls. Monthly dump fetch is
+one streamed download (no local persistence).
+
+`work_count`-descending candidate ordering is a future enhancement — it
+requires either an additional OL works-dump pass (~several GB) or batch
+queries to OL search, neither of which is in this version.
 
 ## Authentication
 
-Uses Internet Archive S3 keys (access + secret) per OL's standard write-API auth path. Get them from https://archive.org/account/s3.php while signed in to the bot account.
+Internet Archive S3 keys (access + secret) per OL's standard write-API auth
+path. Get them from https://archive.org/account/s3.php while signed in to
+the bot account.
 
 ```bash
 export OL_BOT_ACCESS=<access key>
@@ -48,54 +75,28 @@ export OL_BOT_SECRET=<secret key>
 
 The bot account is `agenticcommonsbot`.
 
-## How to use
+## Usage
 
 ```bash
-# Dry-run (default — does not write):
-python3 wikidata_author_alias_bot.py --proposal sample_proposal.json
+# Find first 10 candidates from the monthly dump:
+python3 wikidata_author_alias_bot.py discover --limit 10
 
-# Live submission:
-python3 wikidata_author_alias_bot.py --proposal sample_proposal.json --live
+# Dry-run a single author (no write):
+python3 wikidata_author_alias_bot.py sync /authors/OL713582A
 
-# If proposal contains multiple items, pick one with --item-index:
-python3 wikidata_author_alias_bot.py --proposal multi_item.json --item-index 2 --live
+# Actually submit:
+python3 wikidata_author_alias_bot.py sync /authors/OL713582A --live
 ```
 
-## Proposal JSON shape
+## What a sync run looks like
 
-See `sample_proposal.json` in this directory for a real example. The shape is:
+See [`sample_run.txt`](sample_run.txt) for a captured dry-run against the
+canonical Su Tong record (`/authors/OL713582A`). Summary of that run:
 
-```json
-{
-  "items": [
-    {
-      "ol_key": "/authors/OL2630047A",
-      "task_type": "add_alternate_name",
-      "author_name_primary": "Su Tong",
-      "current_alternate_names": [],
-      "proposed_addition": "苏童",
-      "comment": "Adding native-script form per Wikidata Q778276 (zh label '苏童') and Chinese Wikipedia article title '苏童'.",
-      "evidence": [
-        {"source": "Wikidata Q778276", "url": "https://www.wikidata.org/wiki/Q778276", "value": "苏童"},
-        {"source": "Wikipedia (zh)", "url": "https://zh.wikipedia.org/wiki/%E8%8B%8F%E7%AB%A5", "value": "苏童"}
-      ],
-      "rationale": "Su Tong is a major contemporary Chinese novelist (Wives and Concubines / Raise the Red Lantern). Both Wikidata and zhwiki confirm 苏童 as the canonical native-script form."
-    }
-  ]
-}
-```
-
-## Edit comment format
-
-Pure factual citation, with the Wikidata Q-id and Wikipedia article inline. Example:
-
-> Adding native-script form per Wikidata Q778276 (zh label '苏童') and Chinese Wikipedia article title '苏童'.
-
-No project attribution, no slogans.
-
-## What a dry-run looks like
-
-See `sample_dry_run.txt` in this directory for captured output from a real dry-run against `/authors/OL2630047A` (real OL author, real network calls, no PUT issued).
+- 41 Wikidata labels for Q778276
+- 19 non-Latin after Unicode-block filter
+- 7 net new after dedup against OL's existing 6 `alternate_names`
+- Edit would add: Hebrew, Russian, Thai, Arabic + Egyptian Arabic variant, Korean, Assamese (Bulgarian "Су Тун" was deduped against Russian's identical spelling)
 
 ## Maintainer
 
