@@ -153,7 +153,11 @@ class ITANRecord(DataProviderRecord):
             (sr.split(":", 1)[1] for sr in self.source_records if ":" in sr), None
         )
         slug = _SLUG_MAP.get(boo_id) if boo_id else None
-        identifiers = {"itan_technologies": [slug or boo_id]} if (slug or boo_id) else self.identifiers
+        identifiers = (
+            {"itan_technologies": [slug or boo_id]}
+            if (slug or boo_id)
+            else self.identifiers
+        )
 
         return OLImportRecord(
             title=self.title,
