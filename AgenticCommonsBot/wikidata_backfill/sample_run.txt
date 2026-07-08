@@ -1,0 +1,43 @@
+$ OL_BOT_ACCESS=xxxxxx OL_BOT_SECRET=xxxxxx \
+    python3 wikidata_backfill_bot.py sync /authors/OL4155123A \
+        --proposal sample_proposal.json
+
+[1] POST /account/login (S3 auth)
+  HTTP 200
+
+[2] GET /authors/OL4155123A.json (current OL state)
+  name: Liu Xiaobo
+  birth_date: 1955
+  death_date: 2017
+  current remote_ids: {}
+
+[3] GET Wikidata Q41617 entity (revalidate proposal)
+  entity id: Q41617
+  P31=Q5 ✓
+  P648=['OL4155123A'] contains OL4155123A ✓ (Source A)
+
+[4] Diff — remote_ids.wikidata to add: Q41617
+  new remote_ids: {'wikidata': 'Q41617'}
+
+[DRY-RUN] Would PUT /authors/OL4155123A.json
+  edit comment: Adding remote_ids.wikidata=Q41617 per Wikidata P648 cross-reference (https://www.wikidata.org/wiki/Q41617).
+
+  Re-run with --live to actually submit.
+{
+  "status": "dry_run",
+  "ol_key": "/authors/OL4155123A",
+  "qid": "Q41617",
+  "source": "P648_reverse",
+  "evidence": [
+    "Wikidata Q41617 P648 = 'OL4155123A' (self-declared cross-link)",
+    "Wikidata Q41617 P31 = Q5 (human)",
+    "Wikidata Q41617 P569 = 1955-12-28, OL birth_date = 1955",
+    "Wikidata Q41617 P570 = 2017-07-13, OL death_date = 2017",
+    "Wikidata Q41617 has 115 sitelinks including zhwiki:'刘晓波', enwiki:'Liu Xiaobo'"
+  ],
+  "current_remote_ids": {},
+  "new_remote_ids": {
+    "wikidata": "Q41617"
+  },
+  "edit_note": "Adding remote_ids.wikidata=Q41617 per Wikidata P648 cross-reference (https://www.wikidata.org/wiki/Q41617)."
+}
