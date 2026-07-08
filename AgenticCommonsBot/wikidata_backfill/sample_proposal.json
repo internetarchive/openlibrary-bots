@@ -1,0 +1,28 @@
+{
+  "schema_version": "wikidata_backfill_proposal.v1",
+  "ol_key": "/authors/OL4155123A",
+  "qid": "Q41617",
+  "source": "P648_reverse",
+  "result": "found",
+  "confidence": "high",
+  "evidence": [
+    "Wikidata Q41617 P648 = 'OL4155123A' (self-declared cross-link)",
+    "Wikidata Q41617 P31 = Q5 (human)",
+    "Wikidata Q41617 P569 = 1955-12-28, OL birth_date = 1955",
+    "Wikidata Q41617 P570 = 2017-07-13, OL death_date = 2017",
+    "Wikidata Q41617 has 115 sitelinks including zhwiki:'刘晓波', enwiki:'Liu Xiaobo'"
+  ],
+  "wikidata_url": "https://www.wikidata.org/wiki/Q41617",
+  "ol_author_url": "https://openlibrary.org/authors/OL4155123A",
+  "ol_edit_url": "https://openlibrary.org/authors/OL4155123A/edit",
+  "wikidata_label_en": "Liu Xiaobo",
+  "wikidata_label_zh": "刘晓波",
+  "ol_name": "Liu Xiaobo",
+  "ol_birth_date": "1955",
+  "ol_death_date": "2017",
+  "current_remote_ids": {},
+  "suggested_add": {
+    "wikidata": "Q41617"
+  },
+  "edit_note": "Adding remote_ids.wikidata=Q41617 per Wikidata P648 cross-reference (https://www.wikidata.org/wiki/Q41617)."
+}
