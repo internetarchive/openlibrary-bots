@@ -43,7 +43,7 @@ class ForeignException:
 
 
 def ForeignException_extract():
-    (exc_type, exc_value, exc_traceback) = sys.exc_info()
+    exc_type, exc_value, exc_traceback = sys.exc_info()
     return ForeignException(exc_type, exc_value, exc_traceback)
 
 
