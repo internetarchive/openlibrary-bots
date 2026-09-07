@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 """
-    Iterates over an archive.org bulk MARC item, such as OpenLibraries-Trent-MARCs,
-    and imports all records in all of its MARC files to Open Library.
+Iterates over an archive.org bulk MARC item, such as OpenLibraries-Trent-MARCs,
+and imports all records in all of its MARC files to Open Library.
 
-    USAGE: ./bulk-import.py <archive.org item id>
+USAGE: ./bulk-import.py <archive.org item id>
 
-    Logs results to STDOUT
+Logs results to STDOUT
 """
 
 import argparse
