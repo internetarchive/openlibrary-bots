@@ -415,8 +415,7 @@ def unittest():
     doc = Namespace("http://example.org/bar")
     bbc = Namespace("http://example.org/bbc")
     dc = Namespace("http://purl.org/dc/elements/1.1/")
-    d = parse(
-        """<doc version="2.7182818284590451"
+    d = parse("""<doc version="2.7182818284590451"
       xmlns="http://example.org/bar"
       xmlns:dc="http://purl.org/dc/elements/1.1/"
       xmlns:bbc="http://example.org/bbc">
@@ -424,8 +423,7 @@ def unittest():
             <dc:creator>John Polk</dc:creator>
             <dc:creator>John Palfrey</dc:creator>
             <bbc:show bbc:station="4">Buffy</bbc:show>
-    </doc>"""
-    )
+    </doc>""")
 
     assert repr(d) == '<doc version="2.7182818284590451">...</doc>'
     assert (
