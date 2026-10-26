@@ -105,7 +105,7 @@ class OnixHandler(ContentHandler):
             self.subhandler.startElementNS(name, qname, attrs)
             self.subdepth += 1
         else:
-            (uri, localname) = name
+            uri, localname = name
             if localname == "product":
                 self.subhandler = xmltramp.Seeder(self.parser)
                 self.subhandler.startElementNS(name, qname, attrs)
