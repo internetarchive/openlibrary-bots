@@ -121,7 +121,7 @@ class NodeCollector(Collector):
         if self.ignoring:
             self.ignoring += 1
         else:
-            (uri, localname) = name
+            uri, localname = name
             c_maker = self.collector_table.get(localname) or self.collector_table.get(
                 collector_any
             )
@@ -180,7 +180,7 @@ class DictCollector(NodeCollector):
         self.values = {}
 
     def collect(self, key_value):
-        (key, value) = key_value
+        key, value = key_value
         if self.values.get(key):
             raise Exception(f"dictionary key '{key}' is already mapped")
         else:

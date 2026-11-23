@@ -27,7 +27,7 @@ class URLCache:
 
     def get(self, url):
         url = url.strip()
-        (entries, next, index) = self.get_entries()
+        entries, next, index = self.get_entries()
         id = entries.get(url)
         if id is None:
             # with index locked, add an entry for this url and
